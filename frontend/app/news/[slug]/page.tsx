@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { client, urlFor } from '../../Lib/sanity'
+import { client, urlFor } from '@/Lib/sanity'
 
 async function getSingleNews(slug: string) {
   const query = `*[_type == "newsPortal" && slug.current == $slug][0] {
