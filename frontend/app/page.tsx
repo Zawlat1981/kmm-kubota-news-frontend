@@ -62,9 +62,20 @@ export default async function Home() {
             
             <div className="p-4 flex flex-col flex-grow">
               {news.category && (
-                <span className="text-xs font-bold text-red-600 uppercase tracking-wider mb-2">
+                <span className="text-xs font-bold text-red-600 uppercase tracking-wider mb-1">
                   {formatCategory(news.category)}
                 </span>
+              )}
+
+              {/* ထည့်သွင်းပေးလိုက်သည့် ရက်စွဲပြကွက် */}
+              {news.publishedAt && (
+                <p className="text-xs text-gray-400 mb-2">
+                  {new Date(news.publishedAt).toLocaleDateString('my-MM', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                  })}
+                </p>
               )}
 
               <h2 className="text-lg font-bold text-gray-900 group-hover:text-red-600 transition line-clamp-2 mb-2">
