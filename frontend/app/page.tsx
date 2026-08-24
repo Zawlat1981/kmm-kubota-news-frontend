@@ -70,7 +70,7 @@ export default async function Home() {
               {/* ထည့်သွင်းပေးလိုက်သည့် ရက်စွဲပြကွက် */}
               {news.publishedAt && (
                 <p className="text-xs text-gray-400 mb-2">
-                  {new Date(news.publishedAt).toLocaleDateString('my-MM', {
+                  {new Date(news.publishedAt).toLocaleDateString('en-US', {
                     year: 'numeric',
                     month: 'long',
                     day: 'numeric'
