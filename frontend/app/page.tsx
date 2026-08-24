@@ -19,7 +19,7 @@ async function getNews(): Promise<NewsItem[]> {
     mainImage,
     body
   }`
-  return await client.fetch(query)
+  return await client.fetch(query, { next: { revalidate: 0 } })
 }
 
 function formatCategory(category?: string) {
