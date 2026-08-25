@@ -30,8 +30,10 @@ function formatCategory(category?: string) {
 export default function NewsContainer({ newsList }: NewsContainerProps) {
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('ALL')
+  const [selectedMonth, setSelectedMonth] = useState('ALL')
+  const [selectedYear, setSelectedYear] = useState('ALL')
 
-  // Filter လုပ်ခြင်း (Search & Brand/Category)
+  // Filter လုပ်ခြင်း (Search, Category, Month & Year)
   const filteredNews = newsList.filter((news) => {
     const matchesSearch = news.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
                           (news.body && news.body.toLowerCase().includes(searchTerm.toLowerCase()))
@@ -39,16 +41,23 @@ export default function NewsContainer({ newsList }: NewsContainerProps) {
     const matchesCategory = selectedCategory === 'ALL' || 
       (news.category && news.category.toLowerCase().includes(selectedCategory.toLowerCase()))
 
-    return matchesSearch && matchesCategory
+    // publishedAt ထဲက Date ကို အသုံးပြုပြီး Month နဲ့ Year စစ်ဆေးခြင်း
+    const newsDate = news.publishedAt ? new Date(news.publishedAt) : null
+
+    const matchesMonth = selectedMonth === 'ALL' || (newsDate && newsDate.toLocaleString('en-US', { month: 'long' }) === selectedMonth)
+
+    const matchesYear = selectedYear === 'ALL' || (newsDate && newsDate.getFullYear().toString() === selectedYear)
+
+    return matchesSearch && matchesCategory && matchesMonth && matchesYear
   })
 
   return (
     <div>
-      {/* --- DASHBOARD FILTER SECTION --- */}
-      <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 mb-8 flex flex-col md:flex-row gap-4 items-center justify-between">
+      {/* --- DASHBOARD FILTER SECTION (4 Columns Layout) --- */}
+      <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 mb-8 grid grid-cols-1 md:grid-cols-4 gap-4 items-center">
         
         {/* Search Input */}
-        <div className="w-full md:w-1/2">
+        <div>
           <input 
             type="text"
             placeholder="Search by Title or Main text..."
@@ -59,7 +68,7 @@ export default function NewsContainer({ newsList }: NewsContainerProps) {
         </div>
 
         {/* Tractor Brands & Categories Filter Dropdown */}
-        <div className="w-full md:w-1/2">
+        <div>
           <select 
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
@@ -76,6 +85,42 @@ export default function NewsContainer({ newsList }: NewsContainerProps) {
             <option value="Yamabisi">Yamabisi</option>
             <option value="Sonalika">Sonalika</option>
             <option value="Dongfeng">Dongfeng</option>
+          </select>
+        </div>
+
+        {/* Month Filter Dropdown */}
+        <div>
+          <select 
+            value={selectedMonth}
+            onChange={(e) => setSelectedMonth(e.target.value)}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 text-sm text-gray-900 bg-white"
+          >
+            <option value="ALL">All Months</option>
+            <option value="January">January</option>
+            <option value="February">February</option>
+            <option value="March">March</option>
+            <option value="April">April</option>
+            <option value="May">May</option>
+            <option value="June">June</option>
+            <option value="July">July</option>
+            <option value="August">August</option>
+            <option value="September">September</option>
+            <option value="October">October</option>
+            <option value="November">November</option>
+            <option value="December">December</option>
+          </select>
+        </div>
+
+        {/* Year Filter Dropdown */}
+        <div>
+          <select 
+            value={selectedYear}
+            onChange={(e) => setSelectedYear(e.target.value)}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 text-sm text-gray-900 bg-white"
+          >
+            <option value="ALL">All Years</option>
+            <option value="2025">2025</option>
+            <option value="2026">2026</option>
           </select>
         </div>
 
