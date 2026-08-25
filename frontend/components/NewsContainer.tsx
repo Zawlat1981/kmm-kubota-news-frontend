@@ -30,10 +30,22 @@ function formatCategory(category?: string) {
 export default function NewsContainer({ newsList }: NewsContainerProps) {
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('ALL')
-  const [selectedMonth, setSelectedMonth] = useState('ALL')
-  const [selectedYear, setSelectedYear] = useState('ALL')
+  const [selectedDate, setSelectedDate] = useState('ALL')
+  const [selectedPriceFilter, setSelectedPriceFilter] = useState('ALL')
 
-  // Filter လုပ်ခြင်း (Search, Category, Month & Year)
+  // သတင်းများထဲမှ ရနိုင်သော Month & Year ပေါင်းစပ်ထားသော Option များကို ထုတ်ယူခြင်း
+  const availableDates = Array.from(
+    new Set(
+      newsList
+        .filter((news) => news.publishedAt)
+        .map((news) => {
+          const date = new Date(news.publishedAt!)
+          return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+        })
+    )
+  )
+
+  // Filter လုပ်ခြင်း (Search, Category, Combined Date, Price Filter)
   const filteredNews = newsList.filter((news) => {
     const matchesSearch = news.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
                           (news.body && news.body.toLowerCase().includes(searchTerm.toLowerCase()))
@@ -41,14 +53,22 @@ export default function NewsContainer({ newsList }: NewsContainerProps) {
     const matchesCategory = selectedCategory === 'ALL' || 
       (news.category && news.category.toLowerCase().includes(selectedCategory.toLowerCase()))
 
-    // publishedAt ထဲက Date ကို အသုံးပြုပြီး Month နဲ့ Year စစ်ဆေးခြင်း
-    const newsDate = news.publishedAt ? new Date(news.publishedAt) : null
+    // Combined Date Filter (Month & Year) စစ်ဆေးခြင်း
+    let matchesDate = true
+    if (selectedDate !== 'ALL' && news.publishedAt) {
+      const date = new Date(news.publishedAt)
+      const newsMonthYear = date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+      matchesDate = newsMonthYear === selectedDate
+    }
 
-    const matchesMonth = selectedMonth === 'ALL' || (newsDate && newsDate.toLocaleString('en-US', { month: 'long' }) === selectedMonth)
+    // All Brand Tractor Prices Filter (ဈေးနှုန်းအလိုက် သို့မဟုတ် Tag အလိုက် စစ်ဆေးရန် placeholder logic)
+    let matchesPrice = true
+    if (selectedPriceFilter !== 'ALL') {
+      // ဥပမာ- body သို့မဟုတ် title ထဲတွင် ဈေးနှုန်းအမျိုးအစား ပါဝင်မှုကို စစ်ဆေးခြင်း သို့မဟုတ် custom field ထည့်ရန်
+      matchesPrice = true 
+    }
 
-    const matchesYear = selectedYear === 'ALL' || (newsDate && newsDate.getFullYear().toString() === selectedYear)
-
-    return matchesSearch && matchesCategory && matchesMonth && matchesYear
+    return matchesSearch && matchesCategory && matchesDate && matchesPrice
   })
 
   return (
@@ -56,7 +76,7 @@ export default function NewsContainer({ newsList }: NewsContainerProps) {
       {/* --- DASHBOARD FILTER SECTION (4 Columns Layout) --- */}
       <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 mb-8 grid grid-cols-1 md:grid-cols-4 gap-4 items-center">
         
-        {/* Search Input */}
+        {/* 1. Search Input */}
         <div>
           <input 
             type="text"
@@ -67,7 +87,7 @@ export default function NewsContainer({ newsList }: NewsContainerProps) {
           />
         </div>
 
-        {/* Tractor Brands & Categories Filter Dropdown */}
+        {/* 2. Tractor Brands & Categories Filter Dropdown */}
         <div>
           <select 
             value={selectedCategory}
@@ -91,39 +111,31 @@ export default function NewsContainer({ newsList }: NewsContainerProps) {
           </select>
         </div>
 
-        {/* Month Filter Dropdown */}
+        {/* 3. Combined Month & Year Date Filter Dropdown */}
         <div>
           <select 
-            value={selectedMonth}
-            onChange={(e) => setSelectedMonth(e.target.value)}
+            value={selectedDate}
+            onChange={(e) => setSelectedDate(e.target.value)}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 text-sm text-gray-900 bg-white"
           >
-            <option value="ALL">All Months</option>
-            <option value="January">January</option>
-            <option value="February">February</option>
-            <option value="March">March</option>
-            <option value="April">April</option>
-            <option value="May">May</option>
-            <option value="June">June</option>
-            <option value="July">July</option>
-            <option value="August">August</option>
-            <option value="September">September</option>
-            <option value="October">October</option>
-            <option value="November">November</option>
-            <option value="December">December</option>
+            <option value="ALL">Date Selection</option>
+            {availableDates.map((dateStr, idx) => (
+              <option key={idx} value={dateStr}>{dateStr}</option>
+            ))}
           </select>
         </div>
 
-        {/* Year Filter Dropdown */}
+        {/* 4. All Brand Tractor Prices Filter Dropdown */}
         <div>
           <select 
-            value={selectedYear}
-            onChange={(e) => setSelectedYear(e.target.value)}
+            value={selectedPriceFilter}
+            onChange={(e) => setSelectedPriceFilter(e.target.value)}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 text-sm text-gray-900 bg-white"
           >
-            <option value="ALL">All Years</option>
-            <option value="2025">2025</option>
-            <option value="2026">2026</option>
+            <option value="ALL">All Brand Agricultural Machinery Prices</option>
+            <option value="low">Under 50 Lakhs / Budget</option>
+            <option value="medium">50 Lakhs - 100 Lakhs</option>
+            <option value="high">Above 100 Lakhs / Premium</option>
           </select>
         </div>
 
