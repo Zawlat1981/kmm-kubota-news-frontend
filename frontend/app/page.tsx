@@ -1,7 +1,5 @@
-export const dynamic = 'force-dynamic'
-export const revalidate = 0
-
 import { client } from '../Lib/sanity'
+import Header from '@/components/Header'
 import NewsContainer from '@/components/NewsContainer'
 
 interface NewsItem {
@@ -25,17 +23,25 @@ async function getNews(): Promise<NewsItem[]> {
   return await client.fetch(query)
 }
 
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 export default async function Home() {
   const newsList = await getNews()
 
   return (
-    <main className="p-6 max-w-6xl mx-auto bg-gray-50 min-h-screen">
-      <h1 className="text-3xl font-bold mb-6 border-b-2 border-red-600 pb-2 text-gray-800">
-        KMM Kubota News Portal
-      </h1>
-      
-      {/* Client Component သို့ Data လွှဲပြောင်းပေးခြင်း */}
-      <NewsContainer newsList={newsList} />
+    <main className="min-h-screen bg-gray-50">
+      {/* --- Header with Animated Logo --- */}
+      <Header />
+
+      {/* --- News Container with Filters --- */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <h1 className="text-3xl font-bold mb-6 border-b-2 border-red-600 pb-2 text-gray-800">
+          KMM Kubota News Portal
+        </h1>
+        
+        <NewsContainer newsList={newsList} />
+      </div>
     </main>
   )
 }

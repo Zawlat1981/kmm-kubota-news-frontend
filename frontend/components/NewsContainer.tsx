@@ -9,7 +9,7 @@ interface NewsItem {
   slug: { current: string }
   category?: string
   publishedAt?: string
-  mainImage?: any
+  mainImage?: Record<string, unknown>
   body?: string
 }
 
@@ -140,6 +140,7 @@ export default function NewsContainer({ newsList }: NewsContainerProps) {
             >
               {news.mainImage && (
                 <div className="h-48 overflow-hidden bg-gray-100">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img 
                     src={urlFor(news.mainImage).url()} 
                     alt={news.title} 
