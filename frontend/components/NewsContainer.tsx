@@ -51,7 +51,7 @@ export default function NewsContainer({ newsList }: NewsContainerProps) {
         <div className="w-full md:w-1/2">
           <input 
             type="text"
-            placeholder="ခေါင်းစဉ် သို့မဟုတ် အဓိက စာသားဖြင့် ရှာရန်..."
+            placeholder="Search by Title or Main text..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 text-sm text-gray-900 placeholder-gray-500 bg-white"
@@ -65,7 +65,7 @@ export default function NewsContainer({ newsList }: NewsContainerProps) {
             onChange={(e) => setSelectedCategory(e.target.value)}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 text-sm text-gray-900 bg-white"
           >
-            <option value="ALL">ထွန်စက်အမျိုးအစား အားလုံး (All Brands)</option>
+            <option value="ALL">Brand Selection</option>
             <option value="Kubota">Kubota</option>
             <option value="Kubota (Second)">Kubota (Second)</option>
             <option value="Yanmar">Yanmar</option>
@@ -135,7 +135,7 @@ export default function NewsContainer({ newsList }: NewsContainerProps) {
           ))
         ) : (
           <div className="col-span-full text-center py-12 text-gray-500 bg-white rounded-lg border border-gray-200">
-            ရှာဖွေမှုနှင့် ကိုက်ညီသော သတင်း မရှိပါ။
+            No news found matching your search criteria.
           </div>
         )}
       </div>
