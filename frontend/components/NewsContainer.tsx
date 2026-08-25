@@ -75,16 +75,19 @@ export default function NewsContainer({ newsList }: NewsContainerProps) {
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 text-sm text-gray-900 bg-white"
           >
             <option value="ALL">Brand Selection</option>
-            <option value="Kubota">Kubota</option>
-            <option value="Kubota (Second)">Kubota (Second)</option>
-            <option value="Yanmar">Yanmar</option>
-            <option value="YTO">YTO</option>
-            <option value="New Holland">New Holland</option>
-            <option value="John Deere">John Deere</option>
-            <option value="Mahindra">Mahindra</option>
-            <option value="Yamabisi">Yamabisi</option>
-            <option value="Sonalika">Sonalika</option>
-            <option value="Dongfeng">Dongfeng</option>
+            <option value="kubota-news">Kubota News</option>
+            <option value="kubota-second-news">Kubota Second News</option>
+            <option value="yammar-news">Yanmar News</option>
+            <option value="john-deere-news">John Deere News</option>
+            <option value="new-holland-news">New Holland News</option>
+            <option value="yto-news">YTO News</option>
+            <option value="sonalika-news">Sonalika News</option>
+            <option value="yamabisi-news">Yamabisi News</option>
+            <option value="mahindra-news">Mahindra News</option>
+            <option value="dongfeng-news">Dongfeng News</option>
+            <option value="crop-prices">Crop Prices</option>
+            <option value="fuel-prices">Fuel Prices</option>
+            <option value="myanmar-news">Myanmar News</option>
           </select>
         </div>
 
