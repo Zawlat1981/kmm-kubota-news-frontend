@@ -54,7 +54,7 @@ export default function NewsContainer({ newsList }: NewsContainerProps) {
             placeholder="ခေါင်းစဉ် သို့မဟုတ် အဓိက စာသားဖြင့် ရှာရန်..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 text-sm"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 text-sm text-gray-900 placeholder-gray-500 bg-white"
           />
         </div>
 
@@ -63,7 +63,7 @@ export default function NewsContainer({ newsList }: NewsContainerProps) {
           <select 
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 text-sm bg-white"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 text-sm text-gray-900 bg-white"
           >
             <option value="ALL">ထွန်စက်အမျိုးအစား အားလုံး (All Brands)</option>
             <option value="Kubota">Kubota</option>
