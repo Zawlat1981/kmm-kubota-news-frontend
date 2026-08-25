@@ -31,7 +31,7 @@ export default function NewsContainer({ newsList }: NewsContainerProps) {
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('ALL')
   const [selectedDate, setSelectedDate] = useState('ALL')
-  const [selectedPriceFilter, setSelectedPriceFilter] = useState('ALL')
+  const [selectedBrandPriceFilter, setSelectedBrandPriceFilter] = useState('ALL')
 
   // သတင်းများထဲမှ ရနိုင်သော Month & Year ပေါင်းစပ်ထားသော Option များကို ထုတ်ယူခြင်း
   const availableDates = Array.from(
@@ -45,7 +45,7 @@ export default function NewsContainer({ newsList }: NewsContainerProps) {
     )
   )
 
-  // Filter လုပ်ခြင်း (Search, Category, Combined Date, Price Filter)
+  // Filter လုပ်ခြင်း (Search, Category, Combined Date, Brand Price Filter)
   const filteredNews = newsList.filter((news) => {
     const matchesSearch = news.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
                           (news.body && news.body.toLowerCase().includes(searchTerm.toLowerCase()))
@@ -61,14 +61,17 @@ export default function NewsContainer({ newsList }: NewsContainerProps) {
       matchesDate = newsMonthYear === selectedDate
     }
 
-    // All Brand Tractor Prices Filter (ဈေးနှုန်းအလိုက် သို့မဟုတ် Tag အလိုက် စစ်ဆေးရန် placeholder logic)
-    let matchesPrice = true
-    if (selectedPriceFilter !== 'ALL') {
-      // ဥပမာ- body သို့မဟုတ် title ထဲတွင် ဈေးနှုန်းအမျိုးအစား ပါဝင်မှုကို စစ်ဆေးခြင်း သို့မဟုတ် custom field ထည့်ရန်
-      matchesPrice = true 
+    // Brand & Price Filter စစ်ဆေးခြင်း (ရွေးချယ်ထားသော Brand ဖြင့် Title သို့မဟုတ် Body တွင် ရှာဖွေရန်)
+    let matchesBrandPrice = true
+    if (selectedBrandPriceFilter !== 'ALL') {
+      const brandQuery = selectedBrandPriceFilter.toLowerCase()
+      const titleMatch = news.title.toLowerCase().includes(brandQuery)
+      const bodyMatch = news.body ? news.body.toLowerCase().includes(brandQuery) : false
+      const categoryMatch = news.category ? news.category.toLowerCase().includes(brandQuery) : false
+      matchesBrandPrice = titleMatch || bodyMatch || categoryMatch
     }
 
-    return matchesSearch && matchesCategory && matchesDate && matchesPrice
+    return matchesSearch && matchesCategory && matchesDate && matchesBrandPrice
   })
 
   return (
@@ -125,17 +128,21 @@ export default function NewsContainer({ newsList }: NewsContainerProps) {
           </select>
         </div>
 
-        {/* 4. All Brand Tractor Prices Filter Dropdown */}
+        {/* 4. Brand Price & Details Filter Dropdown (Updated with Brands) */}
         <div>
           <select 
-            value={selectedPriceFilter}
-            onChange={(e) => setSelectedPriceFilter(e.target.value)}
+            value={selectedBrandPriceFilter}
+            onChange={(e) => setSelectedBrandPriceFilter(e.target.value)}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 text-sm text-gray-900 bg-white"
           >
-            <option value="ALL">All Brand Agricultural Machinery Prices</option>
-            <option value="low">Under 50 Lakhs / Budget</option>
-            <option value="medium">50 Lakhs - 100 Lakhs</option>
-            <option value="high">Above 100 Lakhs / Premium</option>
+            <option value="ALL">All Brand Prices & Machines</option>
+            <option value="Kubota">Kubota Prices & Models</option>
+            <option value="Yanmar">Yanmar Prices & Models</option>
+            <option value="Sonalika">Sonalika Prices & Models</option>
+            <option value="John Deere">John Deere Prices & Models</option>
+            <option value="New Holland">New Holland Prices & Models</option>
+            <option value="Mahindra">Mahindra Prices & Models</option>
+            <option value="YTO">YTO Prices & Models</option>
           </select>
         </div>
 
