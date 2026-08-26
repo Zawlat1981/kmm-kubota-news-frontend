@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { client, urlFor } from '../../../Lib/sanity'
+import { client, urlFor } from '../../../lib/sanity'
 
 interface NewsDetailItem {
   title: string

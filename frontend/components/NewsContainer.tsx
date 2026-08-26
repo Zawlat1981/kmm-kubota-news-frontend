@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { urlFor } from '../Lib/sanity'
+import { urlFor } from '../lib/sanity'
 
 interface NewsItem {
   title: string
