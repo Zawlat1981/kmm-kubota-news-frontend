@@ -99,7 +99,6 @@ export default function NewsContainer({ newsList }: NewsContainerProps) {
           >
             <option value="ALL">Brand Selection</option>
             <option value="kubota-news">Kubota News</option>
-            <option value="kubota-second-news">Kubota Second News</option>
             <option value="yammar-news">Yanmar News</option>
             <option value="john-deere-news">John Deere News</option>
             <option value="new-holland-news">New Holland News</option>
@@ -135,14 +134,14 @@ export default function NewsContainer({ newsList }: NewsContainerProps) {
             onChange={(e) => setSelectedBrandPriceFilter(e.target.value)}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 text-sm text-gray-900 bg-white"
           >
-            <option value="ALL">All Brand Prices & Machines</option>
-            <option value="Kubota">Kubota Prices & Models</option>
-            <option value="Win Shwe Wah (second Kubota)">Win Shwe Wah (second Kubota) Prices & Models</option>
-            <option value="Yanmar">Yanmar Prices & Models</option>
-            <option value="Sonalika">Sonalika Prices & Models</option>
-            <option value="Yamabisi">Yamabisi Prices & Models</option>
-            <option value="John Deere">John Deere Prices & Models</option>
-            <option value="New Holland">New Holland Prices & Models</option>
+            <option value="ALL">All Brand Prices</option>
+            <option value="Kubota">Kubota</option>
+            <option value="Win Shwe Wah (second Kubota)">Win Shwe Wah (second Kubota)</option>
+            <option value="Yanmar">Yanmar</option>
+            <option value="Sonalika">Sonalika</option>
+            <option value="Yamabisi">Yamabisi</option>
+            <option value="John Deere">John Deere</option>
+            <option value="New Holland">New Holland</option>
             <option value="Mahindra">Mahindra Prices & Models</option>
             <option value="YTO">YTO Prices & Models</option>
           </select>
