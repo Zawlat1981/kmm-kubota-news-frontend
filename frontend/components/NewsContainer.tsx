@@ -210,7 +210,7 @@ export default function NewsContainer({ newsList }: NewsContainerProps) {
       <div className="bg-gradient-to-r from-gray-900 to-gray-800 rounded-2xl p-8 text-center text-white shadow-md">
         <h3 className="text-xl font-bold mb-2">သတင်းဟောင်းများ ရှာဖွေရန်</h3>
         <p className="text-gray-300 text-sm mb-6">
-          လအလိုက်၊ ရက်အလိုက် သိမ်းဆည်းထားသော ရှေးဟောင်းသတင်းများအားလုံးကို Monthly Archive တွင် ဆက်လက်ဖတ်ရှုနိုင်ပါသည်။
+          คุณสามารถอ่านข่าวสารย้อนหลังทั้งหมดที่จัดระเบียบตามเดือนและวันที่ได้ใน Monthly Archive
         </p>
         <Link 
           href="/archive" 

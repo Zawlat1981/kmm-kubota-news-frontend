@@ -45,7 +45,7 @@ export default async function ArchivePage() {
         <div className="mb-8 flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Monthly Archive</h1>
-            <p className="text-sm text-gray-500 mt-1">လအလိုက်နှင့် ရက်အလိုက် သိမ်းဆည်းထားသော သတင်းဟောင်းများ</p>
+            <p className="text-sm text-gray-500 mt-1">คุณสามารถอ่านข่าวสารย้อนหลังทั้งหมดที่จัดระเบียบตามเดือนและวันที่ได้ใน Monthly Archive</p>
           </div>
           <Link 
             href="/" 
