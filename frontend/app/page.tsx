@@ -1,62 +1,146 @@
-import { client } from '@/lib/sanity'
-import Header from '@/components/Header'
-import NewsContainer from '@/components/NewsContainer'
-import Link from 'next/link'
+'use client';
 
-interface NewsItem {
-  title: string
-  slug: { current: string }
-  category?: string
-  publishedAt?: string
-  mainImage?: any
-  body?: string
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
+
+function parseCSV(csvText) {
+  const lines = csvText.split('\n');
+  const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
+  
+  const result = [];
+  for (let i = 1; i < lines.length; i++) {
+    if (!lines[i].trim()) continue;
+    const currentline = lines[i].split(',');
+    const obj = {};
+    for (let j = 0; j < headers.length; j++) {
+      obj[headers[j]] = currentline[j] ? currentline[j].trim().replace(/^"|"$/g, '') : '';
+    }
+    result.push(obj);
+  }
+  return result;
 }
 
-async function getNews(): Promise<NewsItem[]> {
-  const query = `*[_type == "newsPortal"] | order(publishedAt desc) {
-    title,
-    slug,
-    category,
-    publishedAt,
-    mainImage,
-    body
-  }`
-  return await client.fetch(query)
-}
+export default function CompaniesPage() {
+  const [activeTab, setActiveTab] = useState('kubota');
+  const [kubotaCompanies, setKubotaCompanies] = useState([]);
+  const [otherCompanies, setOtherCompanies] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-export const dynamic = 'force-dynamic'
-export const revalidate = 0
+  useEffect(() => {
+    async function fetchSheetData() {
+      try {
+        const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQCvsg3Aqd74s4VZKgZhU3Qv-2DQhi3vxmDKHciWcrcv7hz-m75W-t9ssZhB4y4MAGy5JzpMHSw/pub?gid=61187645&single=true&output=csv';
+        const response = await fetch(csvUrl);
+        const csvText = await response.text();
+        const data = parseCSV(csvText);
 
-export default async function Home() {
-  const newsList = await getNews()
+        const kubota = data.filter(item => 
+          item.Brand?.toLowerCase().includes('kubota') || 
+          item.Category?.toLowerCase().includes('kubota')
+        );
+        const others = data.filter(item => 
+          !item.Brand?.toLowerCase().includes('kubota') && 
+          !item.Category?.toLowerCase().includes('kubota')
+        );
+
+        setKubotaCompanies(kubota);
+        setOtherCompanies(others);
+      } catch (error) {
+        console.error('Error fetching sheet:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchSheetData();
+  }, []);
 
   return (
-    <main className="min-h-screen bg-gray-50">
-      {/* --- Header with Animated Logo --- */}
-      <Header />
+    <div className="min-h-screen bg-gray-100 flex flex-col">
+      {/* Header with Back to Home button */}
+      <header className="bg-white shadow-sm border-b px-6 py-4 flex items-center justify-between">
+        <h1 className="text-xl font-bold text-gray-800">KMM Company & Dealer Directory</h1>
+        <Link 
+          href="/" 
+          className="bg-gray-800 hover:bg-gray-900 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+        >
+          ← Back to Home Portal
+        </Link>
+      </header>
 
-      {/* --- Navbar / Extra Menu Bar for Company Directory --- */}
-      <div className="bg-white border-b shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex justify-between items-center">
-          <span className="text-sm font-medium text-gray-600">Welcome to KMM Kubota News & Updates</span>
-          <Link 
-            href="/companies" 
-            className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-semibold text-sm transition-colors shadow-sm flex items-center gap-2"
-          >
-            🏢 Company & Dealer Directory
-          </Link>
-        </div>
-      </div>
-
-      {/* --- News Container --- */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <h1 className="text-3xl font-bold mb-6 border-b-2 border-red-600 pb-2 text-gray-800">
-          KMM Kubota News Portal
-        </h1>
+      <div className="max-w-7xl w-full mx-auto p-6 flex flex-col md:flex-row gap-6 flex-1">
         
-        {/* သတင်းများပြသသည့် အပိုင်း (မူလအတိုင်း အပြည့်အစုံ ပေါ်မည်) */}
-        <NewsContainer newsList={newsList} />
+        {/* Side Menu */}
+        <aside className="w-full md:w-64 bg-white p-4 rounded-xl shadow-sm border h-fit">
+          <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-3">Directory Menu</h2>
+          <nav className="flex flex-col space-y-2">
+            <button
+              onClick={() => setActiveTab('kubota')}
+              className={`w-full text-left px-4 py-2.5 rounded-lg font-medium transition-colors ${
+                activeTab === 'kubota' ? 'bg-red-600 text-white shadow-sm' : 'text-gray-700 hover:bg-gray-100'
+              }`}
+            >
+              🔴 Kubota Companies ({kubotaCompanies.length})
+            </button>
+            <button
+              onClick={() => setActiveTab('others')}
+              className={`w-full text-left px-4 py-2.5 rounded-lg font-medium transition-colors ${
+                activeTab === 'others' ? 'bg-blue-800 text-white shadow-sm' : 'text-gray-700 hover:bg-gray-100'
+              }`}
+            >
+              🔵 Other Brand Companies ({otherCompanies.length})
+            </button>
+          </nav>
+        </aside>
+
+        {/* Main Content Area */}
+        <main className="flex-1 bg-white p-6 rounded-xl shadow-sm border">
+          {activeTab === 'kubota' ? (
+            <div>
+              <h2 className="text-2xl font-bold mb-6 text-red-600 border-b pb-3">Kubota Companies Directory</h2>
+              {loading ? (
+                <p className="text-gray-500">Loading...</p>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {kubotaCompanies.map((comp, idx) => (
+                    <div key={idx} className="p-4 bg-gray-50 rounded-lg border">
+                      <h3 className="font-bold text-lg text-gray-800">{comp['Company Name'] || comp.Name}</h3>
+                      <p className="text-sm text-gray-600 mt-1">📍 {comp.Address || comp.address}</p>
+                      <p className="text-sm text-gray-600 mt-1">📞 {comp.Phone || comp.phone}</p>
+                      {comp['Google Map'] && (
+                        <a href={comp['Google Map']} target="_blank" rel="noopener noreferrer" className="text-blue-600 text-sm font-medium hover:underline inline-block mt-2">
+                          View on Google Map →
+                        </a>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          ) : (
+            <div>
+              <h2 className="text-2xl font-bold mb-6 text-blue-800 border-b pb-3">Other Brand Companies Directory</h2>
+              {loading ? (
+                <p className="text-gray-500">Loading...</p>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {otherCompanies.map((comp, idx) => (
+                    <div key={idx} className="p-4 bg-gray-50 rounded-lg border">
+                      <h3 className="font-bold text-lg text-gray-800">{comp['Company Name'] || comp.Name}</h3>
+                      <p className="text-sm text-gray-600 mt-1">📍 {comp.Address || comp.address}</p>
+                      <p className="text-sm text-gray-600 mt-1">📞 {comp.Phone || comp.phone}</p>
+                      {comp['Google Map'] && (
+                        <a href={comp['Google Map']} target="_blank" rel="noopener noreferrer" className="text-blue-600 text-sm font-medium hover:underline inline-block mt-2">
+                          View on Google Map →
+                        </a>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </main>
       </div>
-    </main>
-  )
+    </div>
+  );
 }
