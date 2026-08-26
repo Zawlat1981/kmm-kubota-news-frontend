@@ -137,8 +137,10 @@ export default function NewsContainer({ newsList }: NewsContainerProps) {
           >
             <option value="ALL">All Brand Prices & Machines</option>
             <option value="Kubota">Kubota Prices & Models</option>
+            <option value="Win Shwe Wah (second Kubota)">Win Shwe Wah (second Kubota) Prices & Models</option>
             <option value="Yanmar">Yanmar Prices & Models</option>
             <option value="Sonalika">Sonalika Prices & Models</option>
+            <option value="Yamabisi">Yamabisi Prices & Models</option>
             <option value="John Deere">John Deere Prices & Models</option>
             <option value="New Holland">New Holland Prices & Models</option>
             <option value="Mahindra">Mahindra Prices & Models</option>
