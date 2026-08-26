@@ -30,22 +30,10 @@ function formatCategory(category?: string) {
 export default function NewsContainer({ newsList }: NewsContainerProps) {
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('ALL')
-  const [selectedDate, setSelectedDate] = useState('ALL')
+  const [selectedDate, setSelectedDate] = useState('')
   const [selectedBrandPriceFilter, setSelectedBrandPriceFilter] = useState('ALL')
 
-  // သတင်းများထဲမှ ရနိုင်သော Month & Year ပေါင်းစပ်ထားသော Option များကို ထုတ်ယူခြင်း
-  const availableDates = Array.from(
-    new Set(
-      newsList
-        .filter((news) => news.publishedAt)
-        .map((news) => {
-          const date = new Date(news.publishedAt!)
-          return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
-        })
-    )
-  )
-
-  // Filter လုပ်ခြင်း (Search, Category, Combined Date, Brand Price Filter)
+  // Filter လုပ်ခြင်း (Search, Category, Date Picker, Brand Price Filter)
   const filteredNews = newsList.filter((news) => {
     const matchesSearch = news.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
                           (news.body && news.body.toLowerCase().includes(searchTerm.toLowerCase()))
@@ -53,15 +41,14 @@ export default function NewsContainer({ newsList }: NewsContainerProps) {
     const matchesCategory = selectedCategory === 'ALL' || 
       (news.category && news.category.toLowerCase().includes(selectedCategory.toLowerCase()))
 
-    // Combined Date Filter (Month & Year) စစ်ဆေးခြင်း
+    // Calendar Date Filter စစ်ဆေးခြင်း
     let matchesDate = true
-    if (selectedDate !== 'ALL' && news.publishedAt) {
-      const date = new Date(news.publishedAt)
-      const newsMonthYear = date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
-      matchesDate = newsMonthYear === selectedDate
+    if (selectedDate !== '' && news.publishedAt) {
+      const newsDateOnly = news.publishedAt.split('T')[0]
+      matchesDate = newsDateOnly === selectedDate
     }
 
-    // Brand & Price Filter စစ်ဆေးခြင်း (ရွေးချယ်ထားသော Brand ဖြင့် Title သို့မဟုတ် Body တွင် ရှာဖွေရန်)
+    // Brand & Price Filter စစ်ဆေးခြင်း
     let matchesBrandPrice = true
     if (selectedBrandPriceFilter !== 'ALL') {
       const brandQuery = selectedBrandPriceFilter.toLowerCase()
@@ -113,21 +100,17 @@ export default function NewsContainer({ newsList }: NewsContainerProps) {
           </select>
         </div>
 
-        {/* 3. Combined Month & Year Date Filter Dropdown */}
+        {/* 3. Calendar Date Picker */}
         <div>
-          <select 
+          <input 
+            type="date"
             value={selectedDate}
             onChange={(e) => setSelectedDate(e.target.value)}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 text-sm text-gray-900 bg-white"
-          >
-            <option value="ALL">Date Selection</option>
-            {availableDates.map((dateStr, idx) => (
-              <option key={idx} value={dateStr}>{dateStr}</option>
-            ))}
-          </select>
+          />
         </div>
 
-        {/* 4. Brand Price & Details Filter Dropdown (Updated with Brands) */}
+        {/* 4. Brand Price & Details Filter Dropdown */}
         <div>
           <select 
             value={selectedBrandPriceFilter}
@@ -136,14 +119,14 @@ export default function NewsContainer({ newsList }: NewsContainerProps) {
           >
             <option value="ALL">All Brand Prices</option>
             <option value="Kubota">Kubota</option>
-            <option value="Win Shwe Wah (second Kubota)">Win Shwe Wah (second Kubota)</option>
+            <option value="Win Shwe Wah">Win Shwe Wah (Second Kubota)</option>
             <option value="Yanmar">Yanmar</option>
             <option value="Sonalika">Sonalika</option>
             <option value="Yamabisi">Yamabisi</option>
             <option value="John Deere">John Deere</option>
             <option value="New Holland">New Holland</option>
-            <option value="Mahindra">Mahindra Prices & Models</option>
-            <option value="YTO">YTO Prices & Models</option>
+            <option value="Mahindra">Mahindra</option>
+            <option value="YTO">YTO</option>
           </select>
         </div>
 
