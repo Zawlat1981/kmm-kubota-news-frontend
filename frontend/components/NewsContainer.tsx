@@ -207,6 +207,6 @@ export default function NewsContainer({ newsList }: NewsContainerProps) {
           </div>
         )}
       </div>
-    </div>
+    </div> 
   )
 }
