@@ -32,8 +32,11 @@ export default function NewsContainer({ newsList }: NewsContainerProps) {
   const [selectedCategory, setSelectedCategory] = useState('ALL')
   const [selectedDate, setSelectedDate] = useState('')
   const [selectedBrandPriceFilter, setSelectedBrandPriceFilter] = useState('ALL')
+  
+  // ပထမအကျော့အနေနဲ့ ၉ ပုဒ်ပြရန်၊ Load More နှိပ်လျှင် ၉ ပုဒ်စီ တိုးရန်
+  const [visibleCount, setVisibleCount] = useState(9)
 
-  // Filter လုပ်ခြင်း (Search, Category, Date Picker, Brand Price Filter)
+  // Filter လုပ်ခြင်း
   const filteredNews = newsList.filter((news) => {
     const matchesSearch = news.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
                           (news.body && news.body.toLowerCase().includes(searchTerm.toLowerCase()))
@@ -41,14 +44,12 @@ export default function NewsContainer({ newsList }: NewsContainerProps) {
     const matchesCategory = selectedCategory === 'ALL' || 
       (news.category && news.category.toLowerCase().includes(selectedCategory.toLowerCase()))
 
-    // Calendar Date Filter စစ်ဆေးခြင်း
     let matchesDate = true
     if (selectedDate !== '' && news.publishedAt) {
       const newsDateOnly = news.publishedAt.split('T')[0]
       matchesDate = newsDateOnly === selectedDate
     }
 
-    // Brand & Price Filter စစ်ဆေးခြင်း
     let matchesBrandPrice = true
     if (selectedBrandPriceFilter !== 'ALL') {
       const brandQuery = selectedBrandPriceFilter.toLowerCase()
@@ -61,12 +62,17 @@ export default function NewsContainer({ newsList }: NewsContainerProps) {
     return matchesSearch && matchesCategory && matchesDate && matchesBrandPrice
   })
 
+  // လက်တလော ပြသရန် သတင်းများ (Pagination slice)
+  const displayedNews = filteredNews.slice(0, visibleCount)
+
+  const handleLoadMore = () => {
+    setVisibleCount((prev) => prev + 9)
+  }
+
   return (
     <div>
-      {/* --- DASHBOARD FILTER SECTION (4 Columns Layout) --- */}
+      {/* --- DASHBOARD FILTER SECTION --- */}
       <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 mb-8 grid grid-cols-1 md:grid-cols-4 gap-4 items-center">
-        
-        {/* 1. Search Input */}
         <div>
           <input 
             type="text"
@@ -77,7 +83,6 @@ export default function NewsContainer({ newsList }: NewsContainerProps) {
           />
         </div>
 
-        {/* 2. Tractor Brands & Categories Filter Dropdown */}
         <div>
           <select 
             value={selectedCategory}
@@ -100,7 +105,6 @@ export default function NewsContainer({ newsList }: NewsContainerProps) {
           </select>
         </div>
 
-        {/* 3. Calendar Date Picker */}
         <div>
           <input 
             type="date"
@@ -110,7 +114,6 @@ export default function NewsContainer({ newsList }: NewsContainerProps) {
           />
         </div>
 
-        {/* 4. Brand Price & Details Filter Dropdown */}
         <div>
           <select 
             value={selectedBrandPriceFilter}
@@ -129,13 +132,12 @@ export default function NewsContainer({ newsList }: NewsContainerProps) {
             <option value="YTO">YTO</option>
           </select>
         </div>
-
       </div>
       
       {/* --- NEWS GRID SECTION --- */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredNews.length > 0 ? (
-          filteredNews.map((news, index) => (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+        {displayedNews.length > 0 ? (
+          displayedNews.map((news, index) => (
             <Link 
               href={`/news/${news.slug?.current}`} 
               key={index}
@@ -143,7 +145,7 @@ export default function NewsContainer({ newsList }: NewsContainerProps) {
             >
               {news.mainImage && (
                 <div className="h-48 overflow-hidden bg-gray-100">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img 
                     src={urlFor(news.mainImage).url()} 
                     alt={news.title} 
@@ -191,6 +193,32 @@ export default function NewsContainer({ newsList }: NewsContainerProps) {
           </div>
         )}
       </div>
+
+      {/* --- LOAD MORE BUTTON --- */}
+      {visibleCount < filteredNews.length && (
+        <div className="text-center mb-12">
+          <button
+            onClick={handleLoadMore}
+            className="px-6 py-3 bg-red-600 text-white font-semibold rounded-lg shadow hover:bg-red-700 transition duration-200 text-sm"
+          >
+            Load More News ↓
+          </button>
+        </div>
+      )}
+
+      {/* --- MONTHLY ARCHIVE SECTION LINK --- */}
+      <div className="bg-gradient-to-r from-gray-900 to-gray-800 rounded-2xl p-8 text-center text-white shadow-md">
+        <h3 className="text-xl font-bold mb-2">သတင်းဟောင်းများ ရှာဖွေရန်</h3>
+        <p className="text-gray-300 text-sm mb-6">
+          လအလိုက်၊ ရက်အလိုက် သိမ်းဆည်းထားသော ရှေးဟောင်းသတင်းများအားလုံးကို Monthly Archive တွင် ဆက်လက်ဖတ်ရှုနိုင်ပါသည်။
+        </p>
+        <Link 
+          href="/archive" 
+          className="inline-block px-6 py-3 bg-white text-gray-900 font-bold rounded-lg shadow hover:bg-gray-100 transition duration-200 text-sm"
+        >
+          View Monthly Archive →
+        </Link>
+      </div>
     </div> 
   )
-}
+} 
