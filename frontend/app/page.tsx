@@ -1,7 +1,6 @@
 import { client } from '@/lib/sanity'
 import Header from '@/components/Header'
 import NewsContainer from '@/components/NewsContainer'
-import PriceListSection from '@/components/PriceListSection' // အသစ်ထည့်လိုက်သော component
 
 interface NewsItem {
   title: string
@@ -35,15 +34,12 @@ export default async function Home() {
       {/* --- Header with Animated Logo --- */}
       <Header />
 
-      {/* --- News Container & Price List --- */}
+      {/* --- News Container --- */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <h1 className="text-3xl font-bold mb-6 border-b-2 border-red-600 pb-2 text-gray-800">
           KMM Kubota News Portal
         </h1>
         
-        {/* Google Sheets မှ ဈေးနှုန်းနှင့် Filter အပိုင်း */}
-        <PriceListSection />
-
         {/* သတင်းများပြသသည့် အပိုင်း */}
         <NewsContainer newsList={newsList} />
       </div>
