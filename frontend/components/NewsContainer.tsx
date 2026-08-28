@@ -15,12 +15,17 @@ interface NewsItem {
 
 interface CompanyItem {
   _id: string
+  slug?: { current: string }
   companyGroup?: string
   companyName?: string
   category?: string
   brand?: string
   stateRegion?: string
   cityTownship?: string
+  logo?: Record<string, unknown>
+  address?: string
+  phone?: string
+  email?: string
 }
 
 interface NewsContainerProps {
@@ -85,7 +90,7 @@ export default function NewsContainer({ newsList, companiesList }: NewsContainer
 
   return (
     <div>
-      {/* --- DASHBOARD FILTER SECTION (5 Dropdowns & Inputs) --- */}
+      {/* --- DASHBOARD FILTER SECTION --- */}
       <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 mb-8 grid grid-cols-1 md:grid-cols-5 gap-4 items-center">
         <div>
           <input 
@@ -147,7 +152,6 @@ export default function NewsContainer({ newsList, companiesList }: NewsContainer
           </select>
         </div>
 
-        {/* ၅ ခုမြောက် Dropdown - Company Group Filter */}
         <div>
           <select 
             value={selectedCompanyGroup}
@@ -161,23 +165,59 @@ export default function NewsContainer({ newsList, companiesList }: NewsContainer
         </div>
       </div>
       
-      {/* --- COMPANIES DIRECTORY PREVIEW --- */}
+      {/* --- COMPANIES DIRECTORY PREVIEW (With Image & Icons) --- */}
       {selectedCompanyGroup !== 'ALL' && (
         <div className="mb-12">
           <h3 className="text-xl font-bold text-gray-900 mb-4">
             {selectedCompanyGroup === 'kubota' ? 'Kubota Companies' : 'Other Brand Companies'} Directory
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredCompanies.length > 0 ? (
               filteredCompanies.map((company) => (
-                <div key={company._id} className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
-                  <h4 className="font-bold text-gray-900 text-lg mb-1">{company.companyName}</h4>
-                  <p className="text-sm text-gray-600">Brand: {company.brand || 'N/A'}</p>
-                  <p className="text-sm text-gray-600">Location: {[company.cityTownship, company.stateRegion].filter(Boolean).join(', ') || 'N/A'}</p>
-                </div>
+                <Link 
+                  href={`/companies/${company.slug?.current || company._id}`}
+                  key={company._id} 
+                  className="bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition duration-200 overflow-hidden flex flex-col group"
+                >
+                  {company.logo ? (
+                    <div className="h-40 overflow-hidden bg-gray-100">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img 
+                        src={urlFor(company.logo).url()} 
+                        alt={company.companyName || 'Company'} 
+                        className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+                      />
+                    </div>
+                  ) : (
+                    <div className="h-40 bg-red-50 flex items-center justify-center text-red-500 font-bold text-xl">
+                      🏢 {company.companyName?.charAt(0) || 'C'}
+                    </div>
+                  )}
+
+                  <div className="p-5 flex flex-col flex-grow">
+                    <h4 className="font-bold text-gray-900 text-lg mb-3 group-hover:text-red-600 transition">
+                      {company.companyName}
+                    </h4>
+
+                    <div className="space-y-2 text-sm text-gray-600 mb-4">
+                      <div className="flex items-center gap-2">
+                        <span>🏷️</span>
+                        <span className="font-medium text-gray-700">Brand:</span> {company.brand || 'N/A'}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span>📍</span>
+                        <span className="font-medium text-gray-700">Location:</span> {[company.cityTownship, company.stateRegion].filter(Boolean).join(', ') || 'N/A'}
+                      </div>
+                    </div>
+
+                    <span className="mt-auto text-xs font-semibold text-blue-600 flex items-center gap-1">
+                      View Detail →
+                    </span>
+                  </div>
+                </Link>
               ))
             ) : (
-              <p className="col-span-full text-sm text-gray-500 bg-white p-4 rounded-xl border border-gray-200 text-center">
+              <p className="col-span-full text-sm text-gray-500 bg-white p-6 rounded-xl border border-gray-200 text-center">
                 ဤအုပ်စုအတွက် ကုမ္ပဏီအချက်အလက် မရှိသေးပါ။
               </p>
             )}
