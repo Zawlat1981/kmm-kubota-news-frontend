@@ -7,12 +7,22 @@ interface NewsItem {
   slug: { current: string }
   category?: string
   publishedAt?: string
-  mainImage?: any
+  mainImage?: Record<string, unknown>
   body?: string
 }
 
-async function getNews(): Promise<NewsItem[]> {
-  const query = `*[_type == "newsPortal"] | order(publishedAt desc) {
+interface CompanyItem {
+  _id: string
+  companyGroup?: string
+  companyName?: string
+  category?: string
+  brand?: string
+  stateRegion?: string
+  cityTownship?: string
+}
+
+async function getData(): Promise<{ newsList: NewsItem[]; companiesList: CompanyItem[] }> {
+  const newsQuery = `*[_type == "newsPortal"] | order(publishedAt desc) {
     title,
     slug,
     category,
@@ -20,14 +30,30 @@ async function getNews(): Promise<NewsItem[]> {
     mainImage,
     body
   }`
-  return await client.fetch(query)
+
+  const companiesQuery = `*[_type == "company"]{
+    _id,
+    companyGroup,
+    companyName,
+    category,
+    brand,
+    stateRegion,
+    cityTownship
+  }`
+
+  const [newsList, companiesList] = await Promise.all([
+    client.fetch(newsQuery),
+    client.fetch(companiesQuery),
+  ])
+
+  return { newsList, companiesList }
 }
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
 export default async function Home() {
-  const newsList = await getNews()
+  const { newsList, companiesList } = await getData()
 
   return (
     <main className="min-h-screen bg-gray-50">
@@ -40,8 +66,8 @@ export default async function Home() {
           KMM Kubota News Portal
         </h1>
         
-        {/* သတင်းများပြသသည့် အပိုင်း */}
-        <NewsContainer newsList={newsList} />
+        {/* သတင်းများ နှင့် ကုမ္ပဏီ Filter များပြသသည့် အပိုင်း */}
+        <NewsContainer newsList={newsList} companiesList={companiesList} />
       </div>
     </main>
   )

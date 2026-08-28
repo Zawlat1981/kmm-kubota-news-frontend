@@ -13,8 +13,19 @@ interface NewsItem {
   body?: string
 }
 
+interface CompanyItem {
+  _id: string
+  companyGroup?: string
+  companyName?: string
+  category?: string
+  brand?: string
+  stateRegion?: string
+  cityTownship?: string
+}
+
 interface NewsContainerProps {
   newsList: NewsItem[]
+  companiesList?: CompanyItem[]
 }
 
 function formatCategory(category?: string) {
@@ -27,16 +38,15 @@ function formatCategory(category?: string) {
   return category.toUpperCase()
 }
 
-export default function NewsContainer({ newsList }: NewsContainerProps) {
+export default function NewsContainer({ newsList, companiesList }: NewsContainerProps) {
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('ALL')
   const [selectedDate, setSelectedDate] = useState('')
   const [selectedBrandPriceFilter, setSelectedBrandPriceFilter] = useState('ALL')
+  const [selectedCompanyGroup, setSelectedCompanyGroup] = useState('ALL')
   
-  // ပထမအကျော့အနေနဲ့ ၉ ပုဒ်ပြရန်၊ Load More နှိပ်လျှင် ၉ ပုဒ်စီ တိုးရန်
   const [visibleCount, setVisibleCount] = useState(9)
 
-  // Filter လုပ်ခြင်း
   const filteredNews = newsList.filter((news) => {
     const matchesSearch = news.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
                           (news.body && news.body.toLowerCase().includes(searchTerm.toLowerCase()))
@@ -62,7 +72,11 @@ export default function NewsContainer({ newsList }: NewsContainerProps) {
     return matchesSearch && matchesCategory && matchesDate && matchesBrandPrice
   })
 
-  // လက်တလော ပြသရန် သတင်းများ (Pagination slice)
+  const filteredCompanies = companiesList?.filter((company) => {
+    if (selectedCompanyGroup === 'ALL') return true
+    return company.companyGroup === selectedCompanyGroup
+  }) || []
+
   const displayedNews = filteredNews.slice(0, visibleCount)
 
   const handleLoadMore = () => {
@@ -71,8 +85,8 @@ export default function NewsContainer({ newsList }: NewsContainerProps) {
 
   return (
     <div>
-      {/* --- DASHBOARD FILTER SECTION --- */}
-      <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 mb-8 grid grid-cols-1 md:grid-cols-4 gap-4 items-center">
+      {/* --- DASHBOARD FILTER SECTION (5 Dropdowns & Inputs) --- */}
+      <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 mb-8 grid grid-cols-1 md:grid-cols-5 gap-4 items-center">
         <div>
           <input 
             type="text"
@@ -132,8 +146,45 @@ export default function NewsContainer({ newsList }: NewsContainerProps) {
             <option value="YTO">YTO</option>
           </select>
         </div>
+
+        {/* ၅ ခုမြောက် Dropdown - Company Group Filter */}
+        <div>
+          <select 
+            value={selectedCompanyGroup}
+            onChange={(e) => setSelectedCompanyGroup(e.target.value)}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 text-sm text-gray-900 bg-white font-medium text-red-600"
+          >
+            <option value="ALL">All Companies</option>
+            <option value="kubota">Kubota Companies</option>
+            <option value="other">Other Brand Companies</option>
+          </select>
+        </div>
       </div>
       
+      {/* --- COMPANIES DIRECTORY PREVIEW --- */}
+      {selectedCompanyGroup !== 'ALL' && (
+        <div className="mb-12">
+          <h3 className="text-xl font-bold text-gray-900 mb-4">
+            {selectedCompanyGroup === 'kubota' ? 'Kubota Companies' : 'Other Brand Companies'} Directory
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {filteredCompanies.length > 0 ? (
+              filteredCompanies.map((company) => (
+                <div key={company._id} className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
+                  <h4 className="font-bold text-gray-900 text-lg mb-1">{company.companyName}</h4>
+                  <p className="text-sm text-gray-600">Brand: {company.brand || 'N/A'}</p>
+                  <p className="text-sm text-gray-600">Location: {[company.cityTownship, company.stateRegion].filter(Boolean).join(', ') || 'N/A'}</p>
+                </div>
+              ))
+            ) : (
+              <p className="col-span-full text-sm text-gray-500 bg-white p-4 rounded-xl border border-gray-200 text-center">
+                ဤအုပ်စုအတွက် ကုမ္ပဏီအချက်အလက် မရှိသေးပါ။
+              </p>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* --- NEWS GRID SECTION --- */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
         {displayedNews.length > 0 ? (
@@ -221,4 +272,4 @@ export default function NewsContainer({ newsList }: NewsContainerProps) {
       </div>
     </div> 
   )
-} 
+}
