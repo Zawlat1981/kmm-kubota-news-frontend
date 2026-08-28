@@ -5,8 +5,9 @@ import Link from 'next/link'
 import { urlFor } from '../lib/sanity'
 
 interface NewsItem {
+  _id?: string
   title: string
-  slug: { current: string }
+  slug?: { current: string }
   category?: string
   publishedAt?: string
   mainImage?: Record<string, unknown>
@@ -238,56 +239,59 @@ export default function NewsContainer({ newsList, companiesList }: NewsContainer
       {/* --- NEWS GRID SECTION --- */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
         {displayedNews.length > 0 ? (
-          displayedNews.map((news, index) => (
-            <Link 
-              href={`/news/${news.slug?.current}`} 
-              key={index}
-              className="group bg-white rounded-lg shadow-sm hover:shadow-md transition duration-200 overflow-hidden border border-gray-200 flex flex-col"
-            >
-              {news.mainImage && (
-                <div className="h-48 overflow-hidden bg-gray-100">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img 
-                    src={urlFor(news.mainImage).url()} 
-                    alt={news.title} 
-                    className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
-                  />
-                </div>
-              )}
-              
-              <div className="p-4 flex flex-col flex-grow">
-                {news.category && (
-                  <span className="text-xs font-bold text-red-600 uppercase tracking-wider mb-1">
-                    {formatCategory(news.category)}
-                  </span>
+          displayedNews.map((news, index) => {
+            const newsDetailId = news.slug?.current || news._id
+            return (
+              <Link 
+                href={`/news/${newsDetailId}`} 
+                key={index}
+                className="group bg-white rounded-lg shadow-sm hover:shadow-md transition duration-200 overflow-hidden border border-gray-200 flex flex-col"
+              >
+                {news.mainImage && (
+                  <div className="h-48 overflow-hidden bg-gray-100">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img 
+                      src={urlFor(news.mainImage).url()} 
+                      alt={news.title} 
+                      className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+                    />
+                  </div>
                 )}
-
-                {news.publishedAt && (
-                  <p className="text-xs text-gray-400 mb-2">
-                    {new Date(news.publishedAt).toLocaleDateString('en-US', {
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric'
-                    })}
-                  </p>
-                )}
-
-                <h2 className="text-lg font-bold text-gray-900 group-hover:text-red-600 transition line-clamp-2 mb-2">
-                  {news.title}
-                </h2>
                 
-                {news.body && (
-                  <p className="text-gray-600 text-sm line-clamp-3 mb-4">
-                    {news.body}
-                  </p>
-                )}
+                <div className="p-4 flex flex-col flex-grow">
+                  {news.category && (
+                    <span className="text-xs font-bold text-red-600 uppercase tracking-wider mb-1">
+                      {formatCategory(news.category)}
+                    </span>
+                  )}
 
-                <span className="mt-auto text-xs font-semibold text-blue-600 flex items-center">
-                  Read full story →
-                </span>
-              </div>
-            </Link>
-          ))
+                  {news.publishedAt && (
+                    <p className="text-xs text-gray-400 mb-2">
+                      {new Date(news.publishedAt).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                      })}
+                    </p>
+                  )}
+
+                  <h2 className="text-lg font-bold text-gray-900 group-hover:text-red-600 transition line-clamp-2 mb-2">
+                    {news.title}
+                  </h2>
+                  
+                  {news.body && (
+                    <p className="text-gray-600 text-sm line-clamp-3 mb-4">
+                      {news.body}
+                    </p>
+                  )}
+
+                  <span className="mt-auto text-xs font-semibold text-blue-600 flex items-center">
+                    Read full story →
+                  </span>
+                </div>
+              </Link>
+            )
+          })
         ) : (
           <div className="col-span-full text-center py-12 text-gray-500 bg-white rounded-lg border border-gray-200">
             No news found matching your search criteria.
