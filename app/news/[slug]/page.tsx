@@ -40,7 +40,7 @@ export default async function NewsDetailPage({ params }: NewsDetailPageProps) {
   }
 
   return (
-    <main className="max-w-4xl mx-auto px-4 py-8">
+    <main className="max-w-4xl mx-auto px-4 py-8 bg-white text-gray-900 min-h-screen">
       <Link
         href="/"
         className="text-sm font-semibold text-red-600 hover:underline mb-6 inline-block"
