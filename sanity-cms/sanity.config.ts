@@ -37,10 +37,11 @@ export default defineConfig({
               .icon(() => '📍')
               .child(
                 S.list()
-                  .title('Dealers')
+                  .title('Dealers & Companies')
                   .items([
                     S.documentTypeListItem('dealer').title('All Dealers'),
                     S.documentTypeListItem('kubotaStaff').title('Kubota Staff'),
+                    S.documentTypeListItem('company').title('Companies'),
                   ])
               ),
 

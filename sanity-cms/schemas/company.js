@@ -2,7 +2,18 @@ export const company = {
   name: 'company',
   title: 'Company Directory',
   type: 'document',
-  fields: [
+  fields: [{
+      name: 'companyGroup',
+      title: 'Company Group',
+      type: 'string',
+      options: {
+        list: [
+          { title: 'Kubota Company', value: 'kubota' },
+          { title: 'Other Brand Company', value: 'other' },
+        ],
+        layout: 'dropdown',
+      },
+    },
     {
       name: 'companyName',
       title: 'Company Name',
@@ -40,6 +51,19 @@ export const company = {
       name: 'address',
       title: 'Address',
       type: 'text',
+    },
+    {
+      name: 'googleMapUrl',
+      title: 'Google Map URL',
+      type: 'url',
+    },
+    {
+      name: 'companyImage',
+      title: 'Company Image',
+      type: 'image',
+      options: {
+        hotspot: true, // ပုံကို လိုသလို ချိန်ညှိ (Crop) လို့ရအောင်ပါ
+      }
     },
     {
       name: 'website',

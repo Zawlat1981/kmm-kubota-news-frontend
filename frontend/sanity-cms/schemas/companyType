@@ -1,0 +1,46 @@
+export default {
+  name: 'companyType',
+  title: 'Company / Brand Type',
+  type: 'document',
+  fields: [
+    {
+      name: 'name',
+      title: 'Company Name',
+      type: 'string',
+    },
+    {
+      name: 'slug',
+      title: 'Slug',
+      type: 'slug',
+      options: {
+        source: 'name',
+        maxLength: 96,
+      },
+    },
+    {
+      name: 'brandCategory',
+      title: 'Brand Category',
+      type: 'string',
+      options: {
+        list: [
+          { title: 'Kubota Brand Company', value: 'kubota-brand' },
+          { title: 'Other Brand Company', value: 'other-brand' },
+        ],
+        layout: 'radio', // Radio button ပုံစံဖြင့် ရွေးချယ်ရန်
+      },
+    },
+    {
+      name: 'description',
+      title: 'Description / Details',
+      type: 'text',
+    },
+    {
+      name: 'image',
+      title: 'Company Logo / Image',
+      type: 'image',
+      options: {
+        hotspot: true,
+      },
+    },
+  ],
+}

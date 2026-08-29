@@ -88,6 +88,8 @@ export default function NewsContainer({ newsList, companiesList }: NewsContainer
 
   const displayedNews = filteredNews.slice(0, visibleCount)
 
+  const isCompanyView = selectedCompanyGroup !== 'ALL'
+
   const handleLoadMore = (): void => {
     setVisibleCount((prev) => prev + 9)
   }
@@ -170,7 +172,7 @@ export default function NewsContainer({ newsList, companiesList }: NewsContainer
       </div>
       
       {/* --- COMPANIES DIRECTORY PREVIEW --- */}
-      {selectedCompanyGroup !== 'ALL' && (
+      {isCompanyView && (
         <div className="mb-12">
           <h3 className="text-xl font-bold text-gray-900 mb-4">
             {selectedCompanyGroup === 'kubota' ? 'Kubota Companies' : 'Other Brand Companies'} Directory
@@ -236,79 +238,83 @@ export default function NewsContainer({ newsList, companiesList }: NewsContainer
         </div>
       )}
 
-      {/* --- NEWS GRID SECTION --- */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-        {displayedNews.length > 0 ? (
-          displayedNews.map((news, index) => {
-            const newsDetailId = news.slug?.current || news._id
-            return (
-              <Link 
-                href={`/news/${newsDetailId}`} 
-                key={index}
-                className="group bg-white rounded-lg shadow-sm hover:shadow-md transition duration-200 overflow-hidden border border-gray-200 flex flex-col"
-              >
-                {news.mainImage && (
-                  <div className="h-48 overflow-hidden bg-gray-100">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img 
-                      src={urlFor(news.mainImage).url()} 
-                      alt={news.title} 
-                      className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
-                    />
-                  </div>
-                )}
-                
-                <div className="p-4 flex flex-col flex-grow">
-                  {news.category && (
-                    <span className="text-xs font-bold text-red-600 uppercase tracking-wider mb-1">
-                      {formatCategory(news.category)}
-                    </span>
-                  )}
+      {/* --- NEWS GRID SECTION (company ရွေးထားချိန်မှာ hide လုပ်မည်) --- */}
+      {!isCompanyView && (
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+            {displayedNews.length > 0 ? (
+              displayedNews.map((news, index) => {
+                const newsDetailId = news.slug?.current || news._id
+                return (
+                  <Link 
+                    href={`/news/${newsDetailId}`} 
+                    key={index}
+                    className="group bg-white rounded-lg shadow-sm hover:shadow-md transition duration-200 overflow-hidden border border-gray-200 flex flex-col"
+                  >
+                    {news.mainImage && (
+                      <div className="h-48 overflow-hidden bg-gray-100">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img 
+                          src={urlFor(news.mainImage).url()} 
+                          alt={news.title} 
+                          className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+                        />
+                      </div>
+                    )}
+                    
+                    <div className="p-4 flex flex-col flex-grow">
+                      {news.category && (
+                        <span className="text-xs font-bold text-red-600 uppercase tracking-wider mb-1">
+                          {formatCategory(news.category)}
+                        </span>
+                      )}
 
-                  {news.publishedAt && (
-                    <p className="text-xs text-gray-400 mb-2">
-                      {new Date(news.publishedAt).toLocaleDateString('en-US', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric'
-                      })}
-                    </p>
-                  )}
+                      {news.publishedAt && (
+                        <p className="text-xs text-gray-400 mb-2">
+                          {new Date(news.publishedAt).toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric'
+                          })}
+                        </p>
+                      )}
 
-                  <h2 className="text-lg font-bold text-gray-900 group-hover:text-red-600 transition line-clamp-2 mb-2">
-                    {news.title}
-                  </h2>
-                  
-                  {news.body && (
-                    <p className="text-gray-600 text-sm line-clamp-3 mb-4">
-                      {news.body}
-                    </p>
-                  )}
+                      <h2 className="text-lg font-bold text-gray-900 group-hover:text-red-600 transition line-clamp-2 mb-2">
+                        {news.title}
+                      </h2>
+                      
+                      {news.body && (
+                        <p className="text-gray-600 text-sm line-clamp-3 mb-4">
+                          {news.body}
+                        </p>
+                      )}
 
-                  <span className="mt-auto text-xs font-semibold text-blue-600 flex items-center">
-                    Read full story →
-                  </span>
-                </div>
-              </Link>
-            )
-          })
-        ) : (
-          <div className="col-span-full text-center py-12 text-gray-500 bg-white rounded-lg border border-gray-200">
-            No news found matching your search criteria.
+                      <span className="mt-auto text-xs font-semibold text-blue-600 flex items-center">
+                        Read full story →
+                      </span>
+                    </div>
+                  </Link>
+                )
+              })
+            ) : (
+              <div className="col-span-full text-center py-12 text-gray-500 bg-white rounded-lg border border-gray-200">
+                No news found matching your search criteria.
+              </div>
+            )}
           </div>
-        )}
-      </div>
 
-      {/* --- LOAD MORE BUTTON --- */}
-      {visibleCount < filteredNews.length && (
-        <div className="text-center mb-12">
-          <button
-            onClick={handleLoadMore}
-            className="px-6 py-3 bg-red-600 text-white font-semibold rounded-lg shadow hover:bg-red-700 transition duration-200 text-sm"
-          >
-            Load More News ↓
-          </button>
-        </div>
+          {/* --- LOAD MORE BUTTON --- */}
+          {visibleCount < filteredNews.length && (
+            <div className="text-center mb-12">
+              <button
+                onClick={handleLoadMore}
+                className="px-6 py-3 bg-red-600 text-white font-semibold rounded-lg shadow hover:bg-red-700 transition duration-200 text-sm"
+              >
+                Load More News ↓
+              </button>
+            </div>
+          )}
+        </>
       )}
 
       {/* --- MONTHLY ARCHIVE SECTION LINK --- */}
