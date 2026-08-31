@@ -3,9 +3,9 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
 interface CompanyDetailProps {
-  params: {
+  params: Promise<{
     slug: string
-  }
+  }>
 }
 
 async function getCompany(slug: string) {
@@ -31,7 +31,8 @@ async function getCompany(slug: string) {
 }
 
 export default async function CompanyDetailPage({ params }: CompanyDetailProps) {
-  const company = await getCompany(params.slug)
+  const resolveParams=await params
+  const company = await getCompany(resolveParams.slug)
 
   if (!company) {
     notFound()
@@ -43,10 +44,10 @@ export default async function CompanyDetailPage({ params }: CompanyDetailProps) 
         {/* --- Back Button --- */}
         <div className="mb-6">
           <Link 
-            href="/companies" 
+            href="/" 
             className="inline-flex items-center text-sm font-semibold text-red-600 hover:text-red-700 bg-white px-4 py-2 rounded-lg border border-gray-200 shadow-sm transition"
           >
-            ← Back to Companies
+            ← Back to Menu
           </Link>
         </div>
 

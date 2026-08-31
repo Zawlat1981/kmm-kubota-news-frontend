@@ -13,12 +13,18 @@ interface NewsItem {
 
 interface CompanyItem {
   _id: string
+  slug?: { current: string }
   companyGroup?: string
   companyName?: string
   category?: string
   brand?: string
   stateRegion?: string
   cityTownship?: string
+  companyImage?: Record<string, unknown>
+  phone?: string
+  address?: string
+  website?: string
+  email?: string
 }
 
 async function getData(): Promise<{ newsList: NewsItem[]; companiesList: CompanyItem[] }> {
@@ -38,7 +44,13 @@ async function getData(): Promise<{ newsList: NewsItem[]; companiesList: Company
     category,
     brand,
     stateRegion,
-    cityTownship
+    cityTownship,
+    slug,
+    companyImage,
+    phone,
+    address,
+    website,
+    email,
   }`
 
   const [newsList, companiesList] = await Promise.all([
