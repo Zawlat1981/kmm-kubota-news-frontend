@@ -44,10 +44,10 @@ export default async function CompanyDetailPage({ params }: CompanyDetailProps) 
         {/* --- Back Button --- */}
         <div className="mb-6">
           <Link 
-            href="/companies" 
+            href="/" 
             className="inline-flex items-center text-sm font-semibold text-red-600 hover:text-red-700 bg-white px-4 py-2 rounded-lg border border-gray-200 shadow-sm transition"
           >
-            ← Back to Companies
+            ← Back to Menu
           </Link>
         </div>
 
