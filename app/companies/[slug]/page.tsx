@@ -3,9 +3,9 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
 interface CompanyDetailProps {
-  params: {
+  params: Promise<{
     slug: string
-  }
+  }>
 }
 
 async function getCompany(slug: string) {
@@ -31,7 +31,8 @@ async function getCompany(slug: string) {
 }
 
 export default async function CompanyDetailPage({ params }: CompanyDetailProps) {
-  const company = await getCompany(params.slug)
+  const resolveParams=await params
+  const company = await getCompany(resolveParams.slug)
 
   if (!company) {
     notFound()
