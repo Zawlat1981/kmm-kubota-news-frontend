@@ -17,6 +17,18 @@ export const company = {
       },
     },
     {
+      name: 'companyGroup',
+      title: 'Company Group',
+      type: 'string',
+      options: {
+        list: [
+          { title: 'Distributor', value: 'distributor' },
+          { title: 'Dealer (Kubota)', value: 'dealer' },
+          { title: 'Dealer (Other Brands)', value: 'other' },
+        ],
+      },
+    },
+    {
       name: 'brand',
       title: 'Brand',
       type: 'string',
@@ -32,14 +44,45 @@ export const company = {
       type: 'string',
     },
     {
-      name: 'phone',
-      title: 'Phone',
-      type: 'string',
-    },
-    {
-      name: 'address',
-      title: 'Address',
-      type: 'text',
+      name: 'branches',
+      title: 'Branch Offices',
+      type: 'array',
+      of: [
+        {
+          type: 'object',
+          name: 'branch',
+          title: 'Branch',
+          fields: [
+            {
+              name: 'address',
+              title: 'Address',
+              type: 'text',
+            },
+            {
+              name: 'phone',
+              title: 'Phone',
+              type: 'string',
+            },
+            {
+              name: 'googleMapUrl',
+              title: 'Google Map URL',
+              type: 'url',
+            },
+          ],
+          preview: {
+            select: {
+              address: 'address',
+              phone: 'phone',
+            },
+            prepare({ address, phone }) {
+              return {
+                title: address || 'No address',
+                subtitle: phone || '',
+              }
+            },
+          },
+        },
+      ],
     },
     {
       name: 'website',
@@ -50,6 +93,14 @@ export const company = {
       name: 'email',
       title: 'Email',
       type: 'string',
+    },
+    {
+      name: 'companyImage',
+      title: 'Company Image',
+      type: 'image',
+      options: {
+        hotspot: true,
+      },
     },
     {
       name: 'facebookLink',

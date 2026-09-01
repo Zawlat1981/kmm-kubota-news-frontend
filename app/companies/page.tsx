@@ -1,6 +1,12 @@
 import { client } from '@/lib/sanity'
 import CompaniesClient from './CompaniesClient'
 
+export interface Branch {
+  address?: string
+  phone?: string
+  googleMapUrl?: string
+}
+
 export interface Company {
   _id: string
   companyGroup?: string
@@ -9,17 +15,21 @@ export interface Company {
   brand?: string
   stateRegion?: string
   cityTownship?: string
-  phone?: string
-  address?: string
+  branches?: Branch[]
   website?: string
   email?: string
-  googleMapUrl?: string
-  companyImage?: { 
+  companyImage?: {
     _ref: string
     _type: string
   }
+  facebookLink?: string
+  tiktokLink?: string
+  viber?: string
+  telegram?: string
   salesPersonName?: string
   salesPhone?: string
+  salesFbLink?: string
+  salesTtLink?: string
 }
 
 async function getCompanies(): Promise<Company[]> {
@@ -31,14 +41,18 @@ async function getCompanies(): Promise<Company[]> {
     brand,
     stateRegion,
     cityTownship,
-    phone,
-    address,
+    branches,
     website,
     email,
-    googleMapUrl,
     companyImage,
+    facebookLink,
+    tiktokLink,
+    viber,
+    telegram,
     salesPersonName,
-    salesPhone
+    salesPhone,
+    salesFbLink,
+    salesTtLink
   }`
   return await client.fetch(query)
 }

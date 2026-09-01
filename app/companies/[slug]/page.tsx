@@ -17,14 +17,18 @@ async function getCompany(slug: string) {
     brand,
     stateRegion,
     cityTownship,
-    phone,
-    address,
+    branches,
     website,
     email,
-    googleMapUrl,
     companyImage,
+    facebookLink,
+    tiktokLink,
+    viber,
+    telegram,
     salesPersonName,
-    salesPhone
+    salesPhone,
+    salesFbLink,
+    salesTtLink
   }`
   const company = await client.fetch(query, { slug })
   return company
@@ -104,27 +108,55 @@ export default async function CompanyDetailPage({ params }: CompanyDetailProps) 
                 </div>
               )}
 
-              {(company.cityTownship || company.stateRegion || company.address) && (
+              {(company.cityTownship || company.stateRegion) && (
                 <div className="flex items-start gap-3 text-gray-700">
-                  <span className="text-xl">📍</span>
+                  <span className="text-xl">🗺️</span>
                   <div>
-                    <span className="font-semibold block text-xs uppercase tracking-wider text-gray-400">Location & Address</span>
+                    <span className="font-semibold block text-xs uppercase tracking-wider text-gray-400">Region</span>
                     <span className="text-base font-medium text-gray-800">
-                      {[company.address, company.cityTownship, company.stateRegion].filter(Boolean).join(', ')}
+                      {[company.cityTownship, company.stateRegion].filter(Boolean).join(', ')}
                     </span>
                   </div>
                 </div>
               )}
 
-              {company.phone && (
-                <div className="flex items-start gap-3 text-gray-700">
-                  <span className="text-xl">📞</span>
-                  <div>
-                    <span className="font-semibold block text-xs uppercase tracking-wider text-gray-400">Phone Number</span>
-                    <a href={`tel:${company.phone}`} className="text-base font-medium text-blue-600 hover:underline">
-                      {company.phone}
-                    </a>
-                  </div>
+              {/* --- ရုံးခွဲများ (Branches) --- */}
+              {company.branches && company.branches.length > 0 && (
+                <div className="pt-4 border-t border-gray-100 space-y-4">
+                  <span className="font-semibold block text-xs uppercase tracking-wider text-gray-400">Branch Offices</span>
+                  {company.branches.map((branch: { address?: string; phone?: string; googleMapUrl?: string }, index: number) => {
+                    const hasContent = branch.address || branch.phone || branch.googleMapUrl
+                    if (!hasContent) return null
+
+                    return (
+                      <div key={index} className="bg-gray-50 rounded-xl p-4 border border-gray-100 space-y-2">
+                        {branch.address && (
+                          <div className="flex items-start gap-3 text-gray-700">
+                            <span className="text-lg">📍</span>
+                            <span className="text-sm font-medium text-gray-800">{branch.address}</span>
+                          </div>
+                        )}
+                        {branch.phone && (
+                          <div className="flex items-start gap-3 text-gray-700">
+                            <span className="text-lg">📞</span>
+                            <a href={`tel:${branch.phone}`} className="text-sm font-medium text-blue-600 hover:underline">
+                              {branch.phone}
+                            </a>
+                          </div>
+                        )}
+                        {branch.googleMapUrl && (
+                          <a
+                            href={branch.googleMapUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center justify-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg shadow transition text-xs gap-1"
+                          >
+                            🗺️ View on Google Map
+                          </a>
+                        )}
+                      </div>
+                    )
+                  })}
                 </div>
               )}
 
@@ -152,38 +184,92 @@ export default async function CompanyDetailPage({ params }: CompanyDetailProps) 
                 </div>
               )}
 
-              {company.salesPersonName && (
-                <div className="flex items-start gap-3 text-gray-700 pt-4 border-t border-gray-100">
-                  <span className="text-xl">👤</span>
-                  <div>
-                    <span className="font-semibold block text-xs uppercase tracking-wider text-gray-400">Sales Person</span>
-                    <span className="text-base font-medium text-gray-800">{company.salesPersonName}</span>
-                  </div>
-                </div>
-              )}
-
-              {company.salesPhone && (
-                <div className="flex items-start gap-3 text-gray-700">
-                  <span className="text-xl">📱</span>
-                  <div>
-                    <span className="font-semibold block text-xs uppercase tracking-wider text-gray-400">Sales Phone</span>
-                    <a href={`tel:${company.salesPhone}`} className="text-base font-medium text-blue-600 hover:underline">
-                      {company.salesPhone}
+              {/* --- Social Links --- */}
+              {(company.facebookLink || company.tiktokLink || company.viber || company.telegram) && (
+                <div className="flex flex-wrap gap-2 pt-2">
+                  {company.facebookLink && (
+                    <a
+                      href={company.facebookLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs bg-blue-50 text-blue-600 border border-blue-200 px-3 py-1.5 rounded-lg hover:bg-blue-100 font-medium transition"
+                    >
+                      Facebook
                     </a>
-                  </div>
+                  )}
+                  {company.tiktokLink && (
+                    <a
+                      href={company.tiktokLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs bg-gray-50 text-gray-800 border border-gray-200 px-3 py-1.5 rounded-lg hover:bg-gray-100 font-medium transition"
+                    >
+                      TikTok
+                    </a>
+                  )}
+                  {company.viber && (
+                    <span className="text-xs bg-purple-50 text-purple-600 border border-purple-200 px-3 py-1.5 rounded-lg font-medium">
+                      Viber: {company.viber}
+                    </span>
+                  )}
+                  {company.telegram && (
+                    <a
+                      href={company.telegram}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs bg-sky-50 text-sky-600 border border-sky-200 px-3 py-1.5 rounded-lg hover:bg-sky-100 font-medium transition"
+                    >
+                      Telegram
+                    </a>
+                  )}
                 </div>
               )}
 
-              {company.googleMapUrl && (
-                <div className="pt-4">
-                  <a 
-                    href={company.googleMapUrl} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center w-full px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg shadow transition text-sm gap-2"
-                  >
-                    🗺️ View on Google Map
-                  </a>
+              {/* --- Sales Contact --- */}
+              {(company.salesPersonName || company.salesPhone || company.salesFbLink || company.salesTtLink) && (
+                <div className="pt-4 border-t border-gray-100 space-y-3">
+                  <span className="font-semibold block text-xs uppercase tracking-wider text-gray-400">Sales Contact</span>
+
+                  {company.salesPersonName && (
+                    <div className="flex items-start gap-3 text-gray-700">
+                      <span className="text-xl">👤</span>
+                      <span className="text-base font-medium text-gray-800">{company.salesPersonName}</span>
+                    </div>
+                  )}
+
+                  {company.salesPhone && (
+                    <div className="flex items-start gap-3 text-gray-700">
+                      <span className="text-xl">📱</span>
+                      <a href={`tel:${company.salesPhone}`} className="text-base font-medium text-blue-600 hover:underline">
+                        {company.salesPhone}
+                      </a>
+                    </div>
+                  )}
+
+                  {(company.salesFbLink || company.salesTtLink) && (
+                    <div className="flex gap-3 pl-9">
+                      {company.salesFbLink && (
+                        <a
+                          href={company.salesFbLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-sm text-blue-600 hover:underline font-medium"
+                        >
+                          FB
+                        </a>
+                      )}
+                      {company.salesTtLink && (
+                        <a
+                          href={company.salesTtLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-sm text-gray-800 hover:underline font-medium"
+                        >
+                          TikTok
+                        </a>
+                      )}
+                    </div>
+                  )}
                 </div>
               )}
 

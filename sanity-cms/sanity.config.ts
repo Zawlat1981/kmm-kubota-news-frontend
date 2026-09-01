@@ -44,6 +44,19 @@ export default defineConfig({
                   ])
               ),
 
+              // Companies Section (အသစ်ထည့်ထားသည်)
+               S.listItem()
+                .title('Companies')
+                 .icon(() => '🏢')
+                 .child(
+                  S.list()
+                  .title('Companies')
+                  .items([
+                    S.documentTypeListItem('company').title('All Companies'),
+                    S.documentTypeListItem('companyType').title('Company Types'),
+                    ])
+              ),
+
             // Manuals Section
             S.listItem()
               .title('Manuals & Documents')
@@ -87,15 +100,13 @@ export default defineConfig({
 
   // Document internationalization
   document: {
-    // @ts-expect-error - experimental feature
     newDocumentOptions: (prev, { creationContext }) => {
       if (creationContext.type === 'global') {
-        return prev.filter((template) => template.schemaId !== 'productMarketing')
+        return prev.filter((template) => (template as any).schemaId !== 'productMarketing')
       }
       return prev
     },
-    // @ts-expect-error - experimental feature
-    actions: (prev, { schemaType }) => {
+    actions: (prev: any[], { schemaType }: { schemaType: string }) => {
       if (schemaType === 'productSpec') {
         return prev.map((action) =>
           action.action === 'duplicate'
