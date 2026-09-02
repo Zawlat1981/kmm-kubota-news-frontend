@@ -231,7 +231,7 @@ export default function NewsContainer({ newsList, companiesList }: NewsContainer
               })
             ) : (
               <p className="col-span-full text-sm text-gray-500 bg-white p-6 rounded-xl border border-gray-200 text-center">
-                ဤအုပ်စုအတွက် ကုမ္ပဏီအချက်အလက် မရှိသေးပါ။
+                No company information available for this group yet.
               </p>
             )}
           </div>
@@ -317,19 +317,34 @@ export default function NewsContainer({ newsList, companiesList }: NewsContainer
         </>
       )}
 
-      {/* --- MONTHLY ARCHIVE SECTION LINK --- */}
-      <div className="bg-gradient-to-r from-gray-900 to-gray-800 rounded-2xl p-8 text-center text-white shadow-md">
-        <h3 className="text-xl font-bold mb-2">သတင်းဟောင်းများ ရှာဖွေရန်</h3>
-        <p className="text-gray-300 text-sm mb-6">
-          คุณสามารถอ่านข่าวสารย้อนหลังทั้งหมดที่จัดระเบียบตามเดือนและวันที่ได้ใน Monthly Archive
-        </p>
-        <Link 
-          href="/archive" 
-          className="inline-block px-6 py-3 bg-white text-gray-900 font-bold rounded-lg shadow hover:bg-gray-100 transition duration-200 text-sm"
-        >
-          View Monthly Archive →
-        </Link>
-      </div>
+      {/* --- BOTTOM SECTION: Archive (news view) or Full Directory link (company view) --- */}
+      {isCompanyView ? (
+        <div className="bg-gradient-to-r from-red-700 to-red-600 rounded-2xl p-8 text-center text-white shadow-md">
+          <h3 className="text-xl font-bold mb-2">View All Kubota &amp; Competitor Companies</h3>
+          <p className="text-red-100 text-sm mb-6">
+            Filter by region and brand, and see full details for every company in the Company Directory.
+          </p>
+          <Link
+            href="/companies"
+            className="inline-block px-6 py-3 bg-white text-red-700 font-bold rounded-lg shadow hover:bg-gray-100 transition duration-200 text-sm"
+          >
+            View Full Company Directory →
+          </Link>
+        </div>
+      ) : (
+        <div className="bg-gradient-to-r from-gray-900 to-gray-800 rounded-2xl p-8 text-center text-white shadow-md">
+          <h3 className="text-xl font-bold mb-2">Search Past News</h3>
+          <p className="text-gray-300 text-sm mb-6">
+            Browse all past news, organized by month and date, in the Monthly Archive.
+          </p>
+          <Link
+            href="/archive"
+            className="inline-block px-6 py-3 bg-white text-gray-900 font-bold rounded-lg shadow hover:bg-gray-100 transition duration-200 text-sm"
+          >
+            View Monthly Archive →
+          </Link>
+        </div>
+      )}
     </div> 
   )
 }

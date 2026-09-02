@@ -17,6 +17,12 @@ export const company = {
       },
     },
     {
+      name: 'distributor',
+      title: 'Distributor',
+      type: 'string',
+      description: 'ဥပမာ - Kubota Myanmar, Yanmar Myanmar',
+    },
+    {
       name: 'companyGroup',
       title: 'Company Group',
       type: 'string',
