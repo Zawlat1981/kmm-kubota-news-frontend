@@ -80,7 +80,7 @@ export default async function CompanyDetailPage({ params }: CompanyDetailProps) 
               
               {company.brand && (
                 <div className="flex items-start gap-3 text-gray-700">
-                  <span className="text-xl">🏷️</span>
+                  <span className="text-xl">🚜</span>
                   <div>
                     <span className="font-semibold block text-xs uppercase tracking-wider text-gray-400">Brand</span>
                     <span className="text-base font-medium text-gray-800">{company.brand}</span>
@@ -90,7 +90,7 @@ export default async function CompanyDetailPage({ params }: CompanyDetailProps) 
 
               {company.companyGroup && (
                 <div className="flex items-start gap-3 text-gray-700">
-                  <span className="text-xl">📂</span>
+                  <span className="text-xl">🏡</span>
                   <div>
                     <span className="font-semibold block text-xs uppercase tracking-wider text-gray-400">Company Group</span>
                     <span className="text-base font-medium text-gray-800 capitalize">{company.companyGroup}</span>
@@ -100,7 +100,7 @@ export default async function CompanyDetailPage({ params }: CompanyDetailProps) 
 
               {company.category && (
                 <div className="flex items-start gap-3 text-gray-700">
-                  <span className="text-xl">📑</span>
+                  <span className="text-xl">🏷️</span>
                   <div>
                     <span className="font-semibold block text-xs uppercase tracking-wider text-gray-400">Category</span>
                     <span className="text-base font-medium text-gray-800">{company.category}</span>
