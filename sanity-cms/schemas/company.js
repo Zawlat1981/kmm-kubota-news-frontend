@@ -22,9 +22,8 @@ export const company = {
       type: 'string',
       options: {
         list: [
-          { title: 'Distributor', value: 'distributor' },
-          { title: 'Dealer (Kubota)', value: 'dealer' },
-          { title: 'Dealer (Other Brands)', value: 'other' },
+          { title: 'Kubota Companies', value: 'kubota' },
+          { title: 'Other Brand Companies', value: 'other' },
         ],
       },
     },
