@@ -11,6 +11,9 @@ import {
   Globe,
   User,
 } from 'lucide-react'
+import { useLanguage } from '@/contexts/LanguageContext'
+import { useTranslatedTexts } from '@/hooks/useTranslatedTexts'
+import { t } from '@/lib/i18n/uiText'
 
 interface Branch {
   address?: string
@@ -70,10 +73,32 @@ export default function CompanyDetailTabs({
   company: Company
 }) {
   const [tab, setTab] = useState<'details' | 'contact'>('details')
+  const { language } = useLanguage()
 
-  const region = [company.cityTownship, company.stateRegion]
+  const rawRegion = [company.cityTownship, company.stateRegion]
     .filter(Boolean)
     .join(', ')
+
+  const rawCategory = company.category
+    ? company.distributor
+      ? `${company.category} from ${company.distributor}`
+      : company.category
+    : ''
+
+  // --- Translate the dynamic data fields together in one batch call ---
+  // Order matters: index 0-3 map to brand / companyGroup / category / region.
+  // Branch addresses are appended after, in order.
+  const branchAddresses = (company.branches || []).map((b) => b.address || '')
+  const dynamicValues = [
+    company.brand || '',
+    company.companyGroup || '',
+    rawCategory,
+    rawRegion,
+    ...branchAddresses,
+  ]
+  const { texts: translatedValues } = useTranslatedTexts(dynamicValues)
+
+  const [tBrand, tCompanyGroup, tCategory, tRegion, ...tBranchAddresses] = translatedValues
 
   const hasContactInfo =
     (company.branches && company.branches.length > 0) ||
@@ -90,18 +115,18 @@ export default function CompanyDetailTabs({
     <>
       {/* Tabs */}
       <div className="flex border-b border-[#E5E2DA] px-5">
-        {(['details', 'contact'] as const).map((t) => {
-          if (t === 'contact' && !hasContactInfo) return null
+        {(['details', 'contact'] as const).map((key) => {
+          if (key === 'contact' && !hasContactInfo) return null
           return (
             <button
-              key={t}
-              onClick={() => setTab(t)}
-              className={`relative py-3.5 mr-6 text-sm font-medium capitalize transition-colors ${
-                tab === t ? 'text-[#1A1A1A]' : 'text-[#B3AEA0]'
+              key={key}
+              onClick={() => setTab(key)}
+              className={`relative py-3.5 mr-6 text-sm font-medium transition-colors ${
+                tab === key ? 'text-[#1A1A1A]' : 'text-[#B3AEA0]'
               }`}
             >
-              {t}
-              {tab === t && (
+              {key === 'details' ? t('details', language) : t('contact', language)}
+              {tab === key && (
                 <span className="absolute left-0 right-0 -bottom-px h-[2px] bg-[#C6001E] rounded-full" />
               )}
             </button>
@@ -112,24 +137,18 @@ export default function CompanyDetailTabs({
       <div className="p-5">
         {tab === 'details' && (
           <div className="divide-y divide-[#EFEDE7]">
-            <Field icon={Truck} label="Brand" value={company.brand} />
+            <Field icon={Truck} label={t('brand', language)} value={tBrand} />
             <Field
               icon={Home}
-              label="Company group"
-              value={company.companyGroup}
+              label={t('companyGroup', language)}
+              value={tCompanyGroup}
             />
             <Field
               icon={Tag}
-              label="Category"
-              value={
-                company.category
-                  ? company.distributor
-                    ? `${company.category} from ${company.distributor}`
-                    : company.category
-                  : undefined
-              }
+              label={t('category', language)}
+              value={tCategory}
             />
-            <Field icon={MapPin} label="Region" value={region} />
+            <Field icon={MapPin} label={t('region', language)} value={tRegion} />
           </div>
         )}
 
@@ -139,7 +158,7 @@ export default function CompanyDetailTabs({
             {company.branches && company.branches.length > 0 && (
               <div>
                 <h2 className="text-xs font-semibold text-[#8A8578] mb-2">
-                  Branch offices
+                  {t('branchOffices', language)}
                 </h2>
                 <div className="space-y-2">
                   {company.branches.map((branch, i) => {
@@ -158,7 +177,7 @@ export default function CompanyDetailTabs({
                               strokeWidth={1.75}
                             />
                             <span className="text-sm font-medium text-[#1A1A1A]">
-                              {branch.address}
+                              {tBranchAddresses[i] || branch.address}
                             </span>
                           </div>
                         )}
@@ -183,7 +202,7 @@ export default function CompanyDetailTabs({
                             rel="noopener noreferrer"
                             className="inline-flex items-center justify-center w-full py-2 rounded-lg bg-[#C6001E] hover:bg-[#8C0016] text-white text-xs font-semibold transition-colors"
                           >
-                            View on Google Map
+                            {t('viewOnMap', language)}
                           </a>
                         )}
                       </div>
@@ -196,10 +215,10 @@ export default function CompanyDetailTabs({
             {/* Direct contact */}
             {(company.email || company.website) && (
               <div className="divide-y divide-[#EFEDE7]">
-                <Field icon={Mail} label="Email" value={company.email} />
+                <Field icon={Mail} label={t('email', language)} value={company.email} />
                 <Field
                   icon={Globe}
-                  label="Website"
+                  label={t('website', language)}
                   value={company.website}
                 />
               </div>
@@ -209,7 +228,7 @@ export default function CompanyDetailTabs({
             {(company.salesPersonName || company.salesPhone) && (
               <div>
                 <h2 className="text-xs font-semibold text-[#8A8578] mb-2">
-                  Sales contact
+                  {t('salesContact', language)}
                 </h2>
                 <div className="rounded-xl border border-[#E5E2DA] p-4 flex items-center gap-3">
                   <div className="w-9 h-9 rounded-full bg-[#FBEAEA] flex items-center justify-center shrink-0">

@@ -44,6 +44,7 @@ export default function PriceListSection() {
             <div>
               {/* Google Sheet ထဲက ပုံလင့်ခ်ကို ယူ၍ ပြသရန် (Sheet ထဲက Column နာမည် Image ဖြစ်သည်ဟု ယူဆပါသည်) */}
               {item.Image && (
+                // eslint-disable-next-line @next/next/no-img-element
                 <img 
                   src={item.Image} 
                   alt={item.Model || item.Name} 
