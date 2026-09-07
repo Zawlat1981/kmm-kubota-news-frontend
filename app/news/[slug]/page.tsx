@@ -1,7 +1,7 @@
 import { client, urlFor } from "@/lib/sanity";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import NewsDetailContent from "./NewsDetailContent";
+import BackToHomeLink from "./BackToHomeLink";
 
 interface NewsDetailPageProps {
   params: Promise<{
@@ -52,12 +52,7 @@ export default async function NewsDetailPage({ params }: NewsDetailPageProps) {
 
   return (
     <main className="max-w-4xl mx-auto px-4 py-8 bg-white text-gray-900 min-h-screen">
-      <Link
-        href="/"
-        className="text-sm font-semibold text-red-600 hover:underline mb-6 inline-block"
-      >
-        ← Home သို့ ပြန်သွားရန်
-      </Link>
+      <BackToHomeLink />
 
       {/* Category, title, date, image, and body — rendered in original order.
           Category/title/body are translated client-side based on the

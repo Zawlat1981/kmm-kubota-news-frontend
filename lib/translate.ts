@@ -9,6 +9,8 @@
  * Nothing else in the app needs to change.
  */
 
+import { detectScript } from './detectScript'
+
 export type TargetLanguage = 'my' | 'th' // Burmese | Thai
 
 const LANGUAGE_NAMES: Record<TargetLanguage, string> = {
@@ -104,6 +106,10 @@ async function translateWithGroq(text: string, target: TargetLanguage): Promise<
 export async function translateText(text: string, target: TargetLanguage): Promise<string> {
   if (!text || !text.trim()) return text
 
+  // Already in the requested language (e.g. Thai article + Thai selected) —
+  // no need to call the API at all.
+  if (detectScript(text) === target) return text
+
   const key = cacheKey(text, target)
   const cached = memoryCache.get(key)
   if (cached) return cached
@@ -119,73 +125,24 @@ export async function translateText(text: string, target: TargetLanguage): Promi
 }
 
 /**
- * Batch helper: translate multiple strings in one Groq call to save requests.
- * Useful for translating a whole company card or news card at once.
+ * Batch helper: translates multiple strings in parallel.
+ *
+ * Earlier version sent all strings in one Groq call using a numbered-list
+ * format ("1. ...", "2. ..."). That broke on multi-line content (e.g. a
+ * news article body with paragraph breaks) — the model's line breaks got
+ * confused with the numbering, misaligning results, and — worse — the
+ * misaligned fallback (original, untranslated text) was being cached as if
+ * it were a real translation, which made translation "silently stop
+ * working" for that content until the server restarted.
+ *
+ * This version translates each string independently (in parallel), reusing
+ * translateText()'s existing per-string caching and same-script-skip logic.
+ * Simpler and correct — the only trade-off is one API call per string that
+ * actually needs translating, instead of one call for the whole batch.
  */
 export async function translateBatch(
   texts: string[],
   target: TargetLanguage
 ): Promise<string[]> {
-  const nonEmpty = texts.filter((t) => t && t.trim())
-  if (nonEmpty.length === 0) return texts
-
-  // Check cache first
-  const results: (string | null)[] = texts.map((t) => {
-    if (!t || !t.trim()) return t
-    return memoryCache.get(cacheKey(t, target)) ?? null
-  })
-
-  const toTranslate = texts.filter((t, i) => t && t.trim() && results[i] === null)
-  if (toTranslate.length === 0) return results as string[]
-
-  const apiKey = process.env.GROQ_API_KEY
-  if (!apiKey) {
-    throw new Error('GROQ_API_KEY is not set in environment variables')
-  }
-
-  const targetName = LANGUAGE_NAMES[target]
-  const numbered = toTranslate.map((t, i) => `${i + 1}. ${t}`).join('\n')
-
-  const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify({
-      model: 'openai/gpt-oss-120b',
-      messages: [
-        {
-          role: 'system',
-          content: `You are a professional translator. Translate each numbered line into ${targetName}. Return ONLY the translated lines, in the same numbered format (e.g. "1. ...", "2. ..."), with no extra commentary.`,
-        },
-        { role: 'user', content: numbered },
-      ],
-      temperature: 0.3,
-    }),
-  })
-
-  if (!response.ok) {
-    const errorBody = await response.text()
-    throw new Error(`Groq API error (${response.status}): ${errorBody}`)
-  }
-
-  const data = await response.json()
-  const raw: string = data.choices?.[0]?.message?.content?.trim() || ''
-  const lines = raw
-    .split('\n')
-    .map((l) => l.replace(/^\d+\.\s*/, '').trim())
-    .filter(Boolean)
-
-  let cursor = 0
-  const finalResults = texts.map((t, i) => {
-    if (!t || !t.trim()) return t
-    if (results[i] !== null) return results[i] as string
-    const translated = lines[cursor] ?? t
-    memoryCache.set(cacheKey(t, target), translated)
-    cursor++
-    return translated
-  })
-
-  return finalResults
+  return Promise.all(texts.map((t) => translateText(t, target)))
 }

@@ -1,7 +1,12 @@
+'use client'
+
 import Image from 'next/image'
 import LanguageSwitcher from './LanguageSwitcher'
+import { useLanguage } from '@/contexts/LanguageContext'
+import { t } from '@/lib/i18n/uiText'
 
 export default function Header() {
+  const { language } = useLanguage()
   return (
     <header className="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
@@ -33,7 +38,7 @@ export default function Header() {
             <h1 className="text-xl font-bold text-gray-900 tracking-tight">
               KMM Kubota <span className="text-red-600">News Portal</span>
             </h1>
-            <p className="text-xs text-gray-500">Agricultural Machinery News & Updates</p>
+            <p className="text-xs text-gray-500">{t('headerSubtitle', language)}</p>
           </div>
         </div>
 

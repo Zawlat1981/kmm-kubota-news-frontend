@@ -21,6 +21,28 @@ export default {
       options: {
         source: 'title',
         maxLength: 96,
+        // Custom slugify: title text + current date/time (down to the minute).
+        // Two articles would need to be generated in the exact same minute
+        // to collide — in practice this won't happen — so the Title field
+        // itself never needs a random code appended to it anymore.
+        slugify: (input) => {
+          const now = new Date()
+          const yyyy = now.getFullYear()
+          const mm = String(now.getMonth() + 1).padStart(2, '0')
+          const dd = String(now.getDate()).padStart(2, '0')
+          const hh = String(now.getHours()).padStart(2, '0')
+          const min = String(now.getMinutes()).padStart(2, '0')
+          const dateStamp = `${yyyy}${mm}${dd}${hh}${min}`
+
+          const base = (input || '')
+            .toLowerCase()
+            .replace(/[^\w\s-]/g, '') // strips non-Latin characters (Burmese/Thai), same as Sanity's default behavior
+            .trim()
+            .replace(/\s+/g, '-')
+            .slice(0, 60)
+
+          return base ? `${base}-${dateStamp}` : dateStamp
+        },
       },
     },
     {

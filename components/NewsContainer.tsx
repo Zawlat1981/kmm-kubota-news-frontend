@@ -3,6 +3,9 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { urlFor } from '../lib/sanity'
+import { useLanguage } from '@/contexts/LanguageContext'
+import { useTranslatedTexts } from '@/hooks/useTranslatedTexts'
+import { t } from '@/lib/i18n/uiText'
 
 interface NewsItem {
   _id?: string
@@ -23,7 +26,7 @@ interface CompanyItem {
   brand?: string
   stateRegion?: string
   cityTownship?: string
-  companyImage?: { 
+  companyImage?: {
     asset?: Record<string, unknown>
     [key: string]: unknown
   }
@@ -47,20 +50,33 @@ function formatCategory(category?: string) {
   return category.toUpperCase()
 }
 
+// One card's title, translated on demand — keeps each card's translation
+// independent so a slow one doesn't block the rest of the grid.
+function NewsCardTitle({ title }: { title: string }) {
+  const { texts } = useTranslatedTexts([title])
+  return <>{texts[0]}</>
+}
+
+function CompanyCardField({ text }: { text: string }) {
+  const { texts } = useTranslatedTexts([text])
+  return <>{texts[0]}</>
+}
+
 export default function NewsContainer({ newsList, companiesList }: NewsContainerProps) {
+  const { language } = useLanguage()
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('ALL')
   const [selectedDate, setSelectedDate] = useState('')
   const [selectedBrandPriceFilter, setSelectedBrandPriceFilter] = useState('ALL')
   const [selectedCompanyGroup, setSelectedCompanyGroup] = useState('ALL')
-  
+
   const [visibleCount, setVisibleCount] = useState(9)
 
   const filteredNews = newsList.filter((news) => {
-    const matchesSearch = news.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    const matchesSearch = news.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                           (news.body && news.body.toLowerCase().includes(searchTerm.toLowerCase()))
 
-    const matchesCategory = selectedCategory === 'ALL' || 
+    const matchesCategory = selectedCategory === 'ALL' ||
       (news.category && news.category.toLowerCase().includes(selectedCategory.toLowerCase()))
 
     let matchesDate = true
@@ -99,9 +115,9 @@ export default function NewsContainer({ newsList, companiesList }: NewsContainer
       {/* --- DASHBOARD FILTER SECTION --- */}
       <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 mb-8 grid grid-cols-1 md:grid-cols-5 gap-4 items-center">
         <div>
-          <input 
+          <input
             type="text"
-            placeholder="Search by Title or Main text..."
+            placeholder={t('searchPlaceholder', language)}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 text-sm text-gray-900 placeholder-gray-500 bg-white"
@@ -109,12 +125,12 @@ export default function NewsContainer({ newsList, companiesList }: NewsContainer
         </div>
 
         <div>
-          <select 
+          <select
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 text-sm text-gray-900 bg-white"
           >
-            <option value="ALL">Brand Selection</option>
+            <option value="ALL">{t('brandSelectionDefault', language)}</option>
             <option value="kubota-news">Kubota News</option>
             <option value="yammar-news">Yanmar News</option>
             <option value="john-deere-news">John Deere News</option>
@@ -131,7 +147,7 @@ export default function NewsContainer({ newsList, companiesList }: NewsContainer
         </div>
 
         <div>
-          <input 
+          <input
             type="date"
             value={selectedDate}
             onChange={(e) => setSelectedDate(e.target.value)}
@@ -140,12 +156,12 @@ export default function NewsContainer({ newsList, companiesList }: NewsContainer
         </div>
 
         <div>
-          <select 
+          <select
             value={selectedBrandPriceFilter}
             onChange={(e) => setSelectedBrandPriceFilter(e.target.value)}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 text-sm text-gray-900 bg-white"
           >
-            <option value="ALL">All Brand Prices</option>
+            <option value="ALL">{t('allBrandPricesDefault', language)}</option>
             <option value="Kubota">Kubota</option>
             <option value="Win Shwe Wah">Win Shwe Wah (Second Kubota)</option>
             <option value="Yanmar">Yanmar</option>
@@ -159,40 +175,41 @@ export default function NewsContainer({ newsList, companiesList }: NewsContainer
         </div>
 
         <div>
-          <select 
+          <select
             value={selectedCompanyGroup}
             onChange={(e) => setSelectedCompanyGroup(e.target.value)}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 text-sm text-gray-900 bg-white font-medium text-red-600"
           >
-            <option value="ALL">All Companies</option>
-            <option value="kubota">Kubota Companies</option>
-            <option value="other">Other Brand Companies</option>
+            <option value="ALL">{t('allCompaniesDefault', language)}</option>
+            <option value="kubota">{t('kubotaCompaniesOption', language)}</option>
+            <option value="other">{t('otherBrandCompaniesOption', language)}</option>
           </select>
         </div>
       </div>
-      
+
       {/* --- COMPANIES DIRECTORY PREVIEW --- */}
       {isCompanyView && (
         <div className="mb-12">
           <h3 className="text-xl font-bold text-gray-900 mb-4">
-            {selectedCompanyGroup === 'kubota' ? 'Kubota Companies' : 'Other Brand Companies'} Directory
+            {selectedCompanyGroup === 'kubota' ? t('kubotaCompaniesOption', language) : t('otherBrandCompaniesOption', language)}{' '}
+            {t('companiesDirectoryHeading', language)}
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredCompanies.length > 0 ? (
               filteredCompanies.map((company) => {
                 const detailId = company.slug?.current || company._id
                 return (
-                  <Link 
+                  <Link
                     href={`/companies/${detailId}`}
-                    key={company._id} 
+                    key={company._id}
                     className="bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition duration-200 overflow-hidden flex flex-col group"
                   >
                     {company.companyImage ? (
                       <div className="h-40 overflow-hidden bg-gray-100">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img 
-                          src={urlFor(company.companyImage).url()} 
-                          alt={company.companyName || 'Company'} 
+                        <img
+                          src={urlFor(company.companyImage).url()}
+                          alt={company.companyName || 'Company'}
                           className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
                         />
                       </div>
@@ -211,19 +228,23 @@ export default function NewsContainer({ newsList, companiesList }: NewsContainer
                         {company.brand && (
                           <div className="flex items-center gap-2">
                             <span>🏷️</span>
-                            <span className="font-medium text-gray-700">Brand:</span> {company.brand}
+                            <span className="font-medium text-gray-700">{t('brand', language)}:</span>{' '}
+                            <CompanyCardField text={company.brand} />
                           </div>
                         )}
                         {(company.cityTownship || company.stateRegion) && (
                           <div className="flex items-center gap-2">
                             <span>📍</span>
-                            <span className="font-medium text-gray-700">Location:</span> {[company.cityTownship, company.stateRegion].filter(Boolean).join(', ')}
+                            <span className="font-medium text-gray-700">{t('region', language)}:</span>{' '}
+                            <CompanyCardField
+                              text={[company.cityTownship, company.stateRegion].filter(Boolean).join(', ')}
+                            />
                           </div>
                         )}
                       </div>
 
                       <span className="mt-auto text-xs font-semibold text-blue-600 flex items-center gap-1">
-                        View Detail →
+                        {t('viewDetailArrow', language)}
                       </span>
                     </div>
                   </Link>
@@ -231,7 +252,7 @@ export default function NewsContainer({ newsList, companiesList }: NewsContainer
               })
             ) : (
               <p className="col-span-full text-sm text-gray-500 bg-white p-6 rounded-xl border border-gray-200 text-center">
-                No company information available for this group yet.
+                {t('noCompanyInfo', language)}
               </p>
             )}
           </div>
@@ -246,22 +267,22 @@ export default function NewsContainer({ newsList, companiesList }: NewsContainer
               displayedNews.map((news, index) => {
                 const newsDetailId = news.slug?.current || news._id
                 return (
-                  <Link 
-                    href={`/news/${newsDetailId}`} 
+                  <Link
+                    href={`/news/${newsDetailId}`}
                     key={index}
                     className="group bg-white rounded-lg shadow-sm hover:shadow-md transition duration-200 overflow-hidden border border-gray-200 flex flex-col"
                   >
                     {news.mainImage && (
                       <div className="h-48 overflow-hidden bg-gray-100">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img 
-                          src={urlFor(news.mainImage).url()} 
-                          alt={news.title} 
+                        <img
+                          src={urlFor(news.mainImage).url()}
+                          alt={news.title}
                           className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
                         />
                       </div>
                     )}
-                    
+
                     <div className="p-4 flex flex-col flex-grow">
                       {news.category && (
                         <span className="text-xs font-bold text-red-600 uppercase tracking-wider mb-1">
@@ -280,17 +301,11 @@ export default function NewsContainer({ newsList, companiesList }: NewsContainer
                       )}
 
                       <h2 className="text-lg font-bold text-gray-900 group-hover:text-red-600 transition line-clamp-2 mb-2">
-                        {news.title}
+                        <NewsCardTitle title={news.title} />
                       </h2>
-                      
-                      {news.body && (
-                        <p className="text-gray-600 text-sm line-clamp-3 mb-4">
-                          {news.body}
-                        </p>
-                      )}
 
                       <span className="mt-auto text-xs font-semibold text-blue-600 flex items-center">
-                        Read full story →
+                        {t('readFullStory', language)}
                       </span>
                     </div>
                   </Link>
@@ -298,7 +313,7 @@ export default function NewsContainer({ newsList, companiesList }: NewsContainer
               })
             ) : (
               <div className="col-span-full text-center py-12 text-gray-500 bg-white rounded-lg border border-gray-200">
-                No news found matching your search criteria.
+                {t('noNewsFound', language)}
               </div>
             )}
           </div>
@@ -310,7 +325,7 @@ export default function NewsContainer({ newsList, companiesList }: NewsContainer
                 onClick={handleLoadMore}
                 className="px-6 py-3 bg-red-600 text-white font-semibold rounded-lg shadow hover:bg-red-700 transition duration-200 text-sm"
               >
-                Load More News ↓
+                {t('loadMoreNews', language)}
               </button>
             </div>
           )}
@@ -320,31 +335,27 @@ export default function NewsContainer({ newsList, companiesList }: NewsContainer
       {/* --- BOTTOM SECTION: Archive (news view) or Full Directory link (company view) --- */}
       {isCompanyView ? (
         <div className="bg-gradient-to-r from-red-700 to-red-600 rounded-2xl p-8 text-center text-white shadow-md">
-          <h3 className="text-xl font-bold mb-2">View All Kubota &amp; Competitor Companies</h3>
-          <p className="text-red-100 text-sm mb-6">
-            Filter by region and brand, and see full details for every company in the Company Directory.
-          </p>
+          <h3 className="text-xl font-bold mb-2">{t('companyBannerTitle', language)}</h3>
+          <p className="text-red-100 text-sm mb-6">{t('companyBannerDesc', language)}</p>
           <Link
             href="/companies"
             className="inline-block px-6 py-3 bg-white text-red-700 font-bold rounded-lg shadow hover:bg-gray-100 transition duration-200 text-sm"
           >
-            View Full Company Directory →
+            {t('viewFullDirectory', language)}
           </Link>
         </div>
       ) : (
         <div className="bg-gradient-to-r from-gray-900 to-gray-800 rounded-2xl p-8 text-center text-white shadow-md">
-          <h3 className="text-xl font-bold mb-2">Search Past News</h3>
-          <p className="text-gray-300 text-sm mb-6">
-            Browse all past news, organized by month and date, in the Monthly Archive.
-          </p>
+          <h3 className="text-xl font-bold mb-2">{t('searchPastNews', language)}</h3>
+          <p className="text-gray-300 text-sm mb-6">{t('searchPastNewsDesc', language)}</p>
           <Link
             href="/archive"
             className="inline-block px-6 py-3 bg-white text-gray-900 font-bold rounded-lg shadow hover:bg-gray-100 transition duration-200 text-sm"
           >
-            View Monthly Archive →
+            {t('viewMonthlyArchive', language)}
           </Link>
         </div>
       )}
-    </div> 
+    </div>
   )
 }

@@ -1,11 +1,10 @@
 import { client, urlFor } from '@/lib/sanity'
-import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import {
   MapPin,
-  ArrowLeft,
 } from 'lucide-react'
 import CompanyDetailTabs from './CompanyDetailTabs'
+import BackToMenuLink from './BackToMenuLink'
 
 interface CompanyDetailProps {
   params: Promise<{
@@ -56,13 +55,7 @@ export default async function CompanyDetailPage({ params }: CompanyDetailProps) 
     <main className="min-h-screen bg-[#FAFAF8] py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md mx-auto">
         {/* --- Back Button --- */}
-        <Link
-          href="/"
-          className="inline-flex items-center gap-1.5 text-sm font-medium text-[#8A8578] hover:text-[#1A1A1A] mb-4 transition-colors"
-        >
-          <ArrowLeft className="w-4 h-4" strokeWidth={2} />
-          Back to menu
-        </Link>
+        <BackToMenuLink />
 
         {/* --- Main Card --- */}
         <div className="bg-white rounded-2xl border border-[#E5E2DA] overflow-hidden shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
