@@ -8,6 +8,7 @@ interface NewsDetailContentProps {
   category?: string
   dateLabel?: string
   imageUrl?: string
+  galleryUrls?: string[]
   body?: string
 }
 
@@ -16,6 +17,7 @@ export default function NewsDetailContent({
   category,
   dateLabel,
   imageUrl,
+  galleryUrls,
   body,
 }: NewsDetailContentProps) {
   const { language } = useLanguage()
@@ -57,6 +59,21 @@ export default function NewsDetailContent({
       {body && (
         <div className="prose max-w-none text-gray-700 leading-relaxed whitespace-pre-line">
           {tBody}
+        </div>
+      )}
+
+      {galleryUrls && galleryUrls.length > 0 && (
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-6">
+          {galleryUrls.map((url, i) => (
+            <div key={i} className="rounded-lg overflow-hidden shadow-sm aspect-square">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={url}
+                alt={`${title} - ${i + 2}`}
+                className="w-full h-full object-cover"
+              />
+            </div>
+          ))}
         </div>
       )}
     </>

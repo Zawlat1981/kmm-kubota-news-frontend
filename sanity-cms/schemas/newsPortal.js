@@ -87,6 +87,20 @@ export default {
       },
     },
     {
+      name: 'gallery',
+      title: 'Additional Images (ပုံနောက်ထပ်များ)',
+      type: 'array',
+      of: [
+        {
+          type: 'image',
+          options: {
+            hotspot: true,
+          },
+        },
+      ],
+      description: 'Main Image အပြင် ထပ်ဖြည့်ချင်သော ပုံများ — အရေအတွက် ကန့်သတ်ချက် မရှိပါ',
+    },
+    {
       name: 'body',
       title: 'Content (သတင်းအသေးစိတ်)',
       type: 'text',

@@ -19,6 +19,7 @@ async function getNewsDetail(slugOrId: string) {
     category,
     publishedAt,
     mainImage,
+    gallery,
     body
   }`;
   const data = await client.fetch(query, { slugOrId });
@@ -49,6 +50,9 @@ export default async function NewsDetailPage({ params }: NewsDetailPageProps) {
     : undefined;
 
   const imageUrl = news.mainImage ? urlFor(news.mainImage).url() : undefined;
+  const galleryUrls: string[] = Array.isArray(news.gallery)
+    ? news.gallery.map((img: unknown) => urlFor(img).url())
+    : [];
 
   return (
     <main className="max-w-4xl mx-auto px-4 py-8 bg-white text-gray-900 min-h-screen">
@@ -56,13 +60,14 @@ export default async function NewsDetailPage({ params }: NewsDetailPageProps) {
 
       {/* Category, title, date, image, and body — rendered in original order.
           Category/title/body are translated client-side based on the
-          selected site language (Original / မြန်မာ / ไทย). Date and image
+          selected site language (Original / မြန်မာ / ไทย). Date and image(s)
           don't need translation, so they're passed through as-is. */}
       <NewsDetailContent
         title={news.title}
         category={news.category}
         dateLabel={dateLabel}
         imageUrl={imageUrl}
+        galleryUrls={galleryUrls}
         body={news.body}
       />
     </main>
