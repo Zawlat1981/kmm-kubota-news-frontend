@@ -1,0 +1,35 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// A KMM branch/company reporting stock (KMM01, KMM02, KMM03, ...)
+model Branch {
+  id         String      @id @default(cuid())
+  code       String      @unique // "KMM01", "KMM02", "KMM03"
+  name       String? // optional display name, e.g. "KMM Yangon Branch"
+  stockItems StockItem[]
+  createdAt  DateTime    @default(now())
+}
+
+// One row per physical machine unit currently in a branch's stock.
+// Entered manually by staff, one at a time, from the photos sent by
+// each branch. Serial number is optional now — can be filled in later
+// without a schema change if per-unit tracking becomes needed.
+model StockItem {
+  id           String    @id @default(cuid())
+  branch       Branch    @relation(fields: [branchId], references: [id])
+  branchId     String
+  brand        String? // e.g. "Kubota"
+  modelNumber  String // e.g. "TC944-15100" or "DH246HW EXPORT"
+  serialNumber String? // optional, for future per-unit tracking
+  addedAt      DateTime  @default(now()) // when this entry was recorded
+  weekOf       DateTime? // which weekly check this entry belongs to (for reconciliation later)
+
+  @@index([branchId])
+}

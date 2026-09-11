@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { urlFor } from '../lib/sanity'
 import { useLanguage } from '@/contexts/LanguageContext'
@@ -35,9 +36,22 @@ interface CompanyItem {
   email?: string
 }
 
+interface PriceItem {
+  _id: string
+  brand?: string
+  modelName?: string
+  category?: string
+  horsepower?: number
+  price?: number
+  currency?: string
+  image?: Record<string, unknown>
+  notes?: string
+}
+
 interface NewsContainerProps {
   newsList: NewsItem[]
   companiesList?: CompanyItem[]
+  priceList?: PriceItem[]
 }
 
 function formatCategory(category?: string) {
@@ -62,8 +76,14 @@ function CompanyCardField({ text }: { text: string }) {
   return <>{texts[0]}</>
 }
 
+function PriceCardNotes({ text }: { text: string }) {
+  const { texts } = useTranslatedTexts([text])
+  return <>{texts[0]}</>
+}
+
 export default function NewsContainer({ newsList, companiesList }: NewsContainerProps) {
   const { language } = useLanguage()
+  const router = useRouter()
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('ALL')
   const [selectedDate, setSelectedDate] = useState('')
@@ -132,7 +152,8 @@ export default function NewsContainer({ newsList, companiesList }: NewsContainer
           >
             <option value="ALL">{t('brandSelectionDefault', language)}</option>
             <option value="kubota-news">Kubota News</option>
-            <option value="yammar-news">Yanmar News</option>
+            <option value="kubota-second-news">Kubota Second News</option>
+            <option value="yanmar-news">Yanmar News</option>
             <option value="john-deere-news">John Deere News</option>
             <option value="new-holland-news">New Holland News</option>
             <option value="yto-news">YTO News</option>
@@ -140,9 +161,12 @@ export default function NewsContainer({ newsList, companiesList }: NewsContainer
             <option value="yamabisi-news">Yamabisi News</option>
             <option value="mahindra-news">Mahindra News</option>
             <option value="dongfeng-news">Dongfeng News</option>
+            <option value="deutzfar-matador-news">DeutzFhar & Matador News</option>
             <option value="crop-prices">Crop Prices</option>
             <option value="fuel-prices">Fuel Prices</option>
+            <option value="exchange-rates">Exchange Rates</option>
             <option value="myanmar-news">Myanmar News</option>
+            <option value="other-brand-news">Other Brand News</option>
           </select>
         </div>
 
@@ -158,7 +182,13 @@ export default function NewsContainer({ newsList, companiesList }: NewsContainer
         <div>
           <select
             value={selectedBrandPriceFilter}
-            onChange={(e) => setSelectedBrandPriceFilter(e.target.value)}
+            onChange={(e) => {
+              if (e.target.value === 'CHECK_STOCK') {
+                router.push('/internal/login')
+                return // don't update filter state — keep dropdown showing "All Brand Prices"
+              }
+              setSelectedBrandPriceFilter(e.target.value)
+            }}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 text-sm text-gray-900 bg-white"
           >
             <option value="ALL">{t('allBrandPricesDefault', language)}</option>
@@ -171,6 +201,7 @@ export default function NewsContainer({ newsList, companiesList }: NewsContainer
             <option value="New Holland">New Holland</option>
             <option value="Mahindra">Mahindra</option>
             <option value="YTO">YTO</option>
+            <option value="CHECK_STOCK">🔒 Check Stock</option>
           </select>
         </div>
 

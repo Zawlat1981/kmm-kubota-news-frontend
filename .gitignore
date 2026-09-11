@@ -42,3 +42,9 @@ next-env.d.ts
 
 sanity-cms/node_modules/
 sanity-cms/.sanity/
+
+# AI coding tool configs (local only)
+.agents/
+.claude/
+.cursor/
+.devin/
