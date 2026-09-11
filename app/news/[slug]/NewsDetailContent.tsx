@@ -2,11 +2,13 @@
 
 import { useLanguage } from '@/contexts/LanguageContext'
 import { useTranslatedTexts } from '@/hooks/useTranslatedTexts'
+import { t } from '@/lib/i18n/uiText'
 
 interface NewsDetailContentProps {
   title: string
   category?: string
   dateLabel?: string
+  sourceUrl?: string
   imageUrl?: string
   galleryUrls?: string[]
   body?: string
@@ -16,6 +18,7 @@ export default function NewsDetailContent({
   title,
   category,
   dateLabel,
+  sourceUrl,
   imageUrl,
   galleryUrls,
   body,
@@ -47,7 +50,18 @@ export default function NewsDetailContent({
         )}
       </h1>
 
-      {dateLabel && <p className="text-sm text-gray-400 mb-6">{dateLabel}</p>}
+      {dateLabel && <p className="text-sm text-gray-400 mb-2">{dateLabel}</p>}
+
+      {sourceUrl && (
+        <a
+          href={sourceUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1 text-sm font-semibold text-blue-600 hover:underline mb-6"
+        >
+          🔗 {t('viewOriginalSource', language)}
+        </a>
+      )}
 
       {imageUrl && (
         <div className="mb-8 rounded-xl overflow-hidden shadow-md max-h-[450px]">

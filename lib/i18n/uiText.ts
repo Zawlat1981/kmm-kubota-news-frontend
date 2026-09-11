@@ -35,6 +35,7 @@ export const uiText = {
   website: { default: 'Website', my: 'ဝဘ်ဆိုက်', th: 'เว็บไซต์' },
   backToMenu: { default: 'Back to Menu', my: 'မီနူးသို့ ပြန်သွားရန်', th: 'กลับเมนู' },
   backToHome: { default: '← Back to Home', my: '← Home သို့ ပြန်သွားရန်', th: '← กลับหน้าแรก' },
+  viewOriginalSource: { default: 'View Original Source', my: 'မူရင်းသတင်း ကြည့်ရန်', th: 'ดูแหล่งที่มาต้นฉบับ' },
   viewDetail: { default: 'View Detail & Contact', my: 'အသေးစိတ်နှင့် ဆက်သွယ်ရန် ကြည့်ရန်', th: 'ดูรายละเอียดและติดต่อ' },
 
   // --- News search / filter bar ---

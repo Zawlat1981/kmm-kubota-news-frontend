@@ -18,6 +18,7 @@ async function getNewsDetail(slugOrId: string) {
     slug,
     category,
     publishedAt,
+    sourceUrl,
     mainImage,
     gallery,
     body
@@ -66,6 +67,7 @@ export default async function NewsDetailPage({ params }: NewsDetailPageProps) {
         title={news.title}
         category={news.category}
         dateLabel={dateLabel}
+        sourceUrl={news.sourceUrl}
         imageUrl={imageUrl}
         galleryUrls={galleryUrls}
         body={news.body}
