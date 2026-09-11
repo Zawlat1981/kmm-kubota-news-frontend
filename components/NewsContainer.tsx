@@ -76,11 +76,6 @@ function CompanyCardField({ text }: { text: string }) {
   return <>{texts[0]}</>
 }
 
-function PriceCardNotes({ text }: { text: string }) {
-  const { texts } = useTranslatedTexts([text])
-  return <>{texts[0]}</>
-}
-
 export default function NewsContainer({ newsList, companiesList }: NewsContainerProps) {
   const { language } = useLanguage()
   const router = useRouter()
@@ -97,7 +92,7 @@ export default function NewsContainer({ newsList, companiesList }: NewsContainer
                           (news.body && news.body.toLowerCase().includes(searchTerm.toLowerCase()))
 
     const matchesCategory = selectedCategory === 'ALL' ||
-      (news.category && news.category.toLowerCase().includes(selectedCategory.toLowerCase()))
+      news.category?.toLowerCase() === selectedCategory.toLowerCase()
 
     let matchesDate = true
     if (selectedDate !== '' && news.publishedAt) {
