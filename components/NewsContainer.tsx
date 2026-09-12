@@ -248,9 +248,23 @@ export default function NewsContainer({ newsList, companiesList, priceList = [] 
 
       {selectedBrandPriceFilter !== 'ALL' && !selectedPriceModel && (
         <section className="mb-12">
-          <h3 className="text-xl font-bold text-gray-900 mb-4">
-            {selectedBrandPriceFilter} {t('modelsLabel', language)}
-          </h3>
+          <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+            <h3 className="text-xl font-bold text-gray-900">
+              {selectedBrandPriceFilter} {t('modelsLabel', language)}
+            </h3>
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedBrandPriceFilter('ALL')
+                setSelectedPriceModel('')
+                setSelectedImplementIds([])
+              }}
+              className="inline-flex items-center gap-1.5 text-sm font-semibold text-red-600 hover:text-red-700"
+            >
+              <ArrowLeft className="w-4 h-4" strokeWidth={2} />
+              {t('backToMenu', language)}
+            </button>
+          </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {modelOptions.map((model) => {
               const machine = selectedBrandPrices.find(
