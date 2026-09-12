@@ -27,7 +27,28 @@ interface CompanyItem {
   email?: string
 }
 
-async function getData(): Promise<{ newsList: NewsItem[]; companiesList: CompanyItem[] }> {
+interface PriceItem {
+  _id: string
+  brand?: string
+  modelName?: string
+  itemType?: 'machine' | 'implement'
+  category?: string
+  series?: string
+  parentModel?: string
+  frontDozer?: 'with-front-dozer' | 'without-front-dozer'
+  frontLoader?: 'with-front-loader'
+  horsepower?: number
+  price?: number
+  currency?: string
+  image?: Record<string, unknown>
+  notes?: string
+}
+
+async function getData(): Promise<{
+  newsList: NewsItem[]
+  companiesList: CompanyItem[]
+  priceList: PriceItem[]
+}> {
   const newsQuery = `*[_type == "newsPortal"] | order(publishedAt desc) {
     title,
     slug,
@@ -53,19 +74,38 @@ async function getData(): Promise<{ newsList: NewsItem[]; companiesList: Company
     email,
   }`
 
-  const [newsList, companiesList] = await Promise.all([
+  const priceListQuery = `*[_type == "priceList"] | order(brand asc, modelName asc){
+    _id,
+    brand,
+    modelName,
+    itemType,
+    category,
+    series,
+    parentModel,
+    frontDozer,
+    frontLoader,
+    configuration,
+    horsepower,
+    price,
+    currency,
+    image,
+    notes
+  }`
+
+  const [newsList, companiesList, priceList] = await Promise.all([
     client.fetch(newsQuery),
     client.fetch(companiesQuery),
+    client.fetch(priceListQuery),
   ])
 
-  return { newsList, companiesList }
+  return { newsList, companiesList, priceList }
 }
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
 export default async function Home() {
-  const { newsList, companiesList } = await getData()
+  const { newsList, companiesList, priceList } = await getData()
 
   return (
     <main className="min-h-screen bg-gray-50">
@@ -79,7 +119,11 @@ export default async function Home() {
         </h1>
         
         {/* သတင်းများ နှင့် ကုမ္ပဏီ Filter များပြသသည့် အပိုင်း */}
-        <NewsContainer newsList={newsList} companiesList={companiesList} />
+        <NewsContainer
+          newsList={newsList}
+          companiesList={companiesList}
+          priceList={priceList}
+        />
       </div>
     </main>
   )

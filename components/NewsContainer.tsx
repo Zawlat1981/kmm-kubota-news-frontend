@@ -40,7 +40,12 @@ interface PriceItem {
   _id: string
   brand?: string
   modelName?: string
+  itemType?: 'machine' | 'implement'
   category?: string
+  series?: string
+  parentModel?: string
+  frontDozer?: 'with-front-dozer' | 'without-front-dozer'
+  frontLoader?: 'with-front-loader'
   horsepower?: number
   price?: number
   currency?: string
@@ -76,13 +81,15 @@ function CompanyCardField({ text }: { text: string }) {
   return <>{texts[0]}</>
 }
 
-export default function NewsContainer({ newsList, companiesList }: NewsContainerProps) {
+export default function NewsContainer({ newsList, companiesList, priceList = [] }: NewsContainerProps) {
   const { language } = useLanguage()
   const router = useRouter()
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('ALL')
   const [selectedDate, setSelectedDate] = useState('')
   const [selectedBrandPriceFilter, setSelectedBrandPriceFilter] = useState('ALL')
+  const [selectedPriceModel, setSelectedPriceModel] = useState('')
+  const [selectedImplementIds, setSelectedImplementIds] = useState<string[]>([])
   const [selectedCompanyGroup, setSelectedCompanyGroup] = useState('ALL')
 
   const [visibleCount, setVisibleCount] = useState(9)
@@ -100,17 +107,39 @@ export default function NewsContainer({ newsList, companiesList }: NewsContainer
       matchesDate = newsDateOnly === selectedDate
     }
 
-    let matchesBrandPrice = true
-    if (selectedBrandPriceFilter !== 'ALL') {
-      const brandQuery = selectedBrandPriceFilter.toLowerCase()
-      const titleMatch = news.title.toLowerCase().includes(brandQuery)
-      const bodyMatch = news.body ? news.body.toLowerCase().includes(brandQuery) : false
-      const categoryMatch = news.category ? news.category.toLowerCase().includes(brandQuery) : false
-      matchesBrandPrice = titleMatch || bodyMatch || categoryMatch
-    }
-
-    return matchesSearch && matchesCategory && matchesDate && matchesBrandPrice
+    return matchesSearch && matchesCategory && matchesDate
   })
+
+  const priceBrands = Array.from(
+    new Set(priceList.map((item) => item.brand).filter((brand): brand is string => Boolean(brand)))
+  )
+
+  const selectedBrandPrices = priceList.filter((item) => item.brand === selectedBrandPriceFilter)
+  const modelOptions = selectedBrandPrices
+    .filter((item) => item.itemType !== 'implement' && item.modelName)
+    .map((item) => ({
+      value: `${item.modelName}|${item.frontDozer || ''}|${item.frontLoader || ''}`,
+      title: [
+        item.modelName,
+        item.frontDozer === 'with-front-dozer' ? t('withFrontDozerLabel', language) : '',
+      ].filter(Boolean).join(' '),
+      label: item.frontDozer === 'with-front-dozer'
+        ? `${item.modelName} ${t('withFrontDozerLabel', language)} & ${t('implementsLabel', language)}`
+        : `${item.modelName} & ${t('implementsLabel', language)}`,
+      modelName: item.modelName as string,
+      frontDozer: item.frontDozer,
+      frontLoader: item.frontLoader,
+    }))
+    .filter((item, index, options) => options.findIndex((option) => option.value === item.value) === index)
+  const filteredPrices = selectedBrandPrices.filter(
+    (item) => {
+      const [modelName, frontDozer, frontLoader] = selectedPriceModel.split('|')
+      if (item.itemType === 'implement') return item.parentModel === modelName
+      return item.modelName === modelName &&
+        (frontDozer ? item.frontDozer === frontDozer : true) &&
+        (frontLoader ? item.frontLoader === frontLoader : true)
+    }
+  )
 
   const filteredCompanies = companiesList?.filter((company) => {
     if (selectedCompanyGroup === 'ALL') return true
@@ -120,6 +149,13 @@ export default function NewsContainer({ newsList, companiesList }: NewsContainer
   const displayedNews = filteredNews.slice(0, visibleCount)
 
   const isCompanyView = selectedCompanyGroup !== 'ALL'
+  const isPriceView = selectedBrandPriceFilter !== 'ALL'
+  const selectedModelTitle = modelOptions.find((model) => model.value === selectedPriceModel)?.title
+  const selectedMachine = filteredPrices.find((item) => item.itemType !== 'implement')
+  const selectedImplements = filteredPrices.filter((item) => item.itemType === 'implement')
+  const totalPrice = (selectedMachine?.price || 0) + selectedImplements
+    .filter((item) => selectedImplementIds.includes(item._id))
+    .reduce((total, item) => total + (item.price || 0), 0)
 
   const handleLoadMore = (): void => {
     setVisibleCount((prev) => prev + 9)
@@ -183,19 +219,15 @@ export default function NewsContainer({ newsList, companiesList }: NewsContainer
                 return // don't update filter state — keep dropdown showing "All Brand Prices"
               }
               setSelectedBrandPriceFilter(e.target.value)
+              setSelectedPriceModel('')
+              setSelectedImplementIds([])
             }}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 text-sm text-gray-900 bg-white"
           >
             <option value="ALL">{t('allBrandPricesDefault', language)}</option>
-            <option value="Kubota">Kubota</option>
-            <option value="Win Shwe Wah">Win Shwe Wah (Second Kubota)</option>
-            <option value="Yanmar">Yanmar</option>
-            <option value="Sonalika">Sonalika</option>
-            <option value="Yamabisi">Yamabisi</option>
-            <option value="John Deere">John Deere</option>
-            <option value="New Holland">New Holland</option>
-            <option value="Mahindra">Mahindra</option>
-            <option value="YTO">YTO</option>
+            {priceBrands.map((brand) => (
+              <option key={brand} value={brand}>{brand}</option>
+            ))}
             <option value="CHECK_STOCK">🔒 Check Stock</option>
           </select>
         </div>
@@ -213,8 +245,128 @@ export default function NewsContainer({ newsList, companiesList }: NewsContainer
         </div>
       </div>
 
+      {selectedBrandPriceFilter !== 'ALL' && !selectedPriceModel && (
+        <section className="mb-12">
+          <h3 className="text-xl font-bold text-gray-900 mb-4">
+            {selectedBrandPriceFilter} {t('modelsLabel', language)}
+          </h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {modelOptions.map((model) => {
+              const machine = selectedBrandPrices.find(
+                (item) => item.modelName === model.modelName &&
+                  item.frontDozer === model.frontDozer &&
+                  item.frontLoader === model.frontLoader
+              )
+
+              return (
+                <button
+                  type="button"
+                  key={model.value}
+                  onClick={() => {
+                    setSelectedPriceModel(model.value)
+                    setSelectedImplementIds([])
+                  }}
+                  className="text-left bg-white rounded-lg border border-gray-200 p-4 shadow-sm hover:border-red-500 hover:shadow-md transition"
+                >
+                  {machine?.image && (
+                    <div className="h-32 overflow-hidden bg-gray-100 rounded-md mb-3">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={urlFor(machine.image).url()}
+                        alt={model.label}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  )}
+                  <h4 className="font-bold text-gray-900">{model.label}</h4>
+                  {machine?.price != null && (
+                    <p className="text-green-700 font-semibold mt-2">
+                      {machine.price.toLocaleString()} {machine.currency || ''}
+                    </p>
+                  )}
+                </button>
+              )
+            })}
+          </div>
+        </section>
+      )}
+
+      {selectedPriceModel && (
+        <section className="mb-12">
+          <h3 className="text-xl font-bold text-gray-900 mb-4">
+            {selectedModelTitle || selectedPriceModel} {t('pricesAndImplementsLabel', language)}
+          </h3>
+          {filteredPrices.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredPrices.map((item) => (
+                <article
+                  key={item._id}
+                  className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden"
+                >
+                  {item.image && (
+                    <div className="h-40 overflow-hidden bg-gray-100">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={urlFor(item.image).url()}
+                        alt={item.modelName || 'Machinery'}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  )}
+                  <div className="p-5">
+                    {item.itemType !== 'implement' && (
+                      <p className="text-sm text-gray-500">{item.brand}</p>
+                    )}
+                    <h4 className="text-lg font-bold text-gray-900">{item.modelName}</h4>
+                    {item.itemType !== 'implement' && item.category && (
+                      <p className="text-sm text-gray-600 mt-1">{item.category}</p>
+                    )}
+                    {item.itemType !== 'implement' && typeof item.horsepower === 'number' && (
+                      <p className="text-sm text-gray-600 mt-1">{item.horsepower} hp</p>
+                    )}
+                    {typeof item.price === 'number' && (
+                      <p className="text-green-700 font-semibold mt-3">
+                        {item.price.toLocaleString()} {item.currency || ''}
+                      </p>
+                    )}
+                    {item.notes && <p className="text-sm text-gray-500 mt-2">{item.notes}</p>}
+                    {item.itemType === 'implement' && (
+                      <label className="flex items-center gap-2 mt-4 text-sm font-medium text-gray-700">
+                        <input
+                          type="checkbox"
+                          checked={selectedImplementIds.includes(item._id)}
+                          onChange={() => setSelectedImplementIds((current) => current.includes(item._id)
+                            ? current.filter((id) => id !== item._id)
+                            : [...current, item._id])}
+                          className="h-4 w-4 accent-red-600"
+                        />
+                        {t('chooseImplementsLabel', language)}
+                      </label>
+                    )}
+                  </div>
+                </article>
+              ))}
+              {selectedMachine && (
+                <aside className="md:col-span-2 lg:col-span-3 bg-red-50 border border-red-200 rounded-xl p-5">
+                  <p className="text-sm text-gray-700">
+                    {t('machinePriceLabel', language)}: {selectedMachine.price?.toLocaleString()} {selectedMachine.currency || ''}
+                  </p>
+                  <p className="text-xl font-bold text-red-700 mt-2">
+                    {t('totalPriceLabel', language)}: {totalPrice.toLocaleString()} {selectedMachine.currency || ''}
+                  </p>
+                </aside>
+              )}
+            </div>
+          ) : (
+            <p className="bg-white p-6 rounded-xl border border-gray-200 text-sm text-gray-500">
+              No published prices found for {selectedBrandPriceFilter}.
+            </p>
+          )}
+        </section>
+      )}
+
       {/* --- COMPANIES DIRECTORY PREVIEW --- */}
-      {isCompanyView && (
+      {isCompanyView && !isPriceView && (
         <div className="mb-12">
           <h3 className="text-xl font-bold text-gray-900 mb-4">
             {selectedCompanyGroup === 'kubota' ? t('kubotaCompaniesOption', language) : t('otherBrandCompaniesOption', language)}{' '}
@@ -286,7 +438,7 @@ export default function NewsContainer({ newsList, companiesList }: NewsContainer
       )}
 
       {/* --- NEWS GRID SECTION (company ရွေးထားချိန်မှာ hide လုပ်မည်) --- */}
-      {!isCompanyView && (
+      {!isCompanyView && !isPriceView && (
         <>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
             {displayedNews.length > 0 ? (
@@ -359,7 +511,7 @@ export default function NewsContainer({ newsList, companiesList }: NewsContainer
       )}
 
       {/* --- BOTTOM SECTION: Archive (news view) or Full Directory link (company view) --- */}
-      {isCompanyView ? (
+      {isPriceView ? null : isCompanyView ? (
         <div className="bg-gradient-to-r from-red-700 to-red-600 rounded-2xl p-8 text-center text-white shadow-md">
           <h3 className="text-xl font-bold mb-2">{t('companyBannerTitle', language)}</h3>
           <p className="text-red-100 text-sm mb-6">{t('companyBannerDesc', language)}</p>

@@ -46,6 +46,21 @@ export const uiText = {
   },
   brandSelectionDefault: { default: 'Brand Selection', my: 'အမှတ်တံဆိပ် ရွေးချယ်ရန်', th: 'เลือกแบรนด์' },
   allBrandPricesDefault: { default: 'All Brand Prices', my: 'အမှတ်တံဆိပ် ဈေးနှုန်းအားလုံး', th: 'ราคาทุกแบรนด์' },
+  modelsLabel: { default: 'Models', my: 'မော်ဒယ်များ', th: 'รุ่น' },
+  withFrontDozerLabel: { default: 'with Front Dozer', my: 'ရှေ့ဂေါ်ပါ', th: 'พร้อมใบมีดดันดินหน้า' },
+  implementsLabel: { default: 'Implements', my: 'နောက်တွဲများ', th: 'อุปกรณ์ต่อพ่วง' },
+  pricesAndImplementsLabel: {
+    default: 'Prices & Implements',
+    my: 'စျေးနှုန်းနှင့် နောက်တွဲများ',
+    th: 'ราคาและอุปกรณ์ต่อพ่วง',
+  },
+  chooseImplementsLabel: {
+    default: 'Choose implements',
+    my: 'နောက်တွဲများ ရွေးချယ်ရန်',
+    th: 'เลือกอุปกรณ์ต่อพ่วง',
+  },
+  totalPriceLabel: { default: 'Estimated Total', my: 'ခန့်မှန်း စုစုပေါင်း', th: 'ราคารวมโดยประมาณ' },
+  machinePriceLabel: { default: 'Machine price', my: 'စက်စျေးနှုန်း', th: 'ราคาเครื่องจักร' },
   allCompaniesDefault: { default: 'All Companies', my: 'ကုမ္ပဏီအားလုံး', th: 'บริษัททั้งหมด' },
   kubotaCompaniesOption: { default: 'Kubota Companies', my: 'Kubota ကုမ္ပဏီများ', th: 'บริษัท Kubota' },
   otherBrandCompaniesOption: {

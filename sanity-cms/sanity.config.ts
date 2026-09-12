@@ -77,6 +77,9 @@ export default defineConfig({
                 S.documentTypeList('newsPortal').title('All News')
               ),
 
+            // Machinery price list
+            S.documentTypeListItem('priceList').title('Price List').icon(() => '💰'),
+
 
             // Settings
             S.divider(),
