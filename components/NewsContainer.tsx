@@ -63,8 +63,8 @@ function formatCategory(category?: string) {
   if (!category) return 'NEWS'
   if (category.includes('မြန်မာနိုင်ငံ') || category.includes('Myanmar')) return 'MYANMAR NEWS'
   if (category.includes('ဈေးနှုန်း') || category.includes('Crop Prices')) return 'CROP PRICES'
-  if (category.includes('kubota') || category.includes('Kubota')) return 'KUBOTA NEWS'
   if (category.includes('Second') || category.includes('second') || category.includes('ဒုတိယလက်သုံး')) return 'KUBOTA SECOND NEWS'
+  if (category.includes('kubota') || category.includes('Kubota')) return 'KUBOTA NEWS'
   if (category.includes('Other Brand') || category.includes('အခြား')) return 'OTHER BRAND NEWS'
   return category.toUpperCase()
 }
