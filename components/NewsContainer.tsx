@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { ArrowLeft } from 'lucide-react'
 import { urlFor } from '../lib/sanity'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { useTranslatedTexts } from '@/hooks/useTranslatedTexts'
@@ -293,9 +294,22 @@ export default function NewsContainer({ newsList, companiesList, priceList = [] 
 
       {selectedPriceModel && (
         <section className="mb-12">
-          <h3 className="text-xl font-bold text-gray-900 mb-4">
-            {selectedModelTitle || selectedPriceModel} {t('pricesAndImplementsLabel', language)}
-          </h3>
+          <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+            <h3 className="text-xl font-bold text-gray-900">
+              {selectedModelTitle || selectedPriceModel} {t('pricesAndImplementsLabel', language)}
+            </h3>
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedPriceModel('')
+                setSelectedImplementIds([])
+              }}
+              className="inline-flex items-center gap-1.5 text-sm font-semibold text-red-600 hover:text-red-700"
+            >
+              <ArrowLeft className="w-4 h-4" strokeWidth={2} />
+              {t('backToModels', language)}
+            </button>
+          </div>
           {filteredPrices.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredPrices.map((item) => (

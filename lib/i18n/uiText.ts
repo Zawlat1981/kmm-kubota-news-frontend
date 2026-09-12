@@ -47,6 +47,7 @@ export const uiText = {
   brandSelectionDefault: { default: 'Brand Selection', my: 'အမှတ်တံဆိပ် ရွေးချယ်ရန်', th: 'เลือกแบรนด์' },
   allBrandPricesDefault: { default: 'All Brand Prices', my: 'အမှတ်တံဆိပ် ဈေးနှုန်းအားလုံး', th: 'ราคาทุกแบรนด์' },
   modelsLabel: { default: 'Models', my: 'မော်ဒယ်များ', th: 'รุ่น' },
+  backToModels: { default: 'Back to Models', my: 'မော်ဒယ်များသို့ ပြန်သွားရန်', th: 'กลับไปยังรุ่น' },
   withFrontDozerLabel: { default: 'with Front Dozer', my: 'ရှေ့ဂေါ်ပါ', th: 'พร้อมใบมีดดันดินหน้า' },
   implementsLabel: { default: 'Implements', my: 'နောက်တွဲများ', th: 'อุปกรณ์ต่อพ่วง' },
   pricesAndImplementsLabel: {
