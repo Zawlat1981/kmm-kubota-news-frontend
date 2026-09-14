@@ -36,6 +36,7 @@ interface PriceItem {
   series?: string
   parentModel?: string
   frontDozer?: 'with-front-dozer' | 'without-front-dozer'
+  specialDozer?: 'with-special-dozer'
   frontLoader?: 'with-front-loader'
   horsepower?: number
   price?: number
@@ -83,6 +84,7 @@ async function getData(): Promise<{
     series,
     parentModel,
     frontDozer,
+    specialDozer,
     frontLoader,
     configuration,
     horsepower,

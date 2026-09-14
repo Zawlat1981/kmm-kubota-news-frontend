@@ -98,10 +98,34 @@ export default {
       hidden: ({ parent }) => parent?.itemType === 'implement',
     },
     {
+      name: 'specialDozer',
+      title: 'Special Dozer (ရှိလျှင်သာ)',
+      type: 'string',
+      options: {
+        list: [{ title: 'Special Dozer ပါ', value: 'with-special-dozer' }],
+      },
+      description: 'ဒီ model မှာ Special Dozer ပါမှ ရွေးပါ။ မရှိရင် အလွတ်ထားပါ။',
+      hidden: ({ parent }) => parent?.itemType === 'implement',
+    },
+    {
       name: 'horsepower',
-      title: 'Horsepower (hp)',
+      title: 'Horsepower / Weight',
       type: 'number',
-      description: 'သက်ဆိုင်ရာ Model ဆိုရင် ဖြည့်ပါ (ဥပမာ - 85)',
+      description: 'သက်ဆိုင်ရာ Model ဆိုရင် ဖြည့်ပါ (Tractor/Harvester → hp ဖြင့်, Excavator → Tons ဖြင့်)',
+    },
+    {
+      name: 'horsepowerUnit',
+       title: 'Unit',
+       type: 'string',
+       options: {
+         list: [
+          { title: 'Horsepower (hp)', value: 'hp' },
+          { title: 'Tons', value: 'tons' },
+        ],
+         layout: 'radio',
+      },
+       initialValue: 'hp',
+       description: 'Excavator အတွက် "Tons" ကို ရွေးပါ။',
     },
     {
       name: 'price',

@@ -48,10 +48,12 @@ function Field({
   icon: Icon,
   label,
   value,
+  href,
 }: {
   icon: React.ElementType
   label: string
   value?: string
+  href?: string
 }) {
   if (!value) return null
   return (
@@ -60,11 +62,26 @@ function Field({
         <Icon className="w-4 h-4 text-[#C6001E]" strokeWidth={1.75} />
         <span className="text-sm text-[#8A8578]">{label}</span>
       </div>
-      <span className="text-sm font-semibold text-[#1A1A1A] text-right">
-        {value}
-      </span>
+      {href ? (
+        <a
+          href={href}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-sm font-semibold text-[#1A1A1A] text-right underline decoration-[#C6001E]/40 underline-offset-2 hover:text-[#C6001E]"
+        >
+          {value}
+        </a>
+      ) : (
+        <span className="text-sm font-semibold text-[#1A1A1A] text-right">
+          {value}
+        </span>
+      )}
     </div>
   )
+}
+
+function externalUrl(value: string) {
+  return /^https?:\/\//i.test(value) ? value : `https://${value}`
 }
 
 export default function CompanyDetailTabs({
@@ -220,6 +237,7 @@ export default function CompanyDetailTabs({
                   icon={Globe}
                   label={t('website', language)}
                   value={company.website}
+                  href={company.website ? externalUrl(company.website) : undefined}
                 />
               </div>
             )}

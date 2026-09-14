@@ -46,6 +46,7 @@ interface PriceItem {
   series?: string
   parentModel?: string
   frontDozer?: 'with-front-dozer' | 'without-front-dozer'
+  specialDozer?: 'with-special-dozer'
   frontLoader?: 'with-front-loader'
   horsepower?: number
   price?: number
@@ -58,6 +59,76 @@ interface NewsContainerProps {
   newsList: NewsItem[]
   companiesList?: CompanyItem[]
   priceList?: PriceItem[]
+}
+
+const kubotaModelNames = [
+  'B2440s',
+  'B2440s+SD',
+  'L3208',
+  'L3208+FD',
+  'L4018',
+  'L4018+FD',
+  'L5228',
+  'L5228+FD',
+  'L5228+SD',
+  'L5228+LA',
+  'MU4902',
+  'MU4902+FD',
+  'MU5702',
+  'MU5702+FD',
+  'M6040SU',
+  'M6040SU+FD',
+  'M6040HI',
+  'M6040H+FD',
+  'M6240SU',
+  'M6240SU+FD',
+  'M6240HI',
+  'M6240HI+FD',
+  'M7040',
+  'M7040+FD',
+  'M8540',
+  'M8540+FD',
+  'M8540+LA',
+  'M9540',
+  'M9540+FD',
+  'M9540+LA',
+  'M108s',
+  'M108s+FD',
+  'DC70G Pro',
+  'SPV6-CMD',
+  'U17-3 (107 Tons)',
+  'KX033-4 (3 Tons)',
+  'U55-6 (5 Tons)',
+  'U55-6 Cabin (5 Tons)',
+  'KX080-3 (8 Tons)',
+]
+
+const preferredPriceBrandOrder = [
+  'Kubota',
+  'Kubota Second',
+  'Yanmar',
+  'John Deere',
+  'New Holland',
+  'YTO',
+  'Sonalika',
+  'Yamabisi',
+  'Mahindra',
+  'Dongfeng',
+  'DeutzFahr & Matador',
+  'Other Brands',
+]
+
+function formatKubotaModelName(modelName: string, language: Parameters<typeof t>[1]) {
+  if (modelName.endsWith('+FD')) {
+    return `${modelName.slice(0, -3)} ${t('withFrontDozerLabel', language)}`
+  }
+  if (modelName.endsWith('+SD')) {
+    return `${modelName.slice(0, -3)} ${t('withSpecialDozerLabel', language)}`
+  }
+  if (modelName.endsWith('+LA')) {
+    return `${modelName.slice(0, -3)} ${t('withFrontLoaderLabel', language)}`
+  }
+  return modelName
 }
 
 function formatCategory(category?: string) {
@@ -111,31 +182,58 @@ export default function NewsContainer({ newsList, companiesList, priceList = [] 
     return matchesSearch && matchesCategory && matchesDate
   })
 
-  const priceBrands = Array.from(
+  const availablePriceBrands = Array.from(
     new Set(priceList.map((item) => item.brand).filter((brand): brand is string => Boolean(brand)))
   )
+  const priceBrands = [
+    ...preferredPriceBrandOrder.filter((brand) => availablePriceBrands.includes(brand)),
+    ...availablePriceBrands.filter((brand) => !preferredPriceBrandOrder.includes(brand)),
+  ]
 
   const selectedBrandPrices = priceList.filter((item) => item.brand === selectedBrandPriceFilter)
-  const modelOptions = selectedBrandPrices
-    .filter((item) => item.itemType !== 'implement' && item.modelName)
-    .map((item) => ({
-      value: `${item.modelName}|${item.frontDozer || ''}|${item.frontLoader || ''}`,
-      title: [
-        item.modelName,
-        item.frontDozer === 'with-front-dozer' ? t('withFrontDozerLabel', language) : '',
-      ].filter(Boolean).join(' '),
-      label: item.frontDozer === 'with-front-dozer'
-        ? `${item.modelName} ${t('withFrontDozerLabel', language)} & ${t('implementsLabel', language)}`
-        : `${item.modelName} & ${t('implementsLabel', language)}`,
-      modelName: item.modelName as string,
-      frontDozer: item.frontDozer,
-      frontLoader: item.frontLoader,
+  const modelOptions = selectedBrandPriceFilter === 'Kubota'
+    ? kubotaModelNames.map((modelName) => ({
+      value: modelName,
+      title: formatKubotaModelName(modelName, language),
+      label: formatKubotaModelName(modelName, language),
+      modelName,
+      frontDozer: undefined,
+      frontLoader: undefined,
     }))
-    .filter((item, index, options) => options.findIndex((option) => option.value === item.value) === index)
+    : selectedBrandPrices
+      .filter((item) => item.itemType !== 'implement' && item.modelName)
+      .map((item) => ({
+        value: `${item.modelName}|${item.frontDozer || ''}|${item.frontLoader || ''}`,
+        title: [
+          item.modelName,
+          item.frontDozer === 'with-front-dozer' ? t('withFrontDozerLabel', language) : '',
+        ].filter(Boolean).join(' '),
+        label: item.frontDozer === 'with-front-dozer'
+          ? `${item.modelName} ${t('withFrontDozerLabel', language)} & ${t('implementsLabel', language)}`
+          : `${item.modelName} & ${t('implementsLabel', language)}`,
+        modelName: item.modelName as string,
+        frontDozer: item.frontDozer,
+        frontLoader: item.frontLoader,
+      }))
+      .filter((item, index, options) => options.findIndex((option) => option.value === item.value) === index)
   const filteredPrices = selectedBrandPrices.filter(
     (item) => {
-      const [modelName, frontDozer, frontLoader] = selectedPriceModel.split('|')
-      if (item.itemType === 'implement') return item.parentModel === modelName
+      const [selectedModelName, frontDozer, frontLoader] = selectedPriceModel.split('|')
+      const modelName = selectedBrandPriceFilter === 'Kubota'
+        ? selectedModelName.replace(/\+(FD|SD|LA)$/, '')
+        : selectedModelName
+      const exactModelName = selectedPriceModel
+      if (item.itemType === 'implement') {
+        return item.parentModel === exactModelName || item.parentModel === modelName
+      }
+      if (selectedBrandPriceFilter === 'Kubota') {
+        return item.modelName === exactModelName || (
+          item.modelName === modelName &&
+          (selectedModelName.endsWith('+FD') ? item.frontDozer === 'with-front-dozer' : true) &&
+          (selectedModelName.endsWith('+SD') ? item.specialDozer === 'with-special-dozer' : true) &&
+          (selectedModelName.endsWith('+LA') ? item.frontLoader === 'with-front-loader' : true)
+        )
+      }
       return item.modelName === modelName &&
         (frontDozer ? item.frontDozer === frontDozer : true) &&
         (frontLoader ? item.frontLoader === frontLoader : true)
@@ -265,43 +363,26 @@ export default function NewsContainer({ newsList, companiesList, priceList = [] 
               {t('backToMenu', language)}
             </button>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {modelOptions.map((model) => {
-              const machine = selectedBrandPrices.find(
-                (item) => item.modelName === model.modelName &&
-                  item.frontDozer === model.frontDozer &&
-                  item.frontLoader === model.frontLoader
-              )
-
-              return (
-                <button
-                  type="button"
-                  key={model.value}
-                  onClick={() => {
-                    setSelectedPriceModel(model.value)
-                    setSelectedImplementIds([])
-                  }}
-                  className="text-left bg-white rounded-lg border border-gray-200 p-4 shadow-sm hover:border-red-500 hover:shadow-md transition"
-                >
-                  {machine?.image && (
-                    <div className="h-32 overflow-hidden bg-gray-100 rounded-md mb-3">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={urlFor(machine.image).url()}
-                        alt={model.label}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  )}
-                  <h4 className="font-bold text-gray-900">{model.label}</h4>
-                  {machine?.price != null && (
-                    <p className="text-green-700 font-semibold mt-2">
-                      {machine.price.toLocaleString()} {machine.currency || ''}
-                    </p>
-                  )}
-                </button>
-              )
-            })}
+          <div className="max-w-xl bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
+            <label htmlFor="price-model" className="block text-sm font-semibold text-gray-700 mb-2">
+              {t('modelsLabel', language)}
+            </label>
+            <select
+              id="price-model"
+              value={selectedPriceModel}
+              onChange={(e) => {
+                setSelectedPriceModel(e.target.value)
+                setSelectedImplementIds([])
+              }}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 text-sm text-gray-900 bg-white"
+            >
+              <option value="">{t('modelSelectionDefault', language)}</option>
+              {modelOptions.map((model) => (
+                <option key={model.value} value={model.value}>
+                  {model.label}
+                </option>
+              ))}
+            </select>
           </div>
         </section>
       )}
