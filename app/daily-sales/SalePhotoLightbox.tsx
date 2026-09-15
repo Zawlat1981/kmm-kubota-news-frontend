@@ -2,6 +2,8 @@
 
 import Image from 'next/image'
 import { useEffect, useState } from 'react'
+import { useLanguage } from '@/contexts/LanguageContext'
+import { t } from '@/lib/i18n/uiText'
 
 interface SalePhotoLightboxProps {
   src: string
@@ -9,6 +11,7 @@ interface SalePhotoLightboxProps {
 }
 
 export default function SalePhotoLightbox({ src, alt }: SalePhotoLightboxProps) {
+  const { language } = useLanguage()
   const [isOpen, setIsOpen] = useState(false)
 
   useEffect(() => {
@@ -36,7 +39,7 @@ export default function SalePhotoLightbox({ src, alt }: SalePhotoLightboxProps) 
       >
         <Image src={src} alt={alt} fill unoptimized className="object-cover transition duration-300 group-hover:scale-105" />
         <span className="absolute bottom-3 right-3 rounded-full bg-black/65 px-3 py-1.5 text-xs font-semibold text-white opacity-0 transition group-hover:opacity-100">
-          View photo
+          {t('viewPhoto', language)}
         </span>
       </button>
 
@@ -61,7 +64,7 @@ export default function SalePhotoLightbox({ src, alt }: SalePhotoLightboxProps) 
               type="button"
               onClick={() => setIsOpen(false)}
               className="absolute -right-2 -top-2 flex h-9 w-9 items-center justify-center rounded-full bg-white text-xl font-bold text-slate-900 shadow-lg hover:bg-slate-100"
-              aria-label="Close enlarged photo"
+              aria-label={t('closePhoto', language)}
             >
               ×
             </button>
