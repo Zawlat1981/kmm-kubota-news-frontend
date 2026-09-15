@@ -44,7 +44,7 @@ export const uiText = {
     my: 'ခေါင်းစဉ် သို့မဟုတ် အကြောင်းအရာဖြင့် ရှာဖွေရန်...',
     th: 'ค้นหาจากหัวข้อหรือเนื้อหา...',
   },
-  brandSelectionDefault: { default: 'Brand Selection', my: 'အမှတ်တံဆိပ် ရွေးချယ်ရန်', th: 'เลือกแบรนด์' },
+  newsSelectionDefault: { default: 'News Selection', my: 'သတင်း ရွေးချယ်ရန်', th: 'เลือกข่าว' },
   allBrandPricesDefault: { default: 'All Brand Prices', my: 'အမှတ်တံဆိပ် ဈေးနှုန်းအားလုံး', th: 'ราคาทุกแบรนด์' },
   modelsLabel: { default: 'Models', my: 'မော်ဒယ်များ', th: 'รุ่น' },
   modelSelectionDefault: { default: 'Select a model', my: 'မော်ဒယ် ရွေးချယ်ရန်', th: 'เลือกรุ่น' },

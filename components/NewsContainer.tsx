@@ -118,6 +118,12 @@ const preferredPriceBrandOrder = [
   'Other Brands',
 ]
 
+const facebookPages = [
+  { name: 'KMM Kubota Mawlamyine', url: 'https://www.facebook.com/kmmkubota' },
+  { name: 'KMM Kubota Tharyarwaddy', url: 'https://www.facebook.com/kmmkubotatyd' },
+  { name: 'KMM Kubota Nawnghkio', url: 'https://www.facebook.com/profile.php?id=100076295352470' },
+]
+
 function formatKubotaModelName(modelName: string, language: Parameters<typeof t>[1]) {
   if (modelName.endsWith('+FD')) {
     return `${modelName.slice(0, -3)} ${t('withFrontDozerLabel', language)}`
@@ -277,10 +283,22 @@ export default function NewsContainer({ newsList, companiesList, priceList = [] 
         <div>
           <select
             value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value)}
+            onChange={(e) => {
+              const facebookPage = facebookPages.find((page) => page.url === e.target.value)
+              if (facebookPage) {
+                window.open(facebookPage.url, '_blank', 'noopener,noreferrer')
+                setSelectedCategory('ALL')
+                return
+              }
+              setSelectedCategory(e.target.value)
+            }}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 text-sm text-gray-900 bg-white"
           >
-            <option value="ALL">{t('brandSelectionDefault', language)}</option>
+            <option value="ALL">{t('newsSelectionDefault', language)}</option>
+            <option disabled>— Facebook Pages —</option>
+            {facebookPages.map((page) => (
+              <option key={page.url} value={page.url}>{page.name}</option>
+            ))}
             <option value="kubota-news">Kubota News</option>
             <option value="kubota-second-news">Kubota Second News</option>
             <option value="yanmar-news">Yanmar News</option>
@@ -313,9 +331,9 @@ export default function NewsContainer({ newsList, companiesList, priceList = [] 
           <select
             value={selectedBrandPriceFilter}
             onChange={(e) => {
-              if (e.target.value === 'CHECK_STOCK') {
-                router.push('/internal/login')
-                return // don't update filter state — keep dropdown showing "All Brand Prices"
+              if (e.target.value === 'DAILY_SALES') {
+                router.push('/daily-sales')
+                return
               }
               setSelectedBrandPriceFilter(e.target.value)
               setSelectedPriceModel('')
@@ -327,7 +345,7 @@ export default function NewsContainer({ newsList, companiesList, priceList = [] 
             {priceBrands.map((brand) => (
               <option key={brand} value={brand}>{brand}</option>
             ))}
-            <option value="CHECK_STOCK">🔒 Check Stock</option>
+            <option value="DAILY_SALES">KMM Kubota Daily Sales Report</option>
           </select>
         </div>
 

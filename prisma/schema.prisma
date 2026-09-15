@@ -33,3 +33,19 @@ model StockItem {
 
   @@index([branchId])
 }
+
+// One public daily sales report entry created by KMM staff.
+model DailySale {
+  id           String   @id @default(cuid())
+  branch       String   // KMM01, KMM02, KMM03
+  saleDate     DateTime
+  model        String
+  customerName String
+  division     String
+  paymentType  String
+  salesPerson  String
+  photoUrl     String?
+  createdAt    DateTime @default(now())
+
+  @@index([branch, saleDate])
+}

@@ -22,7 +22,8 @@ export default function InternalLoginPage() {
       })
 
       if (res.ok) {
-        router.push('/internal/stock')
+        const redirect = new URLSearchParams(window.location.search).get('redirect')
+        router.push(redirect || '/internal/stock')
         router.refresh()
       } else {
         const data = await res.json()
@@ -40,7 +41,7 @@ export default function InternalLoginPage() {
       <div className="w-full max-w-sm bg-white rounded-2xl border border-gray-200 shadow-sm p-8">
         <h1 className="text-xl font-bold text-gray-900 mb-1">KMM Internal Access</h1>
         <p className="text-sm text-gray-500 mb-6">
-          Stock စာရင်းကို ကြည့်ရန် Password ထည့်ပါ
+          Internal စာမျက်နှာများကို ဝင်ရန် Password ထည့်ပါ
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-4">

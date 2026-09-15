@@ -14,5 +14,5 @@ export function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/internal/stock/:path*'],
+  matcher: ['/internal/stock/:path*', '/internal/daily-sales/:path*'],
 }
