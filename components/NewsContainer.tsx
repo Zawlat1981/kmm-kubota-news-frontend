@@ -295,7 +295,7 @@ export default function NewsContainer({ newsList, companiesList, priceList = [] 
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 text-sm text-gray-900 bg-white"
           >
             <option value="ALL">{t('newsSelectionDefault', language)}</option>
-            <option disabled>— Facebook Pages —</option>
+            <option disabled className="text-red-600 font-semibold">— Facebook Pages —</option>
             {facebookPages.map((page) => (
               <option key={page.url} value={page.url}>{page.name}</option>
             ))}
@@ -345,7 +345,7 @@ export default function NewsContainer({ newsList, companiesList, priceList = [] 
             {priceBrands.map((brand) => (
               <option key={brand} value={brand}>{brand}</option>
             ))}
-            <option value="DAILY_SALES">KMM Kubota Daily Sales Report</option>
+            <option value="DAILY_SALES" className="text-red-600 font-semibold">KMM Kubota Daily Sales Report</option>
           </select>
         </div>
 
