@@ -20,6 +20,7 @@ export default async function DailySalesPage() {
         paymentType: sale.paymentType,
         salesPerson: sale.salesPerson,
         photoUrl: sale.photoUrl,
+        stockRemaining: sale.stockRemaining,
       }))}
     />
   )

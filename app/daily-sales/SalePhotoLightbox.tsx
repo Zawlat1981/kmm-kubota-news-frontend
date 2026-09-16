@@ -8,9 +8,13 @@ import { t } from '@/lib/i18n/uiText'
 interface SalePhotoLightboxProps {
   src: string
   alt: string
+  salesPerson: string
+  customerName: string
+  model: string
+  region: string
 }
 
-export default function SalePhotoLightbox({ src, alt }: SalePhotoLightboxProps) {
+export default function SalePhotoLightbox({ src, alt, salesPerson, customerName, model, region }: SalePhotoLightboxProps) {
   const { language } = useLanguage()
   const [isOpen, setIsOpen] = useState(false)
 
@@ -60,6 +64,22 @@ export default function SalePhotoLightbox({ src, alt }: SalePhotoLightboxProps) 
               unoptimized
               className="max-h-[calc(100vh-4rem)] w-auto max-w-full rounded-lg object-contain shadow-2xl"
             />
+            <div className="absolute inset-x-0 bottom-0 rounded-b-lg bg-slate-950/75 px-4 py-3 text-white backdrop-blur-sm sm:px-5">
+              <div className="flex flex-wrap gap-2">
+                <span className="rounded-full border border-white/20 bg-white/10 px-3.5 py-1.5 text-sm font-semibold">
+                  Customer Name: {customerName}
+                </span>
+                <span className="rounded-full border border-white/20 bg-white/10 px-3.5 py-1.5 text-sm font-semibold">
+                  {t('modelTag', language)}: {model}
+                </span>
+                <span className="rounded-full border border-white/20 bg-white/10 px-3.5 py-1.5 text-sm font-semibold">
+                  {t('regionTag', language)}: {region}
+                </span>
+                <span className="rounded-full border border-white/20 bg-white/10 px-3.5 py-1.5 text-sm font-semibold">
+                  Sales Person: {salesPerson}
+                </span>
+              </div>
+            </div>
             <button
               type="button"
               onClick={() => setIsOpen(false)}

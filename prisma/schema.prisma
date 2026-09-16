@@ -45,6 +45,7 @@ model DailySale {
   paymentType  String
   salesPerson  String
   photoUrl     String?
+  stockRemaining Int?
   createdAt    DateTime @default(now())
 
   @@index([branch, saleDate])

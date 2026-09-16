@@ -12,6 +12,7 @@ const initialForm = {
   paymentType: 'Cash',
   salesPerson: '',
   photoUrl: '',
+  stockRemaining: '',
 }
 
 export default function AddDailySalePage() {
@@ -85,6 +86,9 @@ export default function AddDailySalePage() {
             </label>
             <label className="text-sm text-gray-700">Sales person
               <input value={form.salesPerson} onChange={(e) => updateField('salesPerson', e.target.value)} className="field" required />
+            </label>
+            <label className="text-sm text-gray-700">Stock remaining (optional)
+              <input type="number" min="0" step="1" value={form.stockRemaining} onChange={(e) => updateField('stockRemaining', e.target.value)} className="field" placeholder="ညနေမှ ဖြည့်နိုင်သည်" />
             </label>
             <label className="text-sm text-gray-700 sm:col-span-2">Photo URL (optional)
               <input type="url" value={form.photoUrl} onChange={(e) => updateField('photoUrl', e.target.value)} className="field" placeholder="https://..." />

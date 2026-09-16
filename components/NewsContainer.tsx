@@ -79,7 +79,7 @@ const kubotaModelNames = [
   'M6040SU',
   'M6040SU+FD',
   'M6040HI',
-  'M6040H+FD',
+  'M6040HI+FD',
   'M6240SU',
   'M6240SU+FD',
   'M6240HI',
@@ -135,6 +135,13 @@ function formatKubotaModelName(modelName: string, language: Parameters<typeof t>
     return `${modelName.slice(0, -3)} ${t('withFrontLoaderLabel', language)}`
   }
   return modelName
+}
+
+function formatPriceItemModelName(item: PriceItem, language: Parameters<typeof t>[1]) {
+  if (item.frontDozer === 'with-front-dozer') {
+    return `${item.modelName} ${t('withFrontDozerLabel', language)}`
+  }
+  return item.modelName
 }
 
 function formatCategory(category?: string) {
@@ -233,12 +240,14 @@ export default function NewsContainer({ newsList, companiesList, priceList = [] 
         return item.parentModel === exactModelName || item.parentModel === modelName
       }
       if (selectedBrandPriceFilter === 'Kubota') {
-        return item.modelName === exactModelName || (
-          item.modelName === modelName &&
-          (selectedModelName.endsWith('+FD') ? item.frontDozer === 'with-front-dozer' : true) &&
-          (selectedModelName.endsWith('+SD') ? item.specialDozer === 'with-special-dozer' : true) &&
-          (selectedModelName.endsWith('+LA') ? item.frontLoader === 'with-front-loader' : true)
-        )
+        const hasFrontDozer = selectedModelName.endsWith('+FD')
+        const hasSpecialDozer = selectedModelName.endsWith('+SD')
+        const hasFrontLoader = selectedModelName.endsWith('+LA')
+
+        return (item.modelName === modelName || item.modelName === exactModelName) &&
+          (hasFrontDozer ? item.frontDozer === 'with-front-dozer' : item.frontDozer !== 'with-front-dozer') &&
+          (hasSpecialDozer ? item.specialDozer === 'with-special-dozer' : !item.specialDozer) &&
+          (hasFrontLoader ? item.frontLoader === 'with-front-loader' : !item.frontLoader)
       }
       return item.modelName === modelName &&
         (frontDozer ? item.frontDozer === frontDozer : true) &&
@@ -435,7 +444,7 @@ export default function NewsContainer({ newsList, companiesList, priceList = [] 
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={urlFor(item.image).url()}
-                        alt={item.modelName || 'Machinery'}
+                        alt={formatPriceItemModelName(item, language) || 'Machinery'}
                         className="w-full h-full object-cover"
                       />
                     </div>
@@ -444,7 +453,9 @@ export default function NewsContainer({ newsList, companiesList, priceList = [] 
                     {item.itemType !== 'implement' && (
                       <p className="text-sm text-gray-500">{item.brand}</p>
                     )}
-                    <h4 className="text-lg font-bold text-gray-900">{item.modelName}</h4>
+                    <h4 className="text-lg font-bold text-gray-900">
+                      {formatPriceItemModelName(item, language)}
+                    </h4>
                     {item.itemType !== 'implement' && item.category && (
                       <p className="text-sm text-gray-600 mt-1">{item.category}</p>
                     )}
