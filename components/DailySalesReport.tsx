@@ -36,6 +36,29 @@ function monthKey(date: string) {
   return date.slice(0, 7)
 }
 
+function daysFrom(date: string, days: number) {
+  const value = new Date(`${dateKey(date)}T00:00:00.000Z`)
+  value.setUTCDate(value.getUTCDate() + days)
+  return value.toISOString().slice(0, 10)
+}
+
+function getCurrentWeekStart() {
+  const today = new Date()
+  const day = today.getUTCDay()
+  const daysSinceMonday = day === 0 ? 6 : day - 1
+  today.setUTCDate(today.getUTCDate() - daysSinceMonday)
+  return today.toISOString().slice(0, 10)
+}
+
+function getTopNames(records: SaleRecord[], getName: (sale: SaleRecord) => string) {
+  const counts = new Map<string, number>()
+  records.forEach((sale) => counts.set(getName(sale), (counts.get(getName(sale)) || 0) + 1))
+  const highestCount = Math.max(0, ...counts.values())
+  return Array.from(counts.entries())
+    .filter(([, count]) => count === highestCount)
+    .map(([name]) => name)
+}
+
 function formatMonth(month: string, language: Parameters<typeof t>[1]) {
   return new Intl.DateTimeFormat(language === 'th' ? 'th-TH' : language === 'my' ? 'my-MM' : 'en-GB', {
     month: 'long',
@@ -49,12 +72,22 @@ export default function DailySalesReport({ sales }: { sales: SaleRecord[] }) {
   const latestSaleDate = sales[0]?.saleDate
   const latestMonth = latestSaleDate ? monthKey(latestSaleDate) : ''
   const [selectedMonth, setSelectedMonth] = useState(latestMonth)
+  const [showFullMonth, setShowFullMonth] = useState(false)
   const monthOptions = useMemo(() => Array.from(new Set(sales.map((sale) => monthKey(sale.saleDate)))), [sales])
   const monthSales = sales.filter((sale) => monthKey(sale.saleDate) === selectedMonth)
+  const latestMonthSaleDate = monthSales[0]?.saleDate
+  const weekStartDate = latestMonthSaleDate ? daysFrom(latestMonthSaleDate, -6) : ''
+  const displayedSales = showFullMonth
+    ? monthSales
+    : monthSales.filter((sale) => dateKey(sale.saleDate) >= weekStartDate)
   const reportDate = latestSaleDate
-  const reportDateKey = reportDate ? dateKey(reportDate) : ''
-  const dailySales = sales.filter((sale) => dateKey(sale.saleDate) === reportDateKey)
-  const activeBranches = Array.from(new Set(dailySales.map((sale) => sale.branch)))
+  const currentMonth = monthKey(new Date().toISOString())
+  const currentPeriodSales = sales.filter((sale) => monthKey(sale.saleDate) === currentMonth)
+  const weekStart = getCurrentWeekStart()
+  const thisWeekSales = sales.filter((sale) => dateKey(sale.saleDate) >= weekStart && dateKey(sale.saleDate) <= dateKey(new Date().toISOString()))
+  const topBranches = getTopNames(currentPeriodSales, (sale) => sale.branch)
+  const topSalesPeople = getTopNames(currentPeriodSales, (sale) => sale.salesPerson)
+  const topBranchSales = topBranches[0] ? currentPeriodSales.filter((sale) => sale.branch === topBranches[0]).length : 0
 
   return (
     <main className="min-h-screen bg-[#f4f6f8] text-slate-900">
@@ -73,23 +106,21 @@ export default function DailySalesReport({ sales }: { sales: SaleRecord[] }) {
               <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-slate-950">{t('dailySalesReport', language)}</h1>
               <p className="text-sm sm:text-base text-slate-500 mt-2">{t('dailySalesDescription', language)}</p>
             </div>
-            <Link href="/internal/login?redirect=/internal/daily-sales/add" className="inline-flex items-center justify-center text-sm font-bold text-white bg-[#c8102e] hover:bg-[#a80d25] rounded-lg px-5 py-3 shadow-sm transition">
-              + {t('addDailySale', language)}
-            </Link>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 border-t border-slate-100 bg-slate-50/70">
             <div className="px-6 py-4 border-r border-slate-100">
-              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{t('totalSales', language)}</p>
-              <p className="text-2xl font-bold text-slate-950 mt-1">{dailySales.length}</p>
+              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{t('thisWeeksSales', language)}</p>
+              <p className="text-2xl font-bold text-slate-950 mt-1">{thisWeekSales.length}</p>
             </div>
             <div className="px-6 py-4 sm:border-r border-slate-100">
-              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{t('activeBranches', language)}</p>
-              <p className="text-2xl font-bold text-slate-950 mt-1">{activeBranches.length}<span className="text-sm font-medium text-slate-400"> / 3</span></p>
-              <p className="text-xs text-slate-500 mt-1 min-h-4">{activeBranches.join(', ')}</p>
+              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{t('topBranch', language)}</p>
+              <p className="text-base font-bold text-slate-950 mt-2 min-h-7">{topBranches.length ? topBranches.join(' & ') : t('noRecordsYet', language)}</p>
+              <p className="text-xs text-slate-500 mt-1 min-h-4">{topBranches.length ? `${topBranchSales} ${t('records', language)}` : ''}</p>
             </div>
             <div className="col-span-2 sm:col-span-1 px-6 py-4">
-              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{t('latestReport', language)}</p>
-              <p className="text-base font-bold text-slate-950 mt-2">{reportDate ? formatDate(reportDate, language) : t('noRecordsYet', language)}</p>
+              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{t('topSalesPerson', language)}</p>
+              <p className="text-base font-bold text-slate-950 mt-2">{topSalesPeople.length ? topSalesPeople.join(' & ') : t('noRecordsYet', language)}</p>
+              <p className="text-xs text-slate-500 mt-1">{reportDate ? formatDate(reportDate, language) : ''}</p>
             </div>
           </div>
         </div>
@@ -107,7 +138,10 @@ export default function DailySalesReport({ sales }: { sales: SaleRecord[] }) {
                 {t('salesMonthLabel', language)}
                 <select
                   value={selectedMonth}
-                  onChange={(event) => setSelectedMonth(event.target.value)}
+                  onChange={(event) => {
+                    setSelectedMonth(event.target.value)
+                    setShowFullMonth(false)
+                  }}
                   className="ml-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm"
                 >
                   {monthOptions.map((month) => <option key={month} value={month}>{formatMonth(month, language)}</option>)}
@@ -129,7 +163,7 @@ export default function DailySalesReport({ sales }: { sales: SaleRecord[] }) {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
-                    {monthSales.map((sale) => (
+                    {displayedSales.map((sale) => (
                       <tr key={sale.id} className="hover:bg-red-50/40">
                         <td className="px-5 py-4 whitespace-nowrap text-slate-500">{formatDate(sale.saleDate, language)}</td>
                         <td className="px-5 py-4 font-bold text-red-700">{sale.branch}</td>
@@ -143,11 +177,23 @@ export default function DailySalesReport({ sales }: { sales: SaleRecord[] }) {
                   </tbody>
                 </table>
               </div>
-              <div className="border-t border-slate-100 px-5 py-3 text-xs font-semibold text-slate-500">{monthSales.length} {t('records', language)}</div>
+              <div className="border-t border-slate-100 px-5 py-3 flex flex-col sm:flex-row items-center justify-between gap-3">
+                <span className="text-xs font-semibold text-slate-500">{displayedSales.length} / {monthSales.length} {t('records', language)}</span>
+                {monthSales.length > displayedSales.length && (
+                  <button type="button" onClick={() => setShowFullMonth(true)} className="text-sm font-bold text-red-700 hover:text-red-900">
+                    {t('readMore', language)}
+                  </button>
+                )}
+                {showFullMonth && monthSales.length > 7 && (
+                  <button type="button" onClick={() => setShowFullMonth(false)} className="text-sm font-bold text-red-700 hover:text-red-900">
+                    {t('showLess', language)}
+                  </button>
+                )}
+              </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
-              {monthSales.map((sale) => (
+              {displayedSales.map((sale) => (
                 <article key={sale.id} className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow">
                   {sale.photoUrl ? <SalePhotoLightbox src={sale.photoUrl} alt={`${sale.model} sale`} salesPerson={sale.salesPerson} customerName={sale.customerName} model={sale.model} region={sale.division} /> : <div className="w-full aspect-[16/10] bg-slate-100 flex items-center justify-center text-sm text-slate-400">{t('noPhoto', language)}</div>}
                   <div className="p-5 space-y-3">

@@ -80,6 +80,9 @@ export default defineConfig({
             // Machinery price list
             S.documentTypeListItem('priceList').title('Price List').icon(() => '💰'),
 
+            // Daily sales management
+            S.documentTypeListItem('dailySale').title('Daily Sales (အရောင်းစာရင်း)').icon(() => '📊'),
+
 
             // Settings
             S.divider(),

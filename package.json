@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "migrate:daily-sales": "node scripts/migrate-daily-sales-to-sanity.mjs",
     "postinstall": "prisma generate && (prisma skills sync || exit 0)"
   },
   "dependencies": {
