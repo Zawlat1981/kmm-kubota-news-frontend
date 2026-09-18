@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, CalendarDays, Search, SlidersHorizontal, X } from 'lucide-react'
 import { urlFor } from '../lib/sanity'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { useTranslatedTexts } from '@/hooks/useTranslatedTexts'
@@ -103,21 +103,6 @@ const kubotaModelNames = [
   'KX080-3 (8 Tons)',
 ]
 
-const preferredPriceBrandOrder = [
-  'Kubota',
-  'Kubota Second',
-  'Yanmar',
-  'John Deere',
-  'New Holland',
-  'YTO',
-  'Sonalika',
-  'Yamabisi',
-  'Mahindra',
-  'Dongfeng',
-  'DeutzFahr & Matador',
-  'Other Brands',
-]
-
 const facebookPages = [
   { name: 'KMM Kubota Mawlamyine', url: 'https://www.facebook.com/kmmkubota' },
   { name: 'KMM Kubota Tharyarwaddy', url: 'https://www.facebook.com/kmmkubotatyd' },
@@ -170,12 +155,14 @@ export default function NewsContainer({ newsList, companiesList, priceList = [] 
   const { language } = useLanguage()
   const router = useRouter()
   const [searchTerm, setSearchTerm] = useState('')
-  const [selectedCategory, setSelectedCategory] = useState('ALL')
+  const [selectedNewsCategory, setSelectedNewsCategory] = useState('ALL')
+  const [selectedCompetitorCategory, setSelectedCompetitorCategory] = useState('ALL')
   const [selectedDate, setSelectedDate] = useState('')
   const [selectedBrandPriceFilter, setSelectedBrandPriceFilter] = useState('ALL')
   const [selectedPriceModel, setSelectedPriceModel] = useState('')
   const [selectedImplementIds, setSelectedImplementIds] = useState<string[]>([])
   const [selectedCompanyGroup, setSelectedCompanyGroup] = useState('ALL')
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
 
   const [visibleCount, setVisibleCount] = useState(9)
 
@@ -183,6 +170,9 @@ export default function NewsContainer({ newsList, companiesList, priceList = [] 
     const matchesSearch = news.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                           (news.body && news.body.toLowerCase().includes(searchTerm.toLowerCase()))
 
+    const selectedCategory = selectedNewsCategory !== 'ALL'
+      ? selectedNewsCategory
+      : selectedCompetitorCategory
     const matchesCategory = selectedCategory === 'ALL' ||
       news.category?.toLowerCase() === selectedCategory.toLowerCase()
 
@@ -198,10 +188,8 @@ export default function NewsContainer({ newsList, companiesList, priceList = [] 
   const availablePriceBrands = Array.from(
     new Set(priceList.map((item) => item.brand).filter((brand): brand is string => Boolean(brand)))
   )
-  const priceBrands = [
-    ...preferredPriceBrandOrder.filter((brand) => availablePriceBrands.includes(brand)),
-    ...availablePriceBrands.filter((brand) => !preferredPriceBrandOrder.includes(brand)),
-  ]
+  const priceBrands = ['Kubota', 'Yanmar', 'John Deere', 'New Holland', 'YTO']
+    .filter((brand) => availablePriceBrands.includes(brand))
 
   const selectedBrandPrices = priceList.filter((item) => item.brand === selectedBrandPriceFilter)
   const modelOptions = selectedBrandPriceFilter === 'Kubota'
@@ -278,98 +266,117 @@ export default function NewsContainer({ newsList, companiesList, priceList = [] 
   return (
     <div>
       {/* --- DASHBOARD FILTER SECTION --- */}
-      <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 mb-8 grid grid-cols-1 md:grid-cols-5 gap-4 items-center">
-        <div>
-          <input
-            type="text"
-            placeholder={t('searchPlaceholder', language)}
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 text-sm text-gray-900 placeholder-gray-500 bg-white"
-          />
-        </div>
-
-        <div>
-          <select
-            value={selectedCategory}
-            onChange={(e) => {
-              const facebookPage = facebookPages.find((page) => page.url === e.target.value)
-              if (facebookPage) {
-                window.open(facebookPage.url, '_blank', 'noopener,noreferrer')
-                setSelectedCategory('ALL')
-                return
-              }
-              setSelectedCategory(e.target.value)
-            }}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 text-sm text-gray-900 bg-white"
+      <div className="overflow-x-auto rounded-2xl border border-gray-200 bg-white p-5 shadow-sm mb-8">
+        <div className="grid min-w-[980px] grid-cols-6 gap-4 items-stretch">
+          <button
+            type="button"
+            onClick={() => setIsSidebarOpen(true)}
+            aria-label="Open sidebar filters"
+            className="flex h-11 items-center justify-center rounded-xl border border-red-200 bg-red-50 text-red-700 shadow-sm transition hover:bg-red-100"
           >
-            <option value="ALL">{t('newsSelectionDefault', language)}</option>
-            <option disabled className="text-red-600 font-semibold">— Facebook Pages —</option>
-            {facebookPages.map((page) => (
-              <option key={page.url} value={page.url}>{page.name}</option>
-            ))}
-            <option value="kubota-news">Kubota News</option>
-            <option value="kubota-second-news">Kubota Second News</option>
-            <option value="yanmar-news">Yanmar News</option>
-            <option value="john-deere-news">John Deere News</option>
-            <option value="new-holland-news">New Holland News</option>
-            <option value="yto-news">YTO News</option>
-            <option value="sonalika-news">Sonalika News</option>
-            <option value="yamabisi-news">Yamabisi News</option>
-            <option value="mahindra-news">Mahindra News</option>
-            <option value="dongfeng-news">Dongfeng News</option>
-            <option value="deutzfar-matador-news">DeutzFhar & Matador News</option>
-            <option value="crop-prices">Crop Prices</option>
-            <option value="fuel-prices">Fuel Prices</option>
-            <option value="exchange-rates">Exchange Rates</option>
-            <option value="myanmar-news">Myanmar News</option>
-            <option value="other-brand-news">Other Brand News</option>
-          </select>
-        </div>
+            <SlidersHorizontal className="h-5 w-5" />
+            <span className="sr-only">Open sidebar filters</span>
+          </button>
 
-        <div>
-          <input
-            type="date"
-            value={selectedDate}
-            onChange={(e) => setSelectedDate(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 text-sm text-gray-900 bg-white"
-          />
-        </div>
+          <div className="min-w-0">
+            <select id="news-selection" aria-label="News Selections" value={selectedNewsCategory} onChange={(e) => { setSelectedNewsCategory(e.target.value); setSelectedCompetitorCategory('ALL') }} className="h-11 w-full min-w-0 rounded-xl border border-gray-300 bg-white px-3 text-sm text-gray-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500">
+              <option value="ALL">{t('newsSelections', language)}</option>
+              <option value="myanmar-news">{t('myanmarNews', language)}</option>
+              <option value="exchange-rates">{t('exchangeRates', language)}</option>
+              <option value="fuel-prices">{t('fuelPrices', language)}</option>
+              <option value="crop-prices">{t('cropPrices', language)}</option>
+            </select>
+          </div>
 
-        <div>
-          <select
-            value={selectedBrandPriceFilter}
-            onChange={(e) => {
-              if (e.target.value === 'DAILY_SALES') {
-                router.push('/daily-sales')
-                return
-              }
-              setSelectedBrandPriceFilter(e.target.value)
-              setSelectedPriceModel('')
-              setSelectedImplementIds([])
-            }}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 text-sm text-gray-900 bg-white"
-          >
-            <option value="ALL">{t('allBrandPricesDefault', language)}</option>
-            {priceBrands.map((brand) => (
-              <option key={brand} value={brand}>{brand}</option>
-            ))}
-            <option value="DAILY_SALES" className="text-red-600 font-semibold">KMM Kubota Daily Sales Report</option>
-          </select>
-        </div>
+          <div className="min-w-0">
+            <select id="competitor-news" aria-label="Competitor News" value={selectedCompetitorCategory} onChange={(e) => { setSelectedCompetitorCategory(e.target.value); setSelectedNewsCategory('ALL') }} className="h-11 w-full min-w-0 rounded-xl border border-gray-300 bg-white px-3 text-sm text-gray-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500">
+              <option value="ALL">{t('competitorNews', language)}</option>
+              <option value="kubota-news">{t('kubotaNews', language)}</option>
+              <option value="kubota-second-news">{t('kubotaSecondNews', language)}</option>
+              <option value="yanmar-news">{t('yanmarNews', language)}</option>
+              <option value="john-deere-news">{t('johnDeereNews', language)}</option>
+              <option value="new-holland-news">{t('newHollandNews', language)}</option>
+              <option value="yto-news">{t('ytoNews', language)}</option>
+              <option value="sonalika-news">{t('sonalikaNews', language)}</option>
+              <option value="yamabisi-news">{t('yamabisiNews', language)}</option>
+              <option value="mahindra-news">{t('mahindraNews', language)}</option>
+              <option value="dongfeng-news">{t('dongfengNews', language)}</option>
+              <option value="deutzfar-matador-news">{t('deutzfarMatadorNews', language)}</option>
+              <option value="other-brand-news">{t('otherBrandNews', language)}</option>
+            </select>
+          </div>
 
-        <div>
-          <select
-            value={selectedCompanyGroup}
-            onChange={(e) => setSelectedCompanyGroup(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 text-sm text-gray-900 bg-white font-medium text-red-600"
-          >
-            <option value="ALL">{t('allCompaniesDefault', language)}</option>
-            <option value="kubota">{t('kubotaCompaniesOption', language)}</option>
-            <option value="other">{t('otherBrandCompaniesOption', language)}</option>
-          </select>
+          <div className="min-w-0">
+            <select id="daily-sales" aria-label="KMM Kubota Daily Sales Report" defaultValue="" onChange={(e) => { if (e.target.value === 'DAILY_SALES') router.push('/daily-sales') }} className="h-11 w-full min-w-0 rounded-xl border border-gray-300 bg-white px-3 text-sm text-gray-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500">
+              <option value="">{t('dailySalesMenu', language)}</option>
+              <option value="DAILY_SALES">{t('openDailySales', language)}</option>
+            </select>
+          </div>
+
+          <div className="min-w-0">
+            <select id="brand-prices" aria-label="All Brand Prices" value={selectedBrandPriceFilter} onChange={(e) => { setSelectedBrandPriceFilter(e.target.value); setSelectedPriceModel(''); setSelectedImplementIds([]) }} className="h-11 w-full min-w-0 rounded-xl border border-gray-300 bg-white px-3 text-sm text-gray-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500">
+              <option value="ALL">{t('allBrandPricesDefault', language)}</option>
+              {priceBrands.map((brand) => <option key={brand} value={brand}>{brand}</option>)}
+            </select>
+          </div>
+
+          <div className="min-w-0">
+            <select id="company-groups" aria-label="All Companies" value={selectedCompanyGroup} onChange={(e) => setSelectedCompanyGroup(e.target.value)} className="h-11 w-full min-w-0 rounded-xl border border-gray-300 bg-white px-3 text-sm text-gray-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500">
+              <option value="ALL">{t('allCompaniesDefault', language)}</option>
+              <option value="kubota">Kubota Companies</option>
+              <option value="other">Other Brand Companies</option>
+            </select>
+          </div>
         </div>
       </div>
+
+      {isSidebarOpen && (
+        <div className="fixed inset-0 z-50" role="dialog" aria-modal="true" aria-label="Sidebar filters">
+          <button
+            type="button"
+            aria-label="Close sidebar filters"
+            onClick={() => setIsSidebarOpen(false)}
+            className="absolute inset-0 bg-gray-900/30"
+          />
+          <aside className="absolute left-0 top-0 h-full w-full max-w-sm overflow-y-auto bg-white p-5 shadow-2xl">
+            <div className="mb-6 flex items-center justify-between border-b border-gray-200 pb-4">
+              <div>
+                <p className="text-xs font-bold uppercase tracking-[0.16em] text-red-500">{t('sidebarFilters', language)}</p>
+                <h2 className="text-lg font-bold text-gray-900">{t('sidebarFilters', language)}</h2>
+              </div>
+              <button type="button" onClick={() => setIsSidebarOpen(false)} aria-label="Close sidebar filters" className="rounded-full p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-900">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div className="rounded-xl border border-gray-200 bg-gray-50 p-3">
+                <label htmlFor="sidebar-search" className="mb-2 block text-sm font-semibold text-gray-700">{t('searchByTitleOrText', language)}</label>
+                <div className="flex items-center gap-3 rounded-lg border border-gray-200 bg-white px-3 py-2.5 focus-within:border-red-400 focus-within:ring-2 focus-within:ring-red-100">
+                  <Search className="h-4 w-4 shrink-0 text-red-600" />
+                  <input id="sidebar-search" type="text" placeholder={t('searchPlaceholder', language)} value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="min-w-0 flex-1 bg-transparent text-sm text-gray-900 placeholder-gray-500 outline-none" />
+                </div>
+              </div>
+
+              <div className="rounded-xl border border-gray-200 bg-gray-50 p-3">
+                <label htmlFor="sidebar-date" className="mb-2 block text-sm font-semibold text-gray-700">{t('dateFilter', language)}</label>
+                <div className="flex items-center gap-3 rounded-lg border border-gray-200 bg-white px-3 py-2.5 focus-within:border-red-400 focus-within:ring-2 focus-within:ring-red-100">
+                  <CalendarDays className="h-4 w-4 shrink-0 text-red-600" />
+                  <input id="sidebar-date" type="date" value={selectedDate} onChange={(e) => setSelectedDate(e.target.value)} className="min-w-0 flex-1 bg-transparent text-sm text-gray-900 outline-none" />
+                </div>
+              </div>
+
+              <div className="rounded-xl border border-gray-200 bg-gray-50 p-3">
+                <label htmlFor="sidebar-facebook-pages" className="mb-2 block text-sm font-semibold text-gray-700">{t('kmmKubotaFacebookPages', language)}</label>
+                <select id="sidebar-facebook-pages" defaultValue="" onChange={(e) => { const facebookPage = facebookPages.find((page) => page.url === e.target.value); if (facebookPage) window.open(facebookPage.url, '_blank', 'noopener,noreferrer') }} className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-900 focus:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-100">
+                  <option value="">{t('selectFacebookPage', language)}</option>
+                  {facebookPages.map((page) => <option key={page.url} value={page.url}>{page.name}</option>)}
+                </select>
+              </div>
+            </div>
+          </aside>
+        </div>
+      )}
 
       {selectedBrandPriceFilter !== 'ALL' && !selectedPriceModel && (
         <section className="mb-12">
