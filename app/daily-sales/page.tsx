@@ -12,7 +12,7 @@ const DAILY_SALES_QUERY = `*[_type == "dailySale"] | order(saleDate desc, _creat
   division,
   paymentType,
   salesPerson,
-  photoUrl,
+  "photoUrl": coalesce(photo.asset->url, photoUrl),
   stockRemaining
 }`
 

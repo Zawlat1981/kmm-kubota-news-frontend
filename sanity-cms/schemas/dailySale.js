@@ -60,9 +60,18 @@ export default {
       validation: (Rule) => Rule.required(),
     },
     {
+      name: 'photo',
+      title: 'Photo (ရောင်းထွက်ပုံ)',
+      type: 'image',
+      options: {
+        hotspot: true,
+      },
+    },
+    {
       name: 'photoUrl',
-      title: 'Photo URL',
+      title: 'Legacy Photo URL (အရင်ပုံလင့်ခ်)',
       type: 'url',
+      description: 'အသစ်တင်မည့်ပုံများအတွက် အပေါ်က Photo field ကို အသုံးပြုပါ။ ဒီ field က အရင် link နဲ့သိမ်းထားသောပုံများအတွက် ဆက်ထားပါသည်။',
     },
     {
       name: 'stockRemaining',
