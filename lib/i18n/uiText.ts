@@ -93,6 +93,7 @@ export const uiText = {
   yamabisiNews: { default: 'Yamabisi News', my: 'Yamabisi သတင်း', th: 'ข่าว Yamabisi' },
   mahindraNews: { default: 'Mahindra News', my: 'Mahindra သတင်း', th: 'ข่าว Mahindra' },
   dongfengNews: { default: 'Dongfeng News', my: 'Dongfeng သတင်း', th: 'ข่าว Dongfeng' },
+  mahindraDongfengNews: { default: 'Mahindra and Dongfeng News', my: 'Mahindra နှင့် Dongfeng သတင်း', th: 'ข่าว Mahindra และ Dongfeng' },
   deutzfarMatadorNews: { default: 'Deutzfhar & Matador News', my: 'Deutzfhar နှင့် Matador သတင်း', th: 'ข่าว Deutzfhar และ Matador' },
   otherBrandNews: { default: 'Other Brand News', my: 'အခြားအမှတ်တံဆိပ် သတင်းများ', th: 'ข่าวแบรนด์อื่น' },
   kubotaCompaniesOption: { default: 'Kubota Companies', my: 'Kubota ကုမ္ပဏီများ', th: 'บริษัท Kubota' },

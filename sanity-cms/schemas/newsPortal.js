@@ -61,6 +61,7 @@ export default {
           { title: 'Yamabisi News', value: 'yamabisi-news' },
           { title: 'Mahindra News', value: 'mahindra-news' },
           { title: 'Dongfeng News', value: 'dongfeng-news' },
+          { title: 'Mahindra and Dongfeng News', value: 'mahindra-dongfeng-news' },
           { title: 'DeutzFhar & Matador News', value: 'deutzfar-matador-news' },
           { title: 'Crop Prices', value: 'crop-prices' },
           { title: 'Fuel Prices', value: 'fuel-prices' },

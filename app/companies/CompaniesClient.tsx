@@ -23,6 +23,9 @@ export default function CompaniesClient({
 }) {
   const [selectedGroup, setSelectedGroup] = useState('kubota')
 
+  const formatBrands = (brand: string | string[] | undefined) =>
+    Array.isArray(brand) ? brand.join(', ') : brand
+
   const filteredCompanies = companies.filter(
     (company) => company.companyGroup === selectedGroup
   )
@@ -78,7 +81,7 @@ export default function CompaniesClient({
 
                   <div className="space-y-1.5 text-sm text-gray-600 mb-4">
                     {company.category && <p><strong>Category:</strong> {company.category}</p>}
-                    {company.brand && <p><strong>Brand:</strong> {company.brand}</p>}
+                    {company.brand && <p><strong>Brand:</strong> {formatBrands(company.brand)}</p>}
 
                     {(company.stateRegion || company.cityTownship) && (
                       <p>

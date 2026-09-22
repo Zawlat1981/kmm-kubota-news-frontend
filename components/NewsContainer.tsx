@@ -301,6 +301,7 @@ export default function NewsContainer({ newsList, companiesList, priceList = [] 
               <option value="yamabisi-news">{t('yamabisiNews', language)}</option>
               <option value="mahindra-news">{t('mahindraNews', language)}</option>
               <option value="dongfeng-news">{t('dongfengNews', language)}</option>
+              <option value="mahindra-dongfeng-news">{t('mahindraDongfengNews', language)}</option>
               <option value="deutzfar-matador-news">{t('deutzfarMatadorNews', language)}</option>
               <option value="other-brand-news">{t('otherBrandNews', language)}</option>
             </select>

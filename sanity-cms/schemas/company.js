@@ -35,8 +35,11 @@ export const company = {
     },
     {
       name: 'brand',
-      title: 'Brand',
-      type: 'string',
+      title: 'Brands',
+      type: 'array',
+      of: [{ type: 'string' }],
+      validation: (Rule) => Rule.unique(),
+      description: 'ကုမ္ပဏီက ရောင်းချသော Brand များကို တစ်ခုချင်းစီ Add item ဖြင့် ထည့်ပါ။',
     },
     {
       name: 'stateRegion',

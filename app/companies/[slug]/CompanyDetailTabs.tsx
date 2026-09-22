@@ -22,7 +22,7 @@ interface Branch {
 }
 
 interface Company {
-  brand?: string
+  brand?: string | string[]
   companyGroup?: string
   category?: string
   distributor?: string
@@ -96,6 +96,10 @@ export default function CompanyDetailTabs({
     .filter(Boolean)
     .join(', ')
 
+  const rawBrand = Array.isArray(company.brand)
+    ? company.brand.join(', ')
+    : company.brand || ''
+
   const rawCategory = company.category
     ? company.distributor
       ? `${company.category} from ${company.distributor}`
@@ -107,7 +111,7 @@ export default function CompanyDetailTabs({
   // Branch addresses are appended after, in order.
   const branchAddresses = (company.branches || []).map((b) => b.address || '')
   const dynamicValues = [
-    company.brand || '',
+    rawBrand,
     company.companyGroup || '',
     rawCategory,
     rawRegion,

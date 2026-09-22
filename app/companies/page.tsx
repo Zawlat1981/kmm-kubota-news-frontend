@@ -15,7 +15,7 @@ export interface Company {
   companyGroup?: string
   companyName?: string
   category?: string
-  brand?: string
+  brand?: string | string[]
   stateRegion?: string
   cityTownship?: string
   branches?: Branch[]
