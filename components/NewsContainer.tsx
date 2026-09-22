@@ -147,6 +147,32 @@ function normalizeNewsCategory(category?: string) {
     .replace(/news$/, '')
 }
 
+const newsCategoryKeywords: Record<string, string[]> = {
+  'kubota-news': ['kubota'],
+  'kubota-second-news': ['kubota'],
+  'yanmar-news': ['yanmar'],
+  'john-deere-news': ['john deere', 'johndeere'],
+  'new-holland-news': ['new holland', 'newholland'],
+  'yto-news': ['yto'],
+  'sonalika-news': ['sonalika'],
+  'yamabisi-news': ['yamabisi'],
+  'mahindra-news': ['mahindra'],
+  'dongfeng-news': ['dongfeng'],
+  'deutzfar-matador-news': ['deutzfar', 'deutz fhar', 'matador'],
+}
+
+function containsNewsKeyword(news: NewsItem, selectedCategory: string) {
+  const keywords = newsCategoryKeywords[selectedCategory] || []
+  if (keywords.length === 0) return false
+
+  const searchableText = [news.title, news.body, news.brand]
+    .filter(Boolean)
+    .join(' ')
+    .toLowerCase()
+
+  return keywords.some((keyword) => searchableText.includes(keyword))
+}
+
 // One card's title, translated on demand — keeps each card's translation
 // independent so a slow one doesn't block the rest of the grid.
 function NewsCardTitle({ title }: { title: string }) {
@@ -181,13 +207,9 @@ export default function NewsContainer({ newsList, companiesList, priceList = [] 
     const selectedCategory = selectedNewsCategory !== 'ALL'
       ? selectedNewsCategory
       : selectedCompetitorCategory
-    const isDongfengFilter = selectedCategory.toLowerCase().includes('dongfeng')
-    const containsDongfeng = [news.title, news.body, news.brand]
-      .filter(Boolean)
-      .some((value) => value!.toLowerCase().includes('dongfeng'))
     const matchesCategory = selectedCategory === 'ALL' ||
       normalizeNewsCategory(news.category) === normalizeNewsCategory(selectedCategory) ||
-      (isDongfengFilter && containsDongfeng)
+      containsNewsKeyword(news, selectedCategory)
 
     let matchesDate = true
     if (selectedDate !== '' && news.publishedAt) {
