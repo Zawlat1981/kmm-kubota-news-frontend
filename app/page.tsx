@@ -4,6 +4,7 @@ import NewsContainer from '@/components/NewsContainer'
 
 interface NewsItem {
   title: string
+  brand?: string
   slug: { current: string }
   category?: string
   publishedAt?: string
@@ -52,6 +53,7 @@ async function getData(): Promise<{
 }> {
   const newsQuery = `*[_type == "newsPortal"] | order(publishedAt desc) {
     title,
+    brand,
     slug,
     category,
     publishedAt,

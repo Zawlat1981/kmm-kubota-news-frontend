@@ -12,6 +12,7 @@ import { t } from '@/lib/i18n/uiText'
 interface NewsItem {
   _id?: string
   title: string
+  brand?: string
   slug?: { current: string }
   category?: string
   publishedAt?: string
@@ -139,6 +140,13 @@ function formatCategory(category?: string) {
   return category.toUpperCase()
 }
 
+function normalizeNewsCategory(category?: string) {
+  return (category || '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, '')
+    .replace(/news$/, '')
+}
+
 // One card's title, translated on demand — keeps each card's translation
 // independent so a slow one doesn't block the rest of the grid.
 function NewsCardTitle({ title }: { title: string }) {
@@ -173,8 +181,13 @@ export default function NewsContainer({ newsList, companiesList, priceList = [] 
     const selectedCategory = selectedNewsCategory !== 'ALL'
       ? selectedNewsCategory
       : selectedCompetitorCategory
+    const isDongfengFilter = selectedCategory.toLowerCase().includes('dongfeng')
+    const containsDongfeng = [news.title, news.body, news.brand]
+      .filter(Boolean)
+      .some((value) => value!.toLowerCase().includes('dongfeng'))
     const matchesCategory = selectedCategory === 'ALL' ||
-      news.category?.toLowerCase() === selectedCategory.toLowerCase()
+      normalizeNewsCategory(news.category) === normalizeNewsCategory(selectedCategory) ||
+      (isDongfengFilter && containsDongfeng)
 
     let matchesDate = true
     if (selectedDate !== '' && news.publishedAt) {
