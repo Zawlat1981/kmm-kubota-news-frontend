@@ -12,7 +12,8 @@ export default function Header() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
         
         {/* Logo and Animated Tractor Container */}
-        <div className="flex items-center gap-3 group cursor-pointer">
+        {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
+        <a href="/" className="flex items-center gap-3 group cursor-pointer">
           <div className="relative w-16 h-16 flex items-center justify-center">
             
             {/* မီးခိုးထွက်မည့် ပုံစံ (Hover လုပ်မှ ပေါ်မည်) */}
@@ -40,7 +41,7 @@ export default function Header() {
             </h1>
             <p className="text-xs text-gray-500">{t('headerSubtitle', language)}</p>
           </div>
-        </div>
+        </a>
 
         {/* Language Switcher */}
         <LanguageSwitcher />

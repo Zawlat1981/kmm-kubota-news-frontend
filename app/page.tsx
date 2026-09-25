@@ -1,5 +1,4 @@
 import { client } from '@/lib/sanity'
-import Header from '@/components/Header'
 import NewsContainer from '@/components/NewsContainer'
 
 interface NewsItem {
@@ -113,9 +112,6 @@ export default async function Home() {
 
   return (
     <main className="min-h-screen bg-gray-50">
-      {/* --- Header with Animated Logo --- */}
-      <Header />
-
       {/* --- News Container --- */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <h1 className="text-3xl font-bold mb-6 border-b-2 border-red-600 pb-2 text-gray-800">
