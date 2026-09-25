@@ -50,6 +50,8 @@ function getCurrentWeekStart() {
   return today.toISOString().slice(0, 10)
 }
 
+const branchOptions = ['KMM01', 'KMM02', 'KMM03']
+
 function getTopNames(records: SaleRecord[], getName: (sale: SaleRecord) => string) {
   const counts = new Map<string, number>()
   records.forEach((sale) => counts.set(getName(sale), (counts.get(getName(sale)) || 0) + 1))
@@ -72,6 +74,7 @@ export default function DailySalesReport({ sales }: { sales: SaleRecord[] }) {
   const latestSaleDate = sales[0]?.saleDate
   const latestMonth = latestSaleDate ? monthKey(latestSaleDate) : ''
   const [selectedMonth, setSelectedMonth] = useState(latestMonth)
+  const [selectedBranch, setSelectedBranch] = useState('')
   const [showFullMonth, setShowFullMonth] = useState(false)
   const monthOptions = useMemo(() => Array.from(new Set(sales.map((sale) => monthKey(sale.saleDate)))), [sales])
   const monthSales = sales.filter((sale) => monthKey(sale.saleDate) === selectedMonth)
@@ -87,7 +90,8 @@ export default function DailySalesReport({ sales }: { sales: SaleRecord[] }) {
   const thisWeekSales = sales.filter((sale) => dateKey(sale.saleDate) >= weekStart && dateKey(sale.saleDate) <= dateKey(new Date().toISOString()))
   const topBranches = getTopNames(currentPeriodSales, (sale) => sale.branch)
   const topSalesPeople = getTopNames(currentPeriodSales, (sale) => sale.salesPerson)
-  const topBranchSales = topBranches[0] ? currentPeriodSales.filter((sale) => sale.branch === topBranches[0]).length : 0
+  const displayedBranch = selectedBranch || topBranches[0] || branchOptions[0]
+  const displayedBranchSales = currentPeriodSales.filter((sale) => sale.branch === displayedBranch).length
 
   return (
     <main className="min-h-screen bg-[#f4f6f8] text-slate-900">
@@ -113,9 +117,20 @@ export default function DailySalesReport({ sales }: { sales: SaleRecord[] }) {
               <p className="text-2xl font-bold text-slate-950 mt-1">{thisWeekSales.length}</p>
             </div>
             <div className="px-6 py-4 sm:border-r border-slate-100">
-              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{t('topBranch', language)}</p>
-              <p className="text-base font-bold text-slate-950 mt-2 min-h-7">{topBranches.length ? topBranches.join(' & ') : t('noRecordsYet', language)}</p>
-              <p className="text-xs text-slate-500 mt-1 min-h-4">{topBranches.length ? `${topBranchSales} ${t('records', language)}` : ''}</p>
+              <div className="flex items-center gap-2">
+                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{t('topBranch', language)}</p>
+                <label className="sr-only" htmlFor="top-branch-filter">{t('topBranch', language)}</label>
+                <select
+                  id="top-branch-filter"
+                  value={displayedBranch}
+                  onChange={(event) => setSelectedBranch(event.target.value)}
+                  className="min-w-20 rounded-md border border-slate-200 bg-white px-2 py-1 text-xs font-bold text-slate-700 shadow-sm"
+                >
+                  {branchOptions.map((branch) => <option key={branch} value={branch}>{branch}</option>)}
+                </select>
+              </div>
+              <p className="text-base font-bold text-slate-950 mt-2 min-h-7">{displayedBranch}</p>
+              <p className="text-xs text-slate-500 mt-1 min-h-4">{displayedBranchSales} {t('records', language)}</p>
             </div>
             <div className="col-span-2 sm:col-span-1 px-6 py-4">
               <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{t('topSalesPerson', language)}</p>
