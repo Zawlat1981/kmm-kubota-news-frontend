@@ -21,6 +21,28 @@ export default {
       options: {
         source: 'title',
         maxLength: 96,
+        // Custom slugify: title text + current date/time (down to the minute).
+        // Two articles would need to be generated in the exact same minute
+        // to collide — in practice this won't happen — so the Title field
+        // itself never needs a random code appended to it anymore.
+        slugify: (input) => {
+          const now = new Date()
+          const yyyy = now.getFullYear()
+          const mm = String(now.getMonth() + 1).padStart(2, '0')
+          const dd = String(now.getDate()).padStart(2, '0')
+          const hh = String(now.getHours()).padStart(2, '0')
+          const min = String(now.getMinutes()).padStart(2, '0')
+          const dateStamp = `${yyyy}${mm}${dd}${hh}${min}`
+
+          const base = (input || '')
+            .toLowerCase()
+            .replace(/[^\w\s-]/g, '') // strips non-Latin characters (Burmese/Thai), same as Sanity's default behavior
+            .trim()
+            .replace(/\s+/g, '-')
+            .slice(0, 60)
+
+          return base ? `${base}-${dateStamp}` : dateStamp
+        },
       },
     },
     {
@@ -30,8 +52,9 @@ export default {
       options: {
         list: [
           { title: 'Kubota News', value: 'kubota-news' },
+          { title: 'Kubota ZT News', value: 'kubota-zt-news' },
           { title: 'Kubota Second News', value: 'kubota-second-news' }, 
-          { title: 'Yammar News', value: 'yammar-news' },
+          { title: 'Yanmar News', value: 'yanmar-news' },
           { title: 'John Deere News', value: 'john-deere-news' },
           { title: 'New Holland News', value: 'new-holland-news' },
           { title: 'YTO News', value: 'yto-news' },
@@ -39,9 +62,13 @@ export default {
           { title: 'Yamabisi News', value: 'yamabisi-news' },
           { title: 'Mahindra News', value: 'mahindra-news' },
           { title: 'Dongfeng News', value: 'dongfeng-news' },
-          { title: 'Crop Prices', value: 'crop-prices' },
-          { title: 'Fuel Prices', value: 'fuel-prices' },
+          { title: 'Mahindra and Dongfeng News', value: 'mahindra-dongfeng-news' },
+          { title: 'DeutzFhar & Matador News', value: 'deutzfar-matador-news' },
+          { title: 'Crop Price & News', value: 'crop-prices' },
+          { title: 'Fuel Price & News', value: 'fuel-prices' },
+          { title: 'Exchange Rates', value: 'exchange-rates' },
           { title: 'Myanmar News', value: 'myanmar-news' },
+          { title: 'Other Brand News', value: 'other-brand-news' },
         ],
       },
     },
@@ -63,6 +90,20 @@ export default {
       options: {
         hotspot: true,
       },
+    },
+    {
+      name: 'gallery',
+      title: 'Additional Images (ပုံနောက်ထပ်များ)',
+      type: 'array',
+      of: [
+        {
+          type: 'image',
+          options: {
+            hotspot: true,
+          },
+        },
+      ],
+      description: 'Main Image အပြင် ထပ်ဖြည့်ချင်သော ပုံများ — အရေအတွက် ကန့်သတ်ချက် မရှိပါ',
     },
     {
       name: 'body',
