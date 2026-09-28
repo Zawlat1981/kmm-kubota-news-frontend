@@ -84,6 +84,7 @@ export const uiText = {
   fuelPrices: { default: 'Fuel Price & News', my: 'လောင်စာဆီဈေးနှုန်းနှင့် သတင်းများ', th: 'ราคาน้ำมันและข่าวสาร' },
   cropPrices: { default: 'Crop Price & News', my: 'သီးနှံဈေးနှုန်းနှင့် သတင်းများ', th: 'ราคาพืชผลและข่าวสาร' },
   kubotaNews: { default: 'Kubota News', my: 'Kubota သတင်း', th: 'ข่าว Kubota' },
+  kubotaZtNews: { default: 'Kubota ZT News', my: 'Kubota ZT သတင်း', th: 'ข่าว Kubota ZT' },
   kubotaSecondNews: { default: 'Kubota Second News', my: 'Kubota ဒုတိယသတင်း', th: 'ข่าว Kubota ที่สอง' },
   yanmarNews: { default: 'Yanmar News', my: 'Yanmar သတင်း', th: 'ข่าว Yanmar' },
   johnDeereNews: { default: 'John Deere News', my: 'John Deere သတင်း', th: 'ข่าว John Deere' },

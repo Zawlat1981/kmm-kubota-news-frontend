@@ -136,6 +136,7 @@ function formatCategory(category?: string) {
   if (category.includes('မြန်မာနိုင်ငံ') || normalizedCategory.includes('myanmar')) return 'MYANMAR NEWS'
   if (category.includes('လောင်စာဆီ') || normalizedCategory.includes('fuel-price')) return 'FUEL PRICE & NEWS'
   if (category.includes('ဈေးနှုန်း') || normalizedCategory.includes('crop-price')) return 'CROP PRICE & NEWS'
+  if (normalizedCategory.includes('kubota-zt')) return 'KUBOTA ZT NEWS'
   if (category.includes('Second') || category.includes('second') || category.includes('ဒုတိယလက်သုံး')) return 'KUBOTA SECOND NEWS'
   if (category.includes('kubota') || category.includes('Kubota')) return 'KUBOTA NEWS'
   if (category.includes('Other Brand') || category.includes('အခြား')) return 'OTHER BRAND NEWS'
@@ -329,6 +330,7 @@ export default function NewsContainer({ newsList, companiesList, priceList = [] 
             <select id="competitor-news" aria-label="Competitor News" value={selectedCompetitorCategory} onChange={(e) => { setSelectedCompetitorCategory(e.target.value); setSelectedNewsCategory('ALL') }} className="h-11 w-full min-w-0 rounded-xl border border-gray-300 bg-white px-3 text-sm text-gray-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500">
               <option value="ALL">{t('competitorNews', language)}</option>
               <option value="kubota-news">{t('kubotaNews', language)}</option>
+              <option value="kubota-zt-news">{t('kubotaZtNews', language)}</option>
               <option value="kubota-second-news">{t('kubotaSecondNews', language)}</option>
               <option value="yanmar-news">{t('yanmarNews', language)}</option>
               <option value="john-deere-news">{t('johnDeereNews', language)}</option>

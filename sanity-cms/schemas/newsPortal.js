@@ -52,6 +52,7 @@ export default {
       options: {
         list: [
           { title: 'Kubota News', value: 'kubota-news' },
+          { title: 'Kubota ZT News', value: 'kubota-zt-news' },
           { title: 'Kubota Second News', value: 'kubota-second-news' }, 
           { title: 'Yanmar News', value: 'yanmar-news' },
           { title: 'John Deere News', value: 'john-deere-news' },
