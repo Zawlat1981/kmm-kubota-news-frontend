@@ -226,7 +226,7 @@ export default function NewsContainer({ newsList, companiesList, priceList = [] 
   const availablePriceBrands = Array.from(
     new Set(priceList.map((item) => item.brand).filter((brand): brand is string => Boolean(brand)))
   )
-  const priceBrands = ['Kubota', 'Yanmar', 'John Deere', 'New Holland', 'YTO']
+  const priceBrands = ['Kubota', 'Yanmar', 'John Deere', 'New Holland', 'YTO', 'Mahindra', 'Sonalika', 'Dongfeng', 'Deutzfar & Matador', 'Other Brands']
     .filter((brand) => availablePriceBrands.includes(brand))
 
   const selectedBrandPrices = priceList.filter((item) => item.brand === selectedBrandPriceFilter)
