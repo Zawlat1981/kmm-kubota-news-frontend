@@ -74,9 +74,11 @@ export default function DailySalesReport({ sales }: { sales: SaleRecord[] }) {
   const latestSaleDate = sales[0]?.saleDate
   const latestMonth = latestSaleDate ? monthKey(latestSaleDate) : ''
   const [selectedMonth, setSelectedMonth] = useState(latestMonth)
+  const [selectedSalesPeriod, setSelectedSalesPeriod] = useState(latestMonth ? `month:${latestMonth}` : 'week')
   const [selectedBranch, setSelectedBranch] = useState('')
   const [showFullMonth, setShowFullMonth] = useState(false)
   const monthOptions = useMemo(() => Array.from(new Set(sales.map((sale) => monthKey(sale.saleDate)))), [sales])
+  const yearOptions = useMemo(() => Array.from(new Set(sales.map((sale) => sale.saleDate.slice(0, 4)))), [sales])
   const monthSales = sales.filter((sale) => monthKey(sale.saleDate) === selectedMonth)
   const latestMonthSaleDate = monthSales[0]?.saleDate
   const weekStartDate = latestMonthSaleDate ? daysFrom(latestMonthSaleDate, -6) : ''
@@ -88,6 +90,11 @@ export default function DailySalesReport({ sales }: { sales: SaleRecord[] }) {
   const currentPeriodSales = sales.filter((sale) => monthKey(sale.saleDate) === currentMonth)
   const weekStart = getCurrentWeekStart()
   const thisWeekSales = sales.filter((sale) => dateKey(sale.saleDate) >= weekStart && dateKey(sale.saleDate) <= dateKey(new Date().toISOString()))
+  const selectedSalesTotal = selectedSalesPeriod === 'week'
+    ? thisWeekSales.length
+    : selectedSalesPeriod.startsWith('month:')
+      ? sales.filter((sale) => monthKey(sale.saleDate) === selectedSalesPeriod.slice(6)).length
+      : sales.filter((sale) => sale.saleDate.startsWith(selectedSalesPeriod.slice(5))).length
   const topBranches = getTopNames(currentPeriodSales, (sale) => sale.branch)
   const topSalesPeople = getTopNames(currentPeriodSales, (sale) => sale.salesPerson)
   const displayedBranch = selectedBranch || topBranches[0] || branchOptions[0]
@@ -113,8 +120,25 @@ export default function DailySalesReport({ sales }: { sales: SaleRecord[] }) {
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 border-t border-slate-100 bg-slate-50/70">
             <div className="px-6 py-4 border-r border-slate-100">
-              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{t('thisWeeksSales', language)}</p>
-              <p className="text-2xl font-bold text-slate-950 mt-1">{thisWeekSales.length}</p>
+              <div className="flex items-center gap-2">
+                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{t('totalSales', language)}</p>
+                <label className="sr-only" htmlFor="sales-period-filter">{t('salesPeriodLabel', language)}</label>
+                <select
+                  id="sales-period-filter"
+                  value={selectedSalesPeriod}
+                  onChange={(event) => setSelectedSalesPeriod(event.target.value)}
+                  className="min-w-0 max-w-40 rounded-md border border-slate-200 bg-white px-2 py-1 text-xs font-bold text-slate-700 shadow-sm"
+                >
+                  <option value="week">{t('thisWeeksSales', language)}</option>
+                  <optgroup label={t('monthlyTotals', language)}>
+                    {monthOptions.map((month) => <option key={month} value={`month:${month}`}>{formatMonth(month, language)}</option>)}
+                  </optgroup>
+                  <optgroup label={t('yearlyTotals', language)}>
+                    {yearOptions.map((year) => <option key={year} value={`year:${year}`}>{year}</option>)}
+                  </optgroup>
+                </select>
+              </div>
+              <p className="text-2xl font-bold text-slate-950 mt-1">{selectedSalesTotal}</p>
             </div>
             <div className="px-6 py-4 sm:border-r border-slate-100">
               <div className="flex items-center gap-2">
