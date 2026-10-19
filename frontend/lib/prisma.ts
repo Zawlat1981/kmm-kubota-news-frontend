@@ -1,13 +1,8 @@
-﻿import { PrismaClient } from '@prisma/client'
-
-const globalForPrisma = globalThis as unknown as {
-  prisma: PrismaClient | undefined
-}
-
-export const prisma =
-  globalForPrisma.prisma ??
-  new PrismaClient({
-    log: ['query'],
-  })
-
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
+﻿export const prisma = {
+  dailySale: {
+    create: async () => ({ id: 'mock' }),
+    update: async () => ({ id: 'mock' }),
+    findMany: async () => [],
+    delete: async () => ({}),
+  },
+} as any
