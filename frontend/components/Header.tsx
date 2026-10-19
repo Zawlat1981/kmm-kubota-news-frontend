@@ -1,4 +1,5 @@
 import Image from 'next/image'
+import LanguageSwitcher from './LanguageSwitcher'
 
 export default function Header() {
   return (
@@ -35,6 +36,9 @@ export default function Header() {
             <p className="text-xs text-gray-500">Agricultural Machinery News & Updates</p>
           </div>
         </div>
+
+        {/* Language Switcher */}
+        <LanguageSwitcher />
 
       </div>
     </header>
