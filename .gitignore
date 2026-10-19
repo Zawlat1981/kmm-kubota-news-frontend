@@ -1,2 +1,8 @@
 **/node_modules/
 **/.sanity/
+**/dist/
+**/.next/
+.next/
+frontend/sanity-cms/dist/
+frontend/sanity-cms/.sanity/
+frontend/sanity-cms/node_modules/
