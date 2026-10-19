@@ -1,4 +1,4 @@
-import DailySalesReport from '@/components/DailySalesReport'
+﻿import DailySalesReport from '@/components/DailySalesReport'
 import { client } from '@/lib/sanity'
 
 export const dynamic = 'force-dynamic'

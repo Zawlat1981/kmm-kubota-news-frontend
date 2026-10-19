@@ -1,4 +1,4 @@
-/**
+﻿/**
  * lib/i18n/uiText.ts
  *
  * Static UI labels — translated once by hand, shown instantly (no API call,
