@@ -11,7 +11,8 @@ interface NewsDetailPageProps {
 async function getNewsDetail(slugOrId: string) {
   if (!slugOrId) return null;
 
-  const query = `*[_type == "newsPortal" && (slug.current == $slugOrId || _id == $slugOrId)][0]{
+  // FIX 404: search both newsPortal AND old news type
+  const query = `*[_type in ["newsPortal", "news"] && (slug.current == $slugOrId || _id == $slugOrId)][0]{
     _id,
     title,
     slug,
@@ -27,7 +28,6 @@ async function getNewsDetail(slugOrId: string) {
 export default async function NewsDetailPage({ params }: NewsDetailPageProps) {
   const resolvedParams = await params;
 
-  // slug မပါလာရင် သို့မဟုတ် ပျောက်နေရင် 404 ပြရန်
   if (!resolvedParams?.slug) {
     notFound();
   }
@@ -87,3 +87,4 @@ export default async function NewsDetailPage({ params }: NewsDetailPageProps) {
     </main>
   );
 }
+

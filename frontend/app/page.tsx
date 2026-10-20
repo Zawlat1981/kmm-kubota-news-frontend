@@ -51,8 +51,8 @@ async function getData(): Promise<{
   companiesList: CompanyItem[]
   priceList: PriceItem[]
 }> {
-  // FIX: newsPortal + news both - so 17th old news also shows
-  const newsQuery = `*[_type in ["newsPortal", "news"]] | order(publishedAt desc) {
+  // ORIGINAL WORKING QUERY ONLY - don't include "news" old type
+  const newsQuery = `*[_type == "newsPortal"] | order(publishedAt desc) {
     title,
     brand,
     slug,
@@ -115,7 +115,6 @@ export default async function Home() {
   return (
     <main className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* FIX: flex + LanguageSwitcher - this is why dropdown was not showing */}
         <div className="flex justify-between items-center mb-6 border-b-2 border-red-600 pb-2">
           <h1 className="text-3xl font-bold text-gray-800">
             KMM Kubota News Portal
