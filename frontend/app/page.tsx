@@ -1,5 +1,6 @@
 ﻿import { client } from '@/lib/sanity'
 import NewsContainer from '@/components/NewsContainer'
+import LanguageSwitcher from '@/components/LanguageSwitcher'
 
 interface NewsItem {
   title: string
@@ -50,7 +51,8 @@ async function getData(): Promise<{
   companiesList: CompanyItem[]
   priceList: PriceItem[]
 }> {
-  const newsQuery = `*[_type == "newsPortal"] | order(publishedAt desc) {
+  // FIX: newsPortal + news both - so 17th old news also shows
+  const newsQuery = `*[_type in ["newsPortal", "news"]] | order(publishedAt desc) {
     title,
     brand,
     slug,
@@ -112,13 +114,15 @@ export default async function Home() {
 
   return (
     <main className="min-h-screen bg-gray-50">
-      {/* --- News Container --- */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <h1 className="text-3xl font-bold mb-6 border-b-2 border-red-600 pb-2 text-gray-800">
-          KMM Kubota News Portal
-        </h1>
+        {/* FIX: flex + LanguageSwitcher - this is why dropdown was not showing */}
+        <div className="flex justify-between items-center mb-6 border-b-2 border-red-600 pb-2">
+          <h1 className="text-3xl font-bold text-gray-800">
+            KMM Kubota News Portal
+          </h1>
+          <LanguageSwitcher />
+        </div>
         
-        {/* သတင်းများ နှင့် ကုမ္ပဏီ Filter များပြသသည့် အပိုင်း */}
         <NewsContainer
           newsList={newsList}
           companiesList={companiesList}
@@ -128,3 +132,4 @@ export default async function Home() {
     </main>
   )
 }
+
