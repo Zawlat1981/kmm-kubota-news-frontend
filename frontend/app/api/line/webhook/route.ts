@@ -13,29 +13,47 @@ type WebhookBody = {
   events?: LineEvent[]
 }
 
+function detectCategory(text: string): { category: string; branch: string; tags: string[] } {
+  const lower = text.toLowerCase()
+  let category = 'General'
+  let branch = 'KMM'
+  
+  // Category detection
+  if (lower.includes('kubota news') || lower.includes('#kubota')) category = 'Kubota News'
+  else if (lower.includes('yanmar news') || lower.includes('#yanmar')) category = 'Yanmar News'
+  else if (lower.includes('hitachi') || lower.includes('#hitachi')) category = 'Hitachi News'
+  else if (lower.includes('#news')) category = 'General News'
+  else if (lower.includes('#service') || lower.includes('service team')) category = 'Service News'
+  else if (lower.includes('#promotion') || lower.includes('#promo')) category = 'Promotion'
+
+  // Branch detection
+  if (lower.includes('mya taung') || lower.includes('myataung')) branch = 'Kubota Mya Taung'
+  else if (lower.includes('win shwe wah') || lower.includes('winshwewah')) branch = 'Win Shwe Wah'
+  else if (lower.includes('kyaukse') || lower.includes('ကျောက်ဆည်')) branch = 'Kyaukse'
+  else if (lower.includes('mandalay') || lower.includes('မန္တလေး')) branch = 'Mandalay'
+  else if (lower.includes('kmm') || lower.includes('kubota myanmar')) branch = 'KMM'
+
+  const hashtags = text.match(/#[^\s#]+(?:\s[^\s#]+)*/g) || []
+  
+  return { category, branch, tags: hashtags }
+}
+
 export async function GET() {
-  return NextResponse.json({ status: 'KMM Kubota News Webhook Ready', timestamp: new Date().toISOString() }, { status: 200 })
+  return NextResponse.json({ status: 'KMM Kubota News Webhook Ready - Auto Category', timestamp: new Date().toISOString() }, { status: 200 })
 }
 
 export async function POST(req: NextRequest) {
-  console.log('=== WEBHOOK HIT ===', new Date().toISOString())
-
+  console.log('=== WEBHOOK HIT ===')
   try {
     const body = await req.text()
-    console.log('Raw body length:', body.length)
-
     let parsedBody: WebhookBody
     try {
       parsedBody = JSON.parse(body) as WebhookBody
     } catch {
-      console.log('Not JSON, likely verify:', body.substring(0, 100))
       return NextResponse.json({ status: 'ok verify' }, { status: 200 })
     }
 
-    console.log('Parsed events count:', parsedBody.events?.length ?? 0)
-
     if (!parsedBody.events || parsedBody.events.length === 0) {
-      console.log('No events - verify request')
       return NextResponse.json({ status: 'ok no events' }, { status: 200 })
     }
 
@@ -44,20 +62,9 @@ export async function POST(req: NextRequest) {
     const dataset = process.env.NEXT_PUBLIC_SANITY_DATASET || 'production'
     const sanityToken = process.env.SANITY_API_TOKEN
 
-    console.log('Env check:', {
-      hasLineToken: !!channelAccessToken,
-      hasSanityProjectId: !!projectId,
-      hasSanityToken: !!sanityToken,
-    })
-
-    if (!channelAccessToken) {
-      console.error('MISSING LINE_CHANNEL_ACCESS_TOKEN')
-      return NextResponse.json({ status: 'ok missing token' }, { status: 200 })
-    }
-
-    if (!projectId || !sanityToken) {
-      console.error('MISSING SANITY ENV')
-      return NextResponse.json({ status: 'ok missing sanity env' }, { status: 200 })
+    if (!channelAccessToken || !projectId || !sanityToken) {
+      console.error('MISSING ENV')
+      return NextResponse.json({ status: 'ok missing env' }, { status: 200 })
     }
 
     const sanityClient = createClient({
@@ -73,13 +80,9 @@ export async function POST(req: NextRequest) {
     })
 
     for (const event of parsedBody.events) {
-      console.log('Processing event:', event.type)
-
       if (event.type === 'message' && event.message && event.message.type === 'text') {
         const text = event.message.text
         const groupId = event.source.groupId || event.source.roomId || event.source.userId
-
-        console.log(`Message from ${groupId}: ${text.substring(0, 100)}`)
 
         if (text.trim().toLowerCase() === 'groupid') {
           await client.replyMessage({
@@ -89,60 +92,56 @@ export async function POST(req: NextRequest) {
           continue
         }
 
-        if (!text.includes('#')) {
-          console.log('Skipping - no hashtag')
+        if (!text.includes('#') && !text.toLowerCase().includes('news')) {
           continue
         }
 
-        console.log('Creating Sanity doc...')
         try {
-          const hashtags = text.match(/#[^\s#]+(?:\s[^\s#]+)*/g) || []
+          const { category, branch, tags } = detectCategory(text)
+          const fbMatch = text.match(/https?:\/\/(www\.)?facebook\.com\/[^\s]+/i)
           const tiktokMatch = text.match(/https?:\/\/[^\s]+tiktok[^\s]*/i)
 
           const newsDoc = {
             _type: 'news',
-            title: text.split('\n')[0]?.substring(0, 150) || text.substring(0, 150),
+            title: text.split('\n')[0]?.substring(0, 200) || text.substring(0, 200),
             content: text,
-            description: text,
+            description: text.substring(0, 500),
             body: text,
             originalMessage: text,
+            category: category,
+            branch: branch,
+            tags: tags,
+            facebookUrl: fbMatch ? fbMatch[0] : '',
+            tiktokUrl: tiktokMatch ? tiktokMatch[0] : '',
             lineGroupId: groupId,
             lineMessageId: event.message.id,
             source: 'LINE',
-            hashtags: hashtags,
-            tiktokUrl: tiktokMatch ? tiktokMatch[0] : '',
             publishedAt: new Date().toISOString(),
             status: 'published',
           }
 
-          console.log('Sanity doc to create:', JSON.stringify(newsDoc).substring(0, 300))
-
+          console.log(`Creating: ${category} | ${branch} | ${tags.join(',')}`)
           const result = await sanityClient.create(newsDoc)
-          console.log('Sanity created SUCCESS:', result._id)
+          console.log('SUCCESS:', result._id, category)
 
           await client.replyMessage({
             replyToken: event.replyToken,
-            messages: [{ type: 'text', text: `✅ သတင်းရောက်ပြီ! ID: ${result._id}` }],
+            messages: [{ type: 'text', text: `✅ ${category} | ${branch}\nတက်ပြီ! Dashboard မှာ Auto ပြမယ်\nID: ${result._id.substring(0,8)}` }],
           })
         } catch (err) {
           const error = err as Error
-          console.error('SANITY CREATE FAILED:', error.message)
-          try {
-            await client.replyMessage({
-              replyToken: event.replyToken,
-              messages: [{ type: 'text', text: `❌ Sanity Error: ${error.message.substring(0, 120)}` }],
-            })
-          } catch (replyErr) {
-            const rErr = replyErr as Error
-            console.error('Failed to reply error', rErr.message)
-          }
+          console.error('SANITY FAILED:', error.message)
+          await client.replyMessage({
+            replyToken: event.replyToken,
+            messages: [{ type: 'text', text: `❌ Error: ${error.message.substring(0,100)}` }],
+          })
         }
       }
     }
     return NextResponse.json({ status: 'ok' }, { status: 200 })
   } catch (err) {
     const error = err as Error
-    console.error('WEBHOOK CRITICAL ERROR:', error.message, error.stack)
+    console.error('CRITICAL:', error.message)
     return NextResponse.json({ status: 'ok error caught' }, { status: 200 })
   }
 }
