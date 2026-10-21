@@ -1,6 +1,5 @@
 'use client'
 
-import Image from 'next/image'
 import Link from 'next/link'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { t } from '@/lib/i18n/uiText'
@@ -15,28 +14,21 @@ export default function Header() {
         
         <Link href="/" className="flex items-center gap-3 group cursor-pointer">
           <div className="relative w-16 h-16 flex items-center justify-center">
-            
             <div className="absolute -top-4 left-8 flex flex-col items-center opacity-0 group-hover:opacity-100 transition-all duration-300 group-hover:-translate-y-2">
               <span className="w-2.5 h-2.5 bg-gray-300 rounded-full animate-ping"></span>
               <span className="w-3.5 h-3.5 bg-gray-400 rounded-full mt-0.5 opacity-80"></span>
             </div>
-
             <div className="relative w-14 h-14 overflow-hidden rounded-full border-2 border-red-600 bg-gray-50 flex items-center justify-center transition-transform duration-300 group-hover:scale-105">
-              <Image 
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img 
                 src="/kubota-logo.png" 
                 alt="Kubota Logo"
                 width={56}
                 height={56}
-                className="object-cover"
-                priority
-                unoptimized
-                onError={() => {
-                  console.log('Logo not found')
-                }}
+                className="object-cover w-14 h-14"
               />
             </div>
           </div>
-
           <div>
             <h1 className="text-xl font-bold text-gray-900 tracking-tight group-hover:text-red-600 transition-colors">
               KMM Kubota <span className="text-red-600">{t('newsPortal', language)}</span>
@@ -46,7 +38,6 @@ export default function Header() {
         </Link>
 
         <LanguageSwitcher />
-
       </div>
     </header>
   )
