@@ -23,7 +23,7 @@ export default function Header() {
 
             <div className="relative w-14 h-14 overflow-hidden rounded-full border-2 border-red-600 bg-gray-50 flex items-center justify-center transition-transform duration-300 group-hover:scale-105">
               <Image 
-                src="/kubota-logo.png.png" 
+                src="/kubota-logo.png" 
                 alt="Kubota Logo"
                 width={56}
                 height={56}
