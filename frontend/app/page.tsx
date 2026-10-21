@@ -1,6 +1,7 @@
 ﻿import { client } from '@/lib/sanity'
 import NewsContainer from '@/components/NewsContainer'
 import LanguageSwitcher from '@/components/LanguageSwitcher'
+import Link from 'next/link'
 
 interface NewsItem {
   title: string
@@ -51,7 +52,6 @@ async function getData(): Promise<{
   companiesList: CompanyItem[]
   priceList: PriceItem[]
 }> {
-  // ORIGINAL WORKING QUERY ONLY - don't include "news" old type
   const newsQuery = `*[_type == "newsPortal"] | order(publishedAt desc) {
     title,
     brand,
@@ -116,9 +116,19 @@ export default async function Home() {
     <main className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex justify-between items-center mb-6 border-b-2 border-red-600 pb-2">
-          <h1 className="text-3xl font-bold text-gray-800">
-            KMM Kubota News Portal
-          </h1>
+          <div className="flex items-center gap-3">
+            <Link href="/" className="cursor-pointer group">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img 
+                src="/kubota-logo.png" 
+                alt="Kubota Logo"
+                className="w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-red-600 object-cover group-hover:scale-105 transition-transform duration-300"
+              />
+            </Link>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">
+              KMM Kubota News Portal
+            </h1>
+          </div>
           <LanguageSwitcher />
         </div>
         
@@ -131,4 +141,3 @@ export default async function Home() {
     </main>
   )
 }
-
