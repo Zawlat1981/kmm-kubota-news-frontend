@@ -22,7 +22,7 @@ type SanityImage = {
   asset: {
     _ref: string
     _type: string
-  }
+  }     
 }
 
 interface NewsData {
