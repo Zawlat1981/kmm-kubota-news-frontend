@@ -15,6 +15,11 @@ import { SiteLanguage } from '@/contexts/LanguageContext'
 
 export const uiText = {
   // --- Header ---
+  newsPortal: {
+    default: 'News Portal',
+    my: 'သတင်းပေါ်တယ်',
+    th: 'พอร์ทัลข่าว',
+  },
   headerSubtitle: {
     default: 'Agricultural Machinery News & Updates',
     my: 'စိုက်ပျိုးရေးစက်ကိရိယာ သတင်းနှင့် အချက်အလက်များ',
@@ -78,7 +83,7 @@ export const uiText = {
   searchByTitleOrText: { default: 'Search by Title or Main text', my: 'ခေါင်းစဉ် သို့မဟုတ် အကြောင်းအရာဖြင့် ရှာရန်', th: 'ค้นหาจากหัวข้อหรือเนื้อหา' },
   dateFilter: { default: 'Date mm/dd/yyyy', my: 'ရက်စွဲ လ/ရက်/နှစ်', th: 'วันที่ ดด/วว/ปปปป' },
   kmmKubotaFacebookPages: { default: 'KMM Kubota Facebook Pages', my: 'KMM Kubota Facebook စာမျက်နှာများ', th: 'เพจ Facebook KMM Kubota' },
-  selectFacebookPage: { default: 'Select a Facebook Page', my: 'Facebook စာမျက်နှာ ရွေးချယ်ရန်', th: 'เลือกเพจ Facebook' },
+  selectFacebookPage: { default: 'Select a Facebook Page', my: 'Facebook စာမျက်နာ ရွေးချယ်ရန်', th: 'เลือกเพจ Facebook' },
   myanmarNews: { default: 'Myanmar News', my: 'မြန်မာသတင်း', th: 'ข่าวเมียนมา' },
   exchangeRates: { default: 'Exchange Rates', my: 'ငွေလဲနှုန်းများ', th: 'อัตราแลกเปลี่ยน' },
   fuelPrices: { default: 'Fuel Price & News', my: 'လောင်စာဆီဈေးနှုန်းနှင့် သတင်းများ', th: 'ราคาน้ำมันและข่าวสาร' },
@@ -195,6 +200,11 @@ export const uiText = {
     my: 'Monthly Archive ကြည့်ရန် →',
     th: 'ดู Monthly Archive →',
   },
+
+  // --- Missing keys added ---
+  newsCategoryDefault: { default: 'NEWS', my: 'သတင်း', th: 'ข่าว' },
+  kubotaCompanies: { default: 'Kubota Companies', my: 'Kubota ကုမ္ပဏီများ', th: 'บริษัท Kubota' },
+  otherCompanies: { default: 'Other Companies', my: 'အခြားကုမ္ပဏီများ', th: 'บริษัทอื่นๆ' },
 } as const
 
 export type UiTextKey = keyof typeof uiText
@@ -204,6 +214,8 @@ export type UiTextKey = keyof typeof uiText
  * Falls back to English/original if the language isn't found.
  */
 export function t(key: UiTextKey, language: SiteLanguage): string {
-  const entry = uiText[key]
-  return entry[language] || entry.default
+  const entry = uiText[key] 
+  if (!entry) return key
+  const langValue = entry[language as keyof typeof entry]
+  return (langValue as string) || entry.default || key
 }
