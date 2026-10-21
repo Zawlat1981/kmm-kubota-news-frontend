@@ -2,22 +2,57 @@
 
 /* eslint-disable @next/next/no-img-element */
 
-import { useLanguage } from '@/contexts/LanguageContext'
+import { useLanguage, SiteLanguage } from '@/contexts/LanguageContext'
 import { useTranslatedTexts } from '@/hooks/useTranslatedTexts'
 import { t } from '@/lib/i18n/uiText'
 import { urlFor } from '@/lib/sanity'
 import Link from 'next/link'
+
+type PortableTextChild = {
+  text?: string
+}
+
+type PortableTextBlock = {
+  _type: string
+  children?: PortableTextChild[]
+}
+
+type SanityImage = {
+  _type: string
+  asset: {
+    _ref: string
+    _type: string
+  }
+}
 
 interface NewsData {
   _id?: string
   title: string
   category?: string
   publishedAt?: string
-  mainImage?: any
-  body?: string
+  mainImage?: SanityImage
+  body?: string | PortableTextBlock[]
+  isBreaking?: boolean
 }
 
-function formatCategory(category: string | undefined, language: any) {
+function blocksToPlainText(blocks: string | PortableTextBlock[] | undefined): string {
+  if (!blocks) return ''
+  if (typeof blocks === 'string') return blocks
+  if (!Array.isArray(blocks)) return ''
+  return blocks
+    .map((block) => {
+      if (block._type !== 'block' || !block.children) return ''
+      return block.children.map((child) => child.text || '').join('')
+    })
+    .filter(Boolean)
+    .join('\n\n')
+}
+
+function plainTextToParagraphs(text: string): string[] {
+  return text.split('\n\n').filter(Boolean)
+}
+
+function formatCategory(category: string | undefined, language: SiteLanguage): string {
   if (!category) return t('newsCategoryDefault', language) || 'NEWS'
   const normalizedCategory = category.toLowerCase()
   const cat = category.trim()
@@ -46,14 +81,19 @@ function formatCategory(category: string | undefined, language: any) {
 export default function NewsDetailClient({ news }: { news: NewsData }) {
   const { language } = useLanguage()
 
-  // 👇 FIX: Title + Body ကို မြန်မာ/ထိုင်း/English ပြန်မယ် - ပုံထဲကစာ မပြန်ဘူး
-  const { texts } = useTranslatedTexts([
+  // Dashboard: language th = original, my/en = translate
+  const plainBody = blocksToPlainText(news.body)
+
+  // For news section, keep original if needed? Requirement: news section only original? 
+  // Logic: if language === 'th', no translate. my/en => translate via API
+  const { texts, isLoading } = useTranslatedTexts([
     news.title || '',
-    news.body || '',
+    plainBody || '',
   ])
 
   const translatedTitle = texts[0] && texts[0].trim() !== '' ? texts[0] : news.title
-  const translatedBody = texts[1] && texts[1].trim() !== '' ? texts[1] : news.body
+  const translatedBodyRaw = texts[1] && texts[1].trim() !== '' ? texts[1] : plainBody
+  const translatedParagraphs = plainTextToParagraphs(translatedBodyRaw)
 
   return (
     <main className="max-w-4xl mx-auto px-4 py-8 bg-white text-gray-900 min-h-screen">
@@ -70,8 +110,8 @@ export default function NewsDetailClient({ news }: { news: NewsData }) {
         </span>
       )}
 
-      <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-        {translatedTitle}
+      <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4 leading-tight">
+        {isLoading ? 'Translating...' : translatedTitle}
       </h1>
 
       {news.publishedAt && (
@@ -84,7 +124,7 @@ export default function NewsDetailClient({ news }: { news: NewsData }) {
         </p>
       )}
 
-      {news.mainImage && (
+      {news.mainImage ? (
         <div className="mb-8 rounded-xl overflow-hidden shadow-md max-h-[450px]">
           <img
             src={urlFor(news.mainImage).url()}
@@ -92,12 +132,30 @@ export default function NewsDetailClient({ news }: { news: NewsData }) {
             className="w-full h-full object-cover"
           />
         </div>
-      )}
+      ) : null}
 
-      {translatedBody && (
-        <div className="prose max-w-none text-gray-700 leading-relaxed whitespace-pre-line">
-          {translatedBody}
-        </div>
+      <div className="prose max-w-none text-gray-800 leading-relaxed text-[16px]">
+        {isLoading ? (
+          <div className="animate-pulse space-y-3">
+            <div className="h-4 bg-gray-200 rounded w-full"></div>
+            <div className="h-4 bg-gray-200 rounded w-5/6"></div>
+            <div className="h-4 bg-gray-200 rounded w-4/6"></div>
+          </div>
+        ) : translatedParagraphs.length > 0 ? (
+          translatedParagraphs.map((para, idx) => (
+            <p key={idx} className="mb-4 whitespace-pre-line">
+              {para}
+            </p>
+          ))
+        ) : (
+          <p className="text-gray-500">No content</p>
+        )}
+      </div>
+
+      {language !== 'th' && (
+        <p className="text-xs text-gray-400 mt-8 italic">
+          {language === 'my' ? 'မူရင်းထိုင်းဘာသာမှ အလိုအလျောက် ဘာသာပြန်ထားသည်' : 'Auto-translated from Thai original'}
+        </p>
       )}
     </main>
   )

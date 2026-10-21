@@ -1,88 +1,72 @@
 'use client'
-
-import { useEffect, useState, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { useLanguage } from '@/contexts/LanguageContext'
 
-/**
- * Translates an array of strings into the currently selected site language.
- * Returns the original strings when language === 'default'.
- * Caches results in sessionStorage so switching pages / re-rendering
- * doesn't re-call the API for text already translated this session.
- */
-export function useTranslatedTexts(originalTexts: string[]): {
-  texts: string[]
-  isTranslating: boolean
-} {
+type TargetLang = 'my' | 'en'
+
+export function useTranslatedTexts(originalTexts: string[]) {
   const { language } = useLanguage()
-  // `translated` only ever holds the result of an actual API call.
-  // When language is 'default' we don't touch this state at all —
-  // the returned `texts` falls back to `originalTexts` directly (see below).
-  const [translated, setTranslated] = useState<string[] | null>(null)
-  const [isTranslating, setIsTranslating] = useState(false)
-  const lastKeyRef = useRef<string>('')
+  const [texts, setTexts] = useState<string[]>(originalTexts)
+  const [isLoading, setIsLoading] = useState(false)
+
+  const originalTextsKey = originalTexts.join('|||')
 
   useEffect(() => {
-    // 'default' language: nothing to fetch, nothing to set — just bail out.
-    if (language === 'default') {
-      lastKeyRef.current = ''
-      return
+    if (language === 'th') {
+      const id = setTimeout(() => {
+        setTexts(originalTexts)
+        setIsLoading(false)
+      }, 0)
+      return () => clearTimeout(id)
     }
 
-    const key = `${language}::${originalTexts.join('||')}`
-    if (key === lastKeyRef.current) return
-    lastKeyRef.current = key
+    if (!originalTexts || originalTexts.length === 0 || originalTexts.every((t) => !t || !t.trim())) {
+      const id = setTimeout(() => setTexts(originalTexts), 0)
+      return () => clearTimeout(id)
+    }
 
+    const target: TargetLang = language === 'my' ? 'my' : 'en'
     let cancelled = false
 
-    async function run() {
-      // Check sessionStorage cache first
-      const cacheKey = `translate-cache::${key}`
-      try {
-        const cached = sessionStorage.getItem(cacheKey)
-        if (cached) {
-          const parsed = JSON.parse(cached)
-          // Async-callback setState (not a synchronous effect-body call) — safe.
-          if (!cancelled) setTranslated(parsed)
-          return
-        }
-      } catch {
-        // ignore cache errors, fall through to API call
-      }
-
-      setIsTranslating(true)
+    const translate = async () => {
+      setIsLoading(true)
       try {
         const res = await fetch('/api/translate', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ texts: originalTexts, target: language }),
+          body: JSON.stringify({ texts: originalTexts, target }),
         })
-        if (!res.ok) throw new Error('Translation request failed')
-        const data = await res.json()
-        if (!cancelled) {
-          setTranslated(data.translated)
-          try {
-            sessionStorage.setItem(cacheKey, JSON.stringify(data.translated))
-          } catch {
-            // storage full or unavailable — non-fatal
-          }
+        if (cancelled) return
+        if (!res.ok) {
+          const txt = await res.text()
+          console.error('Translate API fail', txt)
+          setTexts(originalTexts)
+          return
         }
-      } catch (err) {
-        console.error('Translation error:', err)
-        // Fall back to original text on failure
-        if (!cancelled) setTranslated(null)
+        const data = await res.json()
+        const translated = data.translated || data.texts || originalTexts
+        if (Array.isArray(translated) && translated.length === originalTexts.length) {
+          setTexts(translated)
+        } else {
+          setTexts(originalTexts)
+        }
+      } catch (e) {
+        if (!cancelled) {
+          console.error('Translate hook error', e)
+          setTexts(originalTexts)
+        }
       } finally {
-        if (!cancelled) setIsTranslating(false)
+        if (!cancelled) setIsLoading(false)
       }
     }
 
-    run()
+    translate()
+
     return () => {
       cancelled = true
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [language, originalTexts.join('||')])
+  }, [language, originalTextsKey, originalTexts])
 
-  const texts = language === 'default' || !translated ? originalTexts : translated
-
-  return { texts, isTranslating }
+  return { texts, isLoading, isTranslated: language !== 'th' }
 }
+

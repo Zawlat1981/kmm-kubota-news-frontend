@@ -2,9 +2,10 @@
 import { useState, useRef, useEffect } from 'react'
 import { useLanguage, SiteLanguage } from '@/contexts/LanguageContext'
 
-const OPTIONS: { code: SiteLanguage; label: string; flag: string }[] = [
-  { code: 'default', label: 'ไทย', flag: 'TH' },
-  { code: 'my', label: 'မြန်မာ', flag: 'MM' },
+const OPTIONS: { code: SiteLanguage; label: string; flag: string; full: string }[] = [
+  { code: 'th', label: 'ไทย', flag: '🇹🇭', full: 'ไทย (ต้นฉบับ)' },
+  { code: 'my', label: 'မြန်မာ', flag: '🇲🇲', full: 'မြန်မာလို' },
+  { code: 'en', label: 'EN', flag: '🇬🇧', full: 'English' },
 ]
 
 export default function LanguageSwitcher() {
@@ -26,14 +27,14 @@ export default function LanguageSwitcher() {
     <div className="relative" ref={ref}>
       <button
         onClick={() => setOpen((v) => !v)}
-        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border bg-white text-sm"
+        className="flex items-center gap-2 px-3 py-1.5 rounded-full border bg-white text-sm font-medium shadow-sm hover:bg-gray-50"
       >
         <span>{current.flag}</span>
         <span>{current.label}</span>
-        <span className="text-xs">{open ? '^' : 'v'}</span>
+        <span className="text-[10px]">{open ? '▲' : '▼'}</span>
       </button>
       {open && (
-        <div className="absolute right-0 mt-1 w-36 bg-white border rounded-lg shadow-lg z-50 overflow-hidden">
+        <div className="absolute right-0 mt-2 w-48 bg-white border rounded-xl shadow-xl z-50 overflow-hidden">
           {OPTIONS.map((opt) => (
             <button
               key={opt.code}
@@ -41,10 +42,11 @@ export default function LanguageSwitcher() {
                 setLanguage(opt.code)
                 setOpen(false)
               }}
-              className={`w-full flex gap-2 px-3 py-2 text-sm text-left hover:bg-gray-50 ${opt.code === language ? 'bg-red-50 text-red-600 font-semibold' : 'text-gray-700'}`}
+              className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm text-left hover:bg-gray-50 transition ${opt.code === language ? 'bg-red-50 text-red-600 font-bold' : 'text-gray-700'}`}
             >
-              <span>{opt.flag}</span>
-              <span>{opt.label}</span>
+              <span className="text-base">{opt.flag}</span>
+              <span>{opt.full}</span>
+              {opt.code === language && <span className="ml-auto">✓</span>}
             </button>
           ))}
         </div>

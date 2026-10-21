@@ -1,46 +1,32 @@
 'use client'
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
 
-import { createContext, useContext, useState, ReactNode } from 'react'
+export type SiteLanguage = 'th' | 'my' | 'en'
 
-export type SiteLanguage = 'default' | 'my' | 'th'
-// 'default' = show content exactly as entered in Sanity (no translation)
-// 'my' = translate to Burmese
-// 'th' = translate to Thai
-
-interface LanguageContextValue {
+interface LanguageContextType {
   language: SiteLanguage
   setLanguage: (lang: SiteLanguage) => void
 }
 
-const LanguageContext = createContext<LanguageContextValue | undefined>(undefined)
-
-const STORAGE_KEY = 'kmm-site-language'
-
-function getInitialLanguage(): SiteLanguage {
-  if (typeof window === 'undefined') return 'default' // SSR: no localStorage available
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY) as SiteLanguage | null
-    if (saved === 'my' || saved === 'th' || saved === 'default') {
-      return saved
-    }
-  } catch {
-    // localStorage unavailable — ignore, default language stays active
-  }
-  return 'default'
-}
+const LanguageContext = createContext<LanguageContextType>({
+  language: 'th',
+  setLanguage: () => {},
+})
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  // Lazy initializer reads localStorage once, on first client render —
-  // avoids the extra render + setState-in-effect that a useEffect approach would need.
-  const [language, setLanguageState] = useState<SiteLanguage>(getInitialLanguage)
+  const [language, setLanguageState] = useState<SiteLanguage>('th')
+
+  useEffect(() => {
+    const saved = localStorage.getItem('site-language') as SiteLanguage | null
+    if (saved && ['th', 'my', 'en'].includes(saved)) {
+      const t = setTimeout(() => setLanguageState(saved), 0)
+      return () => clearTimeout(t)
+    }
+  }, [])
 
   const setLanguage = (lang: SiteLanguage) => {
     setLanguageState(lang)
-    try {
-      localStorage.setItem(STORAGE_KEY, lang)
-    } catch {
-      // ignore
-    }
+    localStorage.setItem('site-language', lang)
   }
 
   return (
@@ -51,9 +37,6 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 }
 
 export function useLanguage() {
-  const ctx = useContext(LanguageContext)
-  if (!ctx) {
-    throw new Error('useLanguage must be used within a LanguageProvider')
-  }
-  return ctx
+  return useContext(LanguageContext)
 }
+
