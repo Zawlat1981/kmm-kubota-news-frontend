@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
 
-const SITE_PASSWORD = 'kubota2024'
+const SITE_PASSWORD = 'kubota2026'
 
 export default function SitePasswordGuard({ children }: { children: React.ReactNode }) {
   const [mounted, setMounted] = useState(false)
