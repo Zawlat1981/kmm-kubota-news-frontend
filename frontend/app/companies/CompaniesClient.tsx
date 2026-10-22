@@ -1,130 +1,134 @@
 'use client'
-
-import { useState } from 'react'
+import Link from 'next/link'
 import Image from 'next/image'
 import imageUrlBuilder from '@sanity/image-url'
 import { client } from '@/lib/sanity'
-import { Company } from './page'
+import { Company, SanityImage } from './page'
 
 const builder = imageUrlBuilder(client)
-function urlFor(source: unknown) {
-  return builder.image(source as Parameters<typeof builder.image>[0])
+
+function urlFor(source: SanityImage) {
+  return builder.image(source)
 }
 
-export default function CompaniesClient({ companies }: { companies: Company[] }) {
-  const [selectedGroup, setSelectedGroup] = useState('kubota')
-
-  const filteredCompanies = companies.filter(
-    (company) => company.companyGroup === selectedGroup
-  )
+export default function CompaniesDetailClient({ company }: { company: Company }) {
+  const branches = company.branchOffices?.filter(b => b.address && b.address !== 'No address') || []
+  const imageSource = company.mainImage || company.companyImage
 
   return (
-    <div>
-      {/* Tab ခလုတ်များ */}
-      <div className="flex justify-center gap-4 mb-10">
-        <button
-          onClick={() => setSelectedGroup('kubota')}
-          className={`px-6 py-2.5 rounded-xl font-semibold transition-all shadow-sm ${
-            selectedGroup === 'kubota'
-              ? 'bg-green-600 text-white shadow-md scale-105'
-              : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
-          }`}
-        >
-          Kubota Companies
-        </button>
-        <button
-          onClick={() => setSelectedGroup('other')}
-          className={`px-6 py-2.5 rounded-xl font-semibold transition-all shadow-sm ${
-            selectedGroup === 'other'
-              ? 'bg-blue-600 text-white shadow-md scale-105'
-              : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
-          }`}
-        >
-          Other Brand Companies
-        </button>
-      </div>
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w- mx-auto p-4">
+        <Link href="/companies" className="inline-flex items-center gap-1 text- text-red-600 bg-white px-4 py-2 rounded-full border shadow-sm mb-4 hover:bg-gray-50">
+          ← Back to Menu
+        </Link>
 
-      {/* ကုမ္ပဏီစာရင်း Card များ */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredCompanies.length > 0 ? (
-          filteredCompanies.map((company) => (
-            <div key={company._id} className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition flex flex-col justify-between">
-              <div>
-                {company.companyImage && (
-                  <div className="relative w-full h-48 mb-4">
-                    <Image
-                      src={urlFor(company.companyImage).url()}
-                      alt={company.companyName || 'Company Image'}
-                      fill
-                      className="object-cover rounded-xl"
-                    />
-                  </div>
-                )}
-
-                {company.companyName && (
-                  <h3 className="text-xl font-bold text-gray-900 mb-3">{company.companyName}</h3>
-                )}
-
-                <div className="space-y-1.5 text-sm text-gray-600 mb-4">
-                  {company.category && <p><strong>Category:</strong> {company.category}</p>}
-                  {company.brand && <p><strong>Brand:</strong> {company.brand}</p>}
-                  
-                  {(company.stateRegion || company.cityTownship) && (
-                    <p>
-                      <strong>Location:</strong> {[company.cityTownship, company.stateRegion].filter(Boolean).join(', ')}
-                    </p>
-                  )}
-
-                  {company.phone && <p><strong>Phone:</strong> {company.phone}</p>}
-                  {company.address && <p><strong>Address:</strong> {company.address}</p>}
-                </div>
-
-                {(company.salesPersonName || company.salesPhone) && (
-                  <div className="bg-gray-50 p-3.5 rounded-xl mb-4 text-xs text-gray-700 border border-gray-100">
-                    <p className="font-semibold text-gray-900 mb-1">Sales Contact:</p>
-                    {company.salesPersonName && <p>Name: {company.salesPersonName}</p>}
-                    {company.salesPhone && <p>Phone: {company.salesPhone}</p>}
-                  </div>
-                )}
-              </div>
-
-              <div className="flex flex-wrap gap-2 pt-2 border-t border-gray-100 mt-auto">
-                {company.googleMapUrl && (
-                  <a
-                    href={company.googleMapUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-xs bg-red-50 text-red-600 border border-red-200 px-3 py-1.5 rounded-lg hover:bg-red-100 font-medium transition"
-                  >
-                    View on Map
-                  </a>
-                )}
-                {company.website && (
-                  <a
-                    href={company.website}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-xs bg-gray-50 text-gray-700 border border-gray-200 px-3 py-1.5 rounded-lg hover:bg-gray-100 font-medium transition"
-                  >
-                    Website
-                  </a>
-                )}
-                {company.email && (
-                  <a
-                    href={`mailto:${company.email}`}
-                    className="text-xs bg-blue-50 text-blue-600 border border-blue-200 px-3 py-1.5 rounded-lg hover:bg-blue-100 font-medium transition"
-                  >
-                    Email
-                  </a>
-                )}
-              </div>
+        <div className="bg-white rounded-2xl overflow-hidden shadow-sm border">
+          {imageSource ? (
+            <div className="relative w-full h-">
+              <Image
+                src={urlFor(imageSource).url()}
+                alt={company.name || 'Company'}
+                fill
+                className="object-cover"
+              />
             </div>
-          ))
-        ) : (
-          <p className="text-center col-span-full text-gray-500 py-12 bg-white rounded-2xl border border-gray-200">
-            ဤအုပ်စုအတွက် ကုမ္ပဏီအချက်အလက် မရှိသေးပါ။
-          </p>
-        )}
+          ) : (
+            <div className="h- bg-gray-100" />
+          )}
+
+          <div className="p-6">
+            <h1 className="font-serif text- font-bold text-gray-900">{company.name}</h1>
+            <div className="h-px bg-gray-100 my-4" />
+
+            <div className="space-y-5">
+              {company.brand && (
+                <div className="flex gap-3">
+                  <span>🏷️</span>
+                  <div>
+                    <p className="text- text-gray-400 font-bold uppercase tracking-wider">BRAND</p>
+                    <p className="text- text-gray-800">{company.brand}</p>
+                  </div>
+                </div>
+              )}
+
+              {company.companyGroup && (
+                <div className="flex gap-3">
+                  <span>📁</span>
+                  <div>
+                    <p className="text- text-gray-400 font-bold uppercase tracking-wider">COMPANY GROUP</p>
+                    <p className="text- text-gray-800">{company.companyGroup}</p>
+                  </div>
+                </div>
+              )}
+
+              {company.category && (
+                <div className="flex gap-3">
+                  <span>📄</span>
+                  <div>
+                    <p className="text- text-gray-400 font-bold uppercase tracking-wider">CATEGORY</p>
+                    <p className="text- text-gray-800">{company.category}</p>
+                  </div>
+                </div>
+              )}
+
+              {branches.length > 0 ? (
+                branches.map((branch, idx) => (
+                  <div key={idx} className="flex gap-3">
+                    <span className="mt-0.5">📍</span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text- text-gray-400 font-bold uppercase tracking-wider">
+                        LOCATION & ADDRESS {branches.length > 1 ? `#${idx+1}` : ''}
+                      </p>
+                      <p className="text- text-gray-800 mt-1 leading-snug break-words">
+                        {branch.address}
+                      </p>
+                      {branch.googleMapUrl && (
+                        <a
+                          href={branch.googleMapUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-block mt-2 text- text-blue-600 hover:text-blue-800 hover:underline break-all"
+                        >
+                          🔗 {branch.googleMapUrl}
+                        </a>
+                      )}
+                      {branch.phone && (
+                        <p className="text- text-gray-500 mt-2">📞 {branch.phone}</p>
+                      )}
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="flex gap-3">
+                  <span className="mt-0.5">📍</span>
+                  <div className="flex-1">
+                    <p className="text- text-gray-400 font-bold uppercase">LOCATION & ADDRESS</p>
+                    <p className="text- text-gray-800 mt-1">
+                      {[company.township, company.state].filter(Boolean).join(', ') || company.location || company.address}
+                    </p>
+                    {company.googleMapUrl && (
+                      <a href={company.googleMapUrl} target="_blank" rel="noopener noreferrer" className="inline-block mt-2 text- text-blue-600 hover:underline break-all">
+                        🔗 {company.googleMapUrl}
+                      </a>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {company.email && (
+                <div className="flex gap-3">
+                  <span>✉️</span>
+                  <div>
+                    <p className="text- text-gray-400 font-bold uppercase">EMAIL ADDRESS</p>
+                    <a href={`mailto:${company.email}`} className="text- text-blue-600 hover:underline break-all">
+                      {company.email}
+                    </a>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   )

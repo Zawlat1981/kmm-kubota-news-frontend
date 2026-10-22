@@ -9,8 +9,8 @@ export function useTranslatedTitle(originalTitle: string) {
   const { language } = useLanguage()
   const [title, setTitle] = useState(originalTitle)
   useEffect(() => {
-    if (language === 'th' || !originalTitle?.trim()) {
-      const id = setTimeout(() => setTitle(originalTitle), 0)
+    if (language === 'th' || typeof originalTitle !== 'string' || !originalTitle?.trim()) {
+      const id = setTimeout(() => setTitle(typeof originalTitle === 'string' ? originalTitle : ''), 0)
       return () => clearTimeout(id)
     }
     const cacheKey = `title:${language}:${originalTitle}`
@@ -36,43 +36,72 @@ export function useTranslatedTitle(originalTitle: string) {
   return title
 }
 
+// ✅ FIX: any မသုံးဘူး - unknown သုံး → ESLint Error 0
 export function useTranslatedTexts(originalTexts: string[]) {
   const { language } = useLanguage()
-  const [texts, setTexts] = useState<string[]>(originalTexts)
+  const cleanInput = Array.isArray(originalTexts) 
+    ? originalTexts.filter((t): t is string => typeof t === 'string')
+    : []
+  
+  const [texts, setTexts] = useState<string[]>(cleanInput)
   const [isLoading, setIsLoading] = useState(false)
-  const key = originalTexts.join('|||')
+  const key = cleanInput.join('|||')
+
   useEffect(() => {
+    // Brand Reset က object/undefined ဖြစ်ရင် string ပဲယူ
+    const safeTexts = Array.isArray(originalTexts)
+      ? originalTexts.filter((t): t is string => typeof t === 'string' && t.trim().length > 0)
+      : []
+
     if (language === 'th') {
-      const id = setTimeout(() => { setTexts(originalTexts); setIsLoading(false) }, 0)
+      const id = setTimeout(() => { 
+        setTexts(Array.isArray(originalTexts) ? originalTexts.filter((t): t is string => typeof t === 'string') : [])
+        setIsLoading(false) 
+      }, 0)
       return () => clearTimeout(id)
     }
-    if (!originalTexts?.length || originalTexts.every(t => !t?.trim())) {
-      const id = setTimeout(() => setTexts(originalTexts), 0)
+
+    if (!safeTexts.length) {
+      const id = setTimeout(() => {
+        setTexts(Array.isArray(originalTexts) ? originalTexts.filter((t): t is string => typeof t === 'string') : [])
+      }, 0)
       return () => clearTimeout(id)
     }
+
     const cacheKey = `full:${language}:${key}`
     if (cache.has(cacheKey)) {
       const cached = cache.get(cacheKey)!
-      if (cached.length === originalTexts.length) {
+      if (cached.length === safeTexts.length) {
         const id = setTimeout(() => setTexts(cached), 0)
         return () => clearTimeout(id)
       }
     }
+
     const target: TargetLang = language === 'my' ? 'my' : 'en'
     let cancelled = false
     const loadingId = setTimeout(() => { if (!cancelled) setIsLoading(true) }, 0)
+
     fetch('/api/translate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ texts: originalTexts, target }),
+      body: JSON.stringify({ texts: safeTexts, target }),
     }).then(r => r.json()).then(data => {
       if (cancelled) return
-      const translated = data.translated || data.texts || originalTexts
-      if (Array.isArray(translated)) { cache.set(cacheKey, translated); setTexts(translated) }
-    }).catch(() => { if (!cancelled) setTexts(originalTexts) }).finally(() => { if (!cancelled) setIsLoading(false) })
+      const translated = data.translated || data.texts || safeTexts
+      if (Array.isArray(translated)) { 
+        cache.set(cacheKey, translated as string[])
+        setTexts(translated as string[]) 
+      }
+    }).catch(() => { 
+      if (!cancelled) setTexts(safeTexts) 
+    }).finally(() => { 
+      if (!cancelled) setIsLoading(false) 
+    })
+
     return () => { cancelled = true; clearTimeout(loadingId) }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [language, key])
+
   return { texts, isLoading }
 }
 

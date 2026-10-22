@@ -1,59 +1,71 @@
 import { client } from '@/lib/sanity'
-import CompaniesClient from './CompaniesClient'
+import CompaniesDetailClient from './CompaniesClient'
 
-export interface Company {
-  _id: string
-  companyGroup?: string
-  companyName?: string
-  category?: string
-  brand?: string
-  stateRegion?: string
-  cityTownship?: string
-  phone?: string
+export interface BranchOffice {
   address?: string
-  website?: string
-  email?: string
+  phone?: string
   googleMapUrl?: string
-  companyImage?: { 
+}
+
+export interface SanityImage {
+  _type: string
+  asset: {
     _ref: string
     _type: string
   }
-  salesPersonName?: string
-  salesPhone?: string
 }
 
-async function getCompanies(): Promise<Company[]> {
-  const query = `*[_type == "company"]{
-    _id,
-    companyGroup,
-    companyName,
-    category,
-    brand,
-    stateRegion,
-    cityTownship,
-    phone,
+export interface Company {
+  _id: string
+  name?: string
+  companyName?: string
+  brand?: string
+  companyGroup?: string
+  category?: string
+  state?: string
+  township?: string
+  location?: string
+  address?: string
+  email?: string
+  mainImage?: SanityImage
+  companyImage?: SanityImage
+  googleMapUrl?: string
+  branchOffices?: BranchOffice[]
+  slug?: string
+}
+
+const query = `*[_type == "company" && slug.current == $slug][0]{
+  _id,
+  "name": coalesce(companyName, name),
+  brand,
+  companyGroup,
+  category,
+  "state": stateRegion,
+  "township": cityTownship,
+  location,
+  address,
+  email,
+  mainImage,
+  companyImage,
+  googleMapUrl,
+  "slug": slug.current,
+  branchOffices[]{
     address,
-    website,
-    email,
-    googleMapUrl,
-    companyImage,
-    salesPersonName,
-    salesPhone
-  }`
-  return await client.fetch(query)
-}
+    phone,
+    googleMapUrl
+  }
+}`
 
-export default async function Page() {
-  const companies = await getCompanies()
+export default async function Page({ params }: { params: { slug: string } }) {
+  const company: Company | null = await client.fetch(query, { slug: params.slug }, { cache: 'no-store' })
 
-  return (
-    <main className="min-h-screen bg-gray-50 py-10 px-4">
-      <div className="max-w-7xl mx-auto">
-        <h1 className="text-3xl font-extrabold text-center text-gray-900 mb-8">
-          Company Directory
-        </h1>
-        <CompaniesClient companies={companies} />
+  if (!company) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p>Company not found: {params.slug}</p>
       </div>
-    </main>
-  )
+    )
+  }
+
+  return <CompaniesDetailClient company={company} />
 }
