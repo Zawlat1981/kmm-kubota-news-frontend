@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Kubota Myo Chit",
+  title: "KMM Kubota News Portal",
   description: "Agricultural Directory - KMM Kubota News Portal",
 };
 
