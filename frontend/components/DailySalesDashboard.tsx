@@ -11,7 +11,7 @@ interface SaleRecord {
   branch: string
   saleDate: string
   model: string
-  customerName: string
+  customerName: string 
   division: string
   paymentType: string
   salesPerson: string

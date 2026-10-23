@@ -1,9 +1,18 @@
 "use client";
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { getGoogleSheetsData } from "@/lib/fetchGoogleSheets";
 
+interface PriceItem {
+  Brand?: string;
+  Model?: string;
+  Name?: string;
+  Price?: string;
+  Image?: string;
+}
+
 export default function PriceListSection() {
-  const [priceData, setPriceData] = useState([]);
+  const [priceData, setPriceData] = useState<PriceItem[]>([]);
   const [selectedBrand, setSelectedBrand] = useState("All");
 
   useEffect(() => {
@@ -14,7 +23,7 @@ export default function PriceListSection() {
     fetchData();
   }, []);
 
-  const brands = ["All", ...new Set(priceData.map((item) => item.Brand).filter(Boolean))];
+  const brands: string[] = ["All", ...Array.from(new Set(priceData.map((item) => item.Brand).filter(Boolean) as string[]))];
 
   const filteredPrices = selectedBrand === "All"
     ? priceData
@@ -42,11 +51,13 @@ export default function PriceListSection() {
         {filteredPrices.map((item, idx) => (
           <div key={idx} className="border p-4 rounded-lg shadow-sm bg-gray-50 flex flex-col justify-between">
             <div>
-              {/* Google Sheet ထဲက ပုံလင့်ခ်ကို ယူ၍ ပြသရန် (Sheet ထဲက Column နာမည် Image ဖြစ်သည်ဟု ယူဆပါသည်) */}
               {item.Image && (
-                <img 
+                <Image 
                   src={item.Image} 
-                  alt={item.Model || item.Name} 
+                  alt={item.Model || item.Name || "Machinery"} 
+                  width={400}
+                  height={300}
+                  unoptimized
                   className="w-full h-48 object-cover rounded-md mb-3"
                 />
               )}
@@ -62,3 +73,4 @@ export default function PriceListSection() {
     </div>
   );
 }
+

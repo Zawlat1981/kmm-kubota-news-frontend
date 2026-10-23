@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import SitePasswordGuard from "@/components/SitePasswordGuard";
+import ClientAppShell from "../components/ClientAppShell"
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -16,7 +17,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Kubota Myo Chit",
-  description: "Agricultural Directory",
+  description: "Agricultural Directory - KMM Kubota News Portal",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -25,12 +26,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">
+      <body className="min-h-full flex flex-col bg-gray-50 pb- lg:pb-0">
         <SitePasswordGuard>
-          <LanguageProvider>{children}</LanguageProvider>
+          <LanguageProvider>
+            <ClientAppShell>{children}</ClientAppShell>
+          </LanguageProvider>
         </SitePasswordGuard>
       </body>
     </html>
   );
 }
-
