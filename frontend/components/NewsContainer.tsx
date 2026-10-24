@@ -300,7 +300,7 @@ export default function NewsContainer({ newsList, companiesList, priceList = [] 
 
   return (
     <div>
-      <div className="overflow-x-auto rounded-2xl border border-gray-200 bg-white p-5 shadow-sm mb-8">
+      <div className="hidden lg:block overflow-x-auto rounded-2xl border border-gray-200 bg-white p-5 shadow-sm mb-8">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4 items-stretch">
           <button type="button" onClick={() => setIsSidebarOpen(true)} aria-label="Open sidebar filters" className="flex h-11 items-center justify-center rounded-xl border border-red-200 bg-red-50 text-red-700 shadow-sm transition hover:bg-red-100">
             <SlidersHorizontal className="h-5 w-5" /><span className="sr-only">Open sidebar filters</span>
