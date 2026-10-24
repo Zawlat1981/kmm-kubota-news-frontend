@@ -1,6 +1,7 @@
 ﻿'use client'
 /* eslint-disable react-hooks/set-state-in-effect */
 /* eslint-disable @next/next/no-img-element */
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
@@ -111,7 +112,7 @@ const categoryExactMap: Record<string, string[]> = {
   'crop-prices': ['cropprice', 'cropprices', 'crop'],
   'exchange-rates': ['exchangerate', 'exchangerates', 'exchange'],
   'kubota-news': ['kubota'],
-  'kubota-second-news': ['kubotasecond', 'second', 'kubota2nd', 'kubotasecondhand'],
+  'kubota-second-news': ['kubotasecond', 'second', 'kubota2nd', 'kubotasecondhand', 'kubotasecondhandnews'],
   'kubota-zt-news': ['kubotazt', 'zt', 'kubotaztnews'],
   'yanmar-news': ['yanmar', 'yanmarnews'],
   'john-deere-news': ['johndeere', 'jdeere', 'johndeerenews'],
@@ -121,7 +122,13 @@ const categoryExactMap: Record<string, string[]> = {
   'yamabisi-news': ['yamabisi', 'yamabisinews'],
   'mahindra-news': ['mahindra', 'mahindranews'],
   'dongfeng-news': ['dongfeng', 'dongfengnews'],
-  'deutzfar-matador-news': ['deutzfarmatador', 'deutzfar', 'matador', 'deutzfarmatadornews'],
+  'mahindra-dongfeng-news': ['mahindradongfeng', 'mahindraanddongfeng', 'mahindradongfengnews', 'mahindraanddongfengnews'],
+  'mahindra-and-dongfeng-news': ['mahindradongfeng', 'mahindraanddongfeng', 'mahindradongfengnews', 'mahindraanddongfengnews'],
+  'deutz-fahr-matador-news': ['deutzfahrmatador', 'deutzfahrandmatador', 'deutzfahrmatadornews', 'deutzfahrandmatadornews', 'deutzfahr', 'deutz-fahr', 'matador', 'deutzfahrmatador-news', 'deutz-fahr-matador-news'],
+  'deutz-fahr-and-matador-news': ['deutzfahrmatador', 'deutzfahrandmatador', 'deutzfahrmatadornews', 'deutzfahrandmatadornews'],
+  'deutzfar-matador-news': ['deutzfarmatador', 'deutzfarandmatador', 'deutzfahrmatador', 'deutzfahrandmatador', 'matador', 'deutzfharandmatador', 'deutzfharandmatadornews'],
+  'deutzfhar-matador-news': ['deutzfahrmatador', 'deutzfahrandmatador', 'deutzfharandmatador', 'deutzfharandmatadornews'],
+  'deutzfhar-and-matador-news': ['deutzfahrmatador', 'deutzfahrandmatador', 'deutzfharandmatador', 'deutzfharandmatadornews'],
   'other-brand-news': ['otherbrand', 'otherbrandnews'],
 }
 
@@ -131,20 +138,28 @@ function isCategoryMatch(newsCategory: string | undefined, selectedCategory: str
   if (!normalizedNews) return false
   if (normalizedNews === normalizedSelected) return true
   const allowed = categoryExactMap[selectedCategory] || []
+  // Direct allowed check first (handles all 3 missing: kubota-second, mahindra-dongfeng, deutzfhar-matador)
+  if (allowed.includes(normalizedNews)) return true
   if (selectedCategory === 'kubota-news') {
     if (normalizedNews.includes('second')) return false
-    return allowed.includes(normalizedNews) || normalizedNews === 'kubota'
+    return normalizedNews === 'kubota'
   }
   if (selectedCategory === 'kubota-second-news') {
-    return normalizedNews.includes('second') || allowed.includes(normalizedNews)
+    return normalizedNews.includes('second') || normalizedNews.includes('kubotasecondhand')
+  }
+  if (selectedCategory === 'mahindra-dongfeng-news' || selectedCategory === 'mahindra-and-dongfeng-news') {
+    return (normalizedNews.includes('mahindra') && normalizedNews.includes('dongfeng')) || normalizedNews.includes('mahindradongfeng') || normalizedNews.includes('mahindraanddongfeng')
+  }
+  if (selectedCategory === 'deutz-fahr-matador-news' || selectedCategory === 'deutz-fahr-and-matador-news' || selectedCategory === 'deutzfar-matador-news' || selectedCategory === 'deutzfhar-matador-news' || selectedCategory === 'deutzfhar-and-matador-news' || selectedCategory === 'deutzfar-and-matador-news') {
+    return (normalizedNews.includes('deutz') && normalizedNews.includes('matador')) || normalizedNews.includes('deutzfahrmatador') || normalizedNews.includes('deutzfahrandmatador') || normalizedNews.includes('deutzfharandmatador') || normalizedNews.includes('deutzfarmatador')
   }
   if (selectedCategory === 'yanmar-news') {
-    return normalizedNews === 'yanmar' || allowed.includes(normalizedNews)
+    return normalizedNews === 'yanmar'
   }
   if (selectedCategory === 'myanmar-news') {
-    return normalizedNews === 'myanmar' || allowed.includes(normalizedNews)
+    return normalizedNews === 'myanmar'
   }
-  return allowed.includes(normalizedNews)
+  return false
 }
 
 function NewsCardTitle({ title }: { title: string }) {
@@ -171,18 +186,55 @@ export default function NewsContainer({ newsList, companiesList, priceList = [] 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const [visibleCount, setVisibleCount] = useState(9)
 
-  // FIX: Sync with URL query from BottomNav (phone) -> ?newsCategory= & ?competitor=
+  // FIX: Sync with URL query from BottomNav + FilterDrawer -> ?newsCategory= & ?competitor= & ?brandPrice= & ?company= & ?search= & ?date=
   useEffect(() => {
     const newsCat = searchParams.get('newsCategory')
     const comp = searchParams.get('competitor')
-    if (newsCat) {
+    const brandPrice = searchParams.get('brandPrice')
+    const brandParam = searchParams.get('brand')
+    const companyParam = searchParams.get('company')
+    const searchParam = searchParams.get('search')
+    const dateParam = searchParams.get('date')
+
+    let shouldScroll = false
+
+    if (newsCat && newsCat !== selectedNewsCategory) {
       setSelectedNewsCategory(newsCat)
       setSelectedCompetitorCategory('ALL')
-      window.scrollTo({ top: 0, behavior: 'smooth' })
+      shouldScroll = true
     }
-    if (comp) {
+    if (comp && comp !== selectedCompetitorCategory) {
       setSelectedCompetitorCategory(comp)
       setSelectedNewsCategory('ALL')
+      shouldScroll = true
+    }
+    if (brandPrice && brandPrice !== selectedBrandPriceFilter) {
+      setSelectedBrandPriceFilter(brandPrice)
+      shouldScroll = true
+    }
+    if (brandParam && brandParam !== selectedBrandPriceFilter) {
+      setSelectedBrandPriceFilter(brandParam)
+      shouldScroll = true
+    }
+    if (companyParam && companyParam !== selectedCompanyGroup) {
+      const companyLower = companyParam.toLowerCase()
+      if (companyLower.includes('kubota') || companyLower === 'kubota') {
+        setSelectedCompanyGroup('kubota')
+      } else if (companyLower) {
+        setSelectedCompanyGroup('other')
+      }
+      shouldScroll = true
+    }
+    if (searchParam !== null && searchParam !== searchTerm) {
+      setSearchTerm(searchParam)
+      shouldScroll = true
+    }
+    if (dateParam && dateParam !== selectedDate) {
+      setSelectedDate(dateParam)
+      shouldScroll = true
+    }
+
+    if (shouldScroll) {
       window.scrollTo({ top: 0, behavior: 'smooth' })
     }
   }, [searchParams])
@@ -249,7 +301,7 @@ export default function NewsContainer({ newsList, companiesList, priceList = [] 
   return (
     <div>
       <div className="overflow-x-auto rounded-2xl border border-gray-200 bg-white p-5 shadow-sm mb-8">
-        <div className="grid min-w- grid-cols-6 gap-4 items-stretch">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4 items-stretch">
           <button type="button" onClick={() => setIsSidebarOpen(true)} aria-label="Open sidebar filters" className="flex h-11 items-center justify-center rounded-xl border border-red-200 bg-red-50 text-red-700 shadow-sm transition hover:bg-red-100">
             <SlidersHorizontal className="h-5 w-5" /><span className="sr-only">Open sidebar filters</span>
           </button>

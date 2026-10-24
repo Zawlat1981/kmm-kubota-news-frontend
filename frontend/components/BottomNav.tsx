@@ -78,10 +78,20 @@ export default function BottomNav({ onOpenFilter }: { onOpenFilter: () => void }
   ]
 
   const competitorBrands = [
-    "Kubota News", "Kubota ZT News", "Kubota Second Hand", "Yanmar News",
-    "John Deere News", "New Holland News", "YTO News", "Sonalika News",
-    "Yamabisi News", "Mahindra News", "Dongfeng News",
-    "Mahindra and Dongfeng News", "Deutzfhar and Matador News", "Other Brand"
+    { label: "Kubota News", query: "kubota-news" },
+    { label: "Kubota ZT News", query: "kubota-zt-news" },
+    { label: "Kubota Second Hand", query: "kubota-second-news" },
+    { label: "Yanmar News", query: "yanmar-news" },
+    { label: "John Deere News", query: "john-deere-news" },
+    { label: "New Holland News", query: "new-holland-news" },
+    { label: "YTO News", query: "yto-news" },
+    { label: "Sonalika News", query: "sonalika-news" },
+    { label: "Yamabisi News", query: "yamabisi-news" },
+    { label: "Mahindra News", query: "mahindra-news" },
+    { label: "Dongfeng News", query: "dongfeng-news" },
+    { label: "Mahindra and Dongfeng News", query: "mahindra-dongfeng-news" },
+    { label: "Deutz-Fahr and Matador News", query: "deutz-fahr-matador-news" },
+    { label: "Other Brand", query: "other-brand-news" },
   ]
 
   return (
@@ -128,8 +138,8 @@ export default function BottomNav({ onOpenFilter }: { onOpenFilter: () => void }
                 <h3 className="font-bold text-lg">Competitor News - 14 Brands</h3>
                 <div className="grid grid-cols-1 gap-2">
                   {competitorBrands.map(b=>(
-                    <button key={b} type="button" onClick={() => { router.push(`/?competitor=${encodeURIComponent(b)}`); setActiveSheet(null)}} className="border rounded-xl p-3 text-left text-[13px] font-medium min-h-[48px] hover:bg-red-50 cursor-pointer touch-manipulation active:bg-red-100">
-                      {b}
+                    <button key={b.query} type="button" onClick={() => { router.push(`/?competitor=${b.query}`); setActiveSheet(null)}} className="border rounded-xl p-3 text-left text-[13px] font-medium min-h-[48px] hover:bg-red-50 cursor-pointer touch-manipulation active:bg-red-100">
+                      {b.label}
                     </button>
                   ))}
                 </div>

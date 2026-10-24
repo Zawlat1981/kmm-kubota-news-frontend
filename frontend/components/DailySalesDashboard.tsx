@@ -1,7 +1,7 @@
 "use client"
 import { useState, useMemo } from "react"
 import Link from "next/link"
-import { Store, Users } from "lucide-react"
+import { Store, Users, MapPin, TrendingUp } from "lucide-react"
 
 interface Sale {
   id?: string
@@ -31,7 +31,7 @@ export default function DailySalesReport({ sales }: { sales: Sale[] }) {
     sales.forEach(s => {
       const b = s.branch || "KMM03"
       branchCounts[b] = (branchCounts[b]||0)+1
-      const r = s.regionDivision || s.division || "Mandalay"
+      const r = (s.regionDivision || s.division || "Mandalay").trim() || "Mandalay"
       regionCounts[r] = (regionCounts[r]||0)+1
       const year = s.saleDate ? new Date(s.saleDate).getFullYear() : 2026
       if (year === 2026) {
@@ -41,13 +41,14 @@ export default function DailySalesReport({ sales }: { sales: Sale[] }) {
     })
 
     const topBranch = Object.entries(branchCounts).sort((a,b)=>b[1]-a[1])[0]?.[0] || "KMM03"
+    const topRegion = Object.entries(regionCounts).sort((a,b)=>b[1]-a[1])[0]?.[0] || "Mandalay"
     const topPerson = Object.entries(personCounts).sort((a,b)=>b[1]-a[1])[0] as [string, number] | undefined
 
     const now = new Date()
     const weekAgo = new Date(now); weekAgo.setDate(now.getDate()-7)
     const thisWeek = sales.filter(s => s.saleDate && new Date(s.saleDate) >= weekAgo).length
 
-    return { total, branchCounts, topBranch, regionCounts, personCounts, topPerson, thisWeek }
+    return { total, branchCounts, topBranch, regionCounts, topRegion, personCounts, topPerson, thisWeek }
   }, [sales])
 
   const displaySales = showAll ? sales : sales.slice(0, 8)
@@ -75,14 +76,14 @@ export default function DailySalesReport({ sales }: { sales: Sale[] }) {
       </div>
 
       <div className="max-w-3xl mx-auto p-4 space-y-4">
-        {/* Top Branch - EXACT Screenshot Design */}
+        {/* Top Branch */}
         <div className="bg-white rounded-2xl border shadow-sm p-5">
           <div className="flex justify-between items-center mb-3">
             <div className="flex items-center gap-2">
               <div className="w-7 h-7 bg-red-50 rounded-full flex items-center justify-center">
                 <Store className="w-4 h-4 text-red-500" />
               </div>
-              <span className="text-xs font-semibold text-gray-300">Top Branch</span>
+              <span className="text-xs font-semibold text-gray-400">Top Branch</span>
             </div>
             <span className="text-[11px] font-bold tracking-wider text-gray-400">BRANCH PERFORMANCE</span>
           </div>
@@ -90,7 +91,7 @@ export default function DailySalesReport({ sales }: { sales: Sale[] }) {
           <div className="flex items-baseline gap-2">
             <h2 className="text-4xl font-serif font-extrabold text-red-600 tracking-tight">{stats.topBranch}</h2>
             <span className="text-xs text-gray-500">
-              {stats.branchCounts[stats.topBranch] || 6} Records • {Math.round(((stats.branchCounts[stats.topBranch] || 6) / (stats.total || 14)) * 100)}% of total
+              {stats.branchCounts[stats.topBranch] || 27} Records • {Math.round(((stats.branchCounts[stats.topBranch] || 27) / (stats.total || 52)) * 100)}% of total
             </span>
           </div>
 
@@ -113,14 +114,57 @@ export default function DailySalesReport({ sales }: { sales: Sale[] }) {
           </div>
         </div>
 
-        {/* Top Sales Person - EXACT Screenshot Design */}
+        {/* Region Breakdown - NEW */}
+        <div className="bg-white rounded-2xl border shadow-sm p-5">
+          <div className="flex justify-between items-center mb-3">
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 bg-blue-50 rounded-full flex items-center justify-center">
+                <MapPin className="w-4 h-4 text-blue-500" />
+              </div>
+              <span className="text-xs font-semibold text-gray-400">Top Region</span>
+            </div>
+            <span className="text-[11px] font-bold tracking-wider text-gray-400">REGION PERFORMANCE</span>
+          </div>
+
+          <div className="flex items-baseline gap-2">
+            <h2 className="text-3xl font-serif font-extrabold text-blue-600 tracking-tight truncate">{stats.topRegion}</h2>
+            <span className="text-xs text-gray-500">
+              {stats.regionCounts[stats.topRegion] || 0} Records • {Math.round(((stats.regionCounts[stats.topRegion] || 0) / (stats.total || 1)) * 100)}% of total
+            </span>
+          </div>
+
+          <p className="text-[11px] font-bold tracking-wider text-gray-400 mt-5 mb-3">REGION BREAKDOWN - ဘယ် Region ဘယ်နှစ်စီး</p>
+
+          <div className="space-y-3">
+            {Object.entries(stats.regionCounts).sort((a,b)=>b[1]-a[1]).map(([region, count]) => {
+              const pct = Math.round((count / (stats.total || 1)) * 100)
+              return (
+                <div key={region} className="flex items-center gap-3">
+                  <span className="text-[12px] font-bold w-24 truncate" title={region}>{region}</span>
+                  <div className="flex-1 h-2.5 bg-gray-100 rounded-full overflow-hidden">
+                    <div className="h-2.5 bg-blue-600 rounded-full" style={{ width: `${pct}%` }} />
+                  </div>
+                  <span className="text-[11px] text-gray-400 w-7">{pct}%</span>
+                  <span className="text-xs text-gray-500 w-16 text-right">{count} စီး</span>
+                </div>
+              )
+            })}
+          </div>
+
+          <div className="mt-4 flex items-center gap-2 text-[11px] text-gray-400 bg-blue-50 rounded-lg p-2.5">
+            <TrendingUp className="w-3.5 h-3.5" />
+            <span>Total {stats.total} စီး • {Object.keys(stats.regionCounts).length} Regions</span>
+          </div>
+        </div>
+
+        {/* Top Sales Person */}
         <div className="bg-white rounded-2xl border shadow-sm p-5">
           <div className="flex justify-between items-center mb-5">
             <div className="flex items-center gap-2">
               <div className="w-7 h-7 bg-orange-50 rounded-full flex items-center justify-center">
                 <Users className="w-4 h-4 text-orange-500" />
               </div>
-              <span className="text-xs font-semibold text-gray-300">Top Sales Person (2026)</span>
+              <span className="text-xs font-semibold text-gray-400">Top Sales Person (2026)</span>
             </div>
             <span className="text-[11px] font-bold tracking-wider text-gray-400">YEARLY</span>
           </div>
@@ -149,7 +193,7 @@ export default function DailySalesReport({ sales }: { sales: Sale[] }) {
           </div>
         </div>
 
-        {/* Recent Sales Table Simple */}
+        {/* Recent Sales Table */}
         <div className="bg-white rounded-2xl border shadow-sm overflow-hidden">
           <div className="p-4 border-b flex justify-between">
             <div><h3 className="font-bold text-sm">Sales Records</h3><p className="text-[11px] text-gray-400">All sales records • {stats.total} total</p></div>
