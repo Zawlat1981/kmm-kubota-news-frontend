@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react"
 import Link from "next/link"
 import { Store, Users, MapPin, TrendingUp, Calendar, BarChart3, Filter, X, ChevronDown } from "lucide-react"
+import { useLanguage } from "@/contexts/LanguageContext"
 
 interface Sale {
   id?: string
@@ -21,10 +22,119 @@ interface Sale {
 }
 
 export default function DailySalesReport({ sales }: { sales: Sale[] }) {
+  const { language } = useLanguage()
   const [showAll, setShowAll] = useState(false)
   const [selectedYear, setSelectedYear] = useState<number>(2026)
   const [selectedMonth, setSelectedMonth] = useState<string>('ALL')
   const [showDateFilter, setShowDateFilter] = useState(false)
+
+  const T = {
+    th: {
+      totalSales: 'ยอดขายรวม - စုစုပေါင်းအရောင်း',
+      allTimeTotal: 'คัน • ทั้งหมดสะสม',
+      thisFilter: 'ตัวกรองนี้',
+      thisWeek: 'สัปดาห์นี้',
+      thisMonth: 'เดือนนี้',
+      cars: 'คัน',
+      topBranch: 'สาขายอดเยี่ยม',
+      branchPerformance: 'ผลงานสาขา',
+      branchBreakdown: 'รายละเอียดสาขา',
+      topRegion: 'ภูมิภาคยอดเยี่ยม',
+      regionPerformance: 'ผลงานภูมิภาค',
+      regionBreakdown: 'รายละเอียดภูมิภาค - ภูมิภาคไหนกี่คัน',
+      topSalesPerson: 'พนักงานขายยอดเยี่ยม',
+      yearly: 'รายปี',
+      salesRecords: 'บันทึกการขาย - အရောင်းမှတ်တမ်း',
+      allRecords: 'บันทึกทั้งหมด',
+      clickPhoto: 'คลิกดูรูปใหญ่ได้ • ပုံနှိပ်ကြည့်လို့ရ',
+      sales: 'ขาย',
+      filterByYearMonth: 'กรองตามปีและเดือน - နှစ်နှင့် လအလိုက်',
+      year: 'ปี - နှစ်',
+      month: 'เดือน - လ',
+      allMonths: 'ทุกเดือน - လအားလုံး',
+      reset: 'รีเซ็ตเป็น 2026 ทั้งหมด - ပြန်စ',
+      apply: 'ใช้ - ดู',
+      archiveInfo: 'ข้อมูลเก็บถาวร - မှတ်တမ်းသိမ်းခြင်း',
+      thisYear: 'ปีนี้',
+      lastYear: 'ปีที่แล้วดูได้',
+      autoReset: 'สิ้นปีรีเซ็ตอัตโนมัติใน',
+      butSaved: 'แต่ข้อมูลปี',
+      saved: 'ยังเก็บไว้',
+      backToNews: 'กลับไปที่ข่าว',
+      managementDashboard: 'แดชบอร์ดผู้บริหาร',
+    },
+    my: {
+      totalSales: 'စုစုပေါင်းအရောင်း - TOTAL SALES',
+      allTimeTotal: 'စီး • All Time Total',
+      thisFilter: 'This Filter',
+      thisWeek: 'This Week',
+      thisMonth: 'This Month',
+      cars: 'စီး',
+      topBranch: 'Top Branch',
+      branchPerformance: 'BRANCH PERFORMANCE',
+      branchBreakdown: 'BRANCH BREAKDOWN',
+      topRegion: 'Top Region',
+      regionPerformance: 'REGION PERFORMANCE',
+      regionBreakdown: 'REGION BREAKDOWN - ဘယ် Region ဘယ်နှစ်စီး',
+      topSalesPerson: 'Top Sales Person',
+      yearly: 'YEARLY',
+      salesRecords: 'အရောင်းမှတ်တမ်းများ - Sales Records',
+      allRecords: 'All sales records',
+      clickPhoto: 'ပုံနှိပ်ကြည့်လို့ရ • Click to view',
+      sales: 'sales',
+      filterByYearMonth: 'နှစ်နှင့် လအလိုက် စစ်မယ်',
+      year: 'နှစ် - YEAR',
+      month: 'လ - MONTH',
+      allMonths: 'လအားလုံး - All Months',
+      reset: '2026 All ပြန်စ - Reset',
+      apply: 'ကြည့်မယ် - Apply',
+      archiveInfo: 'မှတ်တမ်းသိမ်းခြင်း - Archive',
+      thisYear: 'ဒီနှစ်',
+      lastYear: 'ပြီးခဲ့တဲ့နှစ် ပြန်ကြည့်လို့ရ',
+      autoReset: 'နှစ်ကုန်ရင် Auto reset',
+      butSaved: 'ဒါပေမယ့်',
+      saved: 'data သိမ်းထားမယ်',
+      backToNews: 'Back to News Portal',
+      managementDashboard: 'MANAGEMENT DASHBOARD',
+    },
+    en: {
+      totalSales: 'TOTAL SALES - Total Sales',
+      allTimeTotal: 'units • All Time Total',
+      thisFilter: 'This Filter',
+      thisWeek: 'This Week',
+      thisMonth: 'This Month',
+      cars: 'units',
+      topBranch: 'Top Branch',
+      branchPerformance: 'BRANCH PERFORMANCE',
+      branchBreakdown: 'BRANCH BREAKDOWN',
+      topRegion: 'Top Region',
+      regionPerformance: 'REGION PERFORMANCE',
+      regionBreakdown: 'REGION BREAKDOWN - Sales by Region',
+      topSalesPerson: 'Top Sales Person',
+      yearly: 'YEARLY',
+      salesRecords: 'Sales Records',
+      allRecords: 'All sales records',
+      clickPhoto: 'Click photo to view large',
+      sales: 'sales',
+      filterByYearMonth: 'Filter by Year & Month',
+      year: 'YEAR',
+      month: 'MONTH',
+      allMonths: 'All Months',
+      reset: 'Reset to 2026 All',
+      apply: 'Apply - View',
+      archiveInfo: 'Archive Info',
+      thisYear: 'This Year',
+      lastYear: 'Last year viewable',
+      autoReset: 'Year end auto reset in',
+      butSaved: 'but',
+      saved: 'data saved',
+      backToNews: 'Back to News Portal',
+      managementDashboard: 'MANAGEMENT DASHBOARD',
+    }
+  }
+
+  const tt = T[language] || T.th
+
 
   // Get available years and months from data
   const availableYears = useMemo(() => {
@@ -123,7 +233,7 @@ export default function DailySalesReport({ sales }: { sales: Sale[] }) {
   if (sales.length === 0) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <div className="bg-[#c00000] text-white px-4 py-3 flex justify-between"><Link href="/" className="text-sm">Back to News Portal</Link><span className="text-xs opacity-80">MANAGEMENT DASHBOARD</span></div>
+        <div className="bg-[#c00000] text-white px-4 py-3 flex justify-between"><Link href="/" className="text-sm font-bold">{tt.backToNews}</Link><span className="text-xs opacity-80 font-bold">{tt.managementDashboard}</span></div>
         <div className="max-w-3xl mx-auto p-6">
           <div className="bg-yellow-50 border border-yellow-200 rounded-2xl p-8 text-center">
             <p className="font-bold">No Sales Data Yet</p>
@@ -138,8 +248,8 @@ export default function DailySalesReport({ sales }: { sales: Sale[] }) {
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
       <div className="bg-[#c00000] text-white px-4 py-3 flex justify-between items-center">
-        <Link href="/" className="text-sm font-serif hover:underline">Back to News Portal</Link>
-        <span className="text-xs tracking-widest opacity-80">MANAGEMENT DASHBOARD</span>
+        <Link href="/" className="text-sm font-serif hover:underline font-bold">{tt.backToNews}</Link>
+        <span className="text-xs tracking-widest opacity-80 font-bold">{tt.managementDashboard}</span>
       </div>
 
       <div className="max-w-3xl mx-auto p-4 space-y-4">
@@ -155,22 +265,22 @@ export default function DailySalesReport({ sales }: { sales: Sale[] }) {
                   <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
                     <BarChart3 className="w-4 h-4" />
                   </div>
-                  <span className="text-xs tracking-widest opacity-80">TOTAL SALES - စုစုပေါင်းအရောင်း</span>
+                  <span className="text-xs tracking-widest opacity-90 font-bold">{tt.totalSales}</span>
                 </div>
                 <h1 className="text-5xl font-black tracking-tight mt-2">{stats.totalAllTime}</h1>
-                <p className="text-[13px] opacity-90 mt-1">စီး • All Time Total</p>
+                <p className="text-[13px] opacity-90 mt-1 font-bold">{tt.cars} • {tt.allTimeTotal}</p>
                 
                 <div className="flex gap-3 mt-4">
                   <div className="bg-white/20 rounded-xl px-3 py-2">
-                    <p className="text-[11px] opacity-70">This Filter</p>
+                    <p className="text-[11px] opacity-80 font-bold">{tt.thisFilter}</p>
                     <p className="text-lg font-bold">{stats.total} စီး</p>
                   </div>
                   <div className="bg-white/15 rounded-xl px-3 py-2">
-                    <p className="text-[11px] opacity-70">This Week</p>
+                    <p className="text-[11px] opacity-80 font-bold">{tt.thisWeek}</p>
                     <p className="text-lg font-bold">{stats.thisWeek} စီး</p>
                   </div>
                   <div className="bg-white/15 rounded-xl px-3 py-2">
-                    <p className="text-[11px] opacity-70">This Month</p>
+                    <p className="text-[11px] opacity-80 font-bold">{tt.thisMonth}</p>
                     <p className="text-lg font-bold">{stats.thisMonthCount} စီး</p>
                   </div>
                 </div>
@@ -207,7 +317,7 @@ export default function DailySalesReport({ sales }: { sales: Sale[] }) {
               <div className="w-7 h-7 bg-red-50 rounded-full flex items-center justify-center">
                 <Store className="w-4 h-4 text-red-500" />
               </div>
-              <span className="text-xs font-black text-gray-800">Top Branch</span>
+              <span className="text-xs font-black text-gray-900">{tt.topBranch}</span>
             </div>
             <span className="text-[11px] font-black tracking-wider text-gray-700">BRANCH PERFORMANCE</span>
           </div>

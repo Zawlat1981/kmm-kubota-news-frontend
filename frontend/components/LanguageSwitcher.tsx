@@ -34,14 +34,17 @@ export default function LanguageSwitcher() {
         <span className="text-[10px]">{open ? '▲' : '▼'}</span>
       </button>
       {open && (
-        <div className="absolute right-0 mt-2 w-44 bg-white border rounded-xl shadow-xl z-50 overflow-hidden">
+        <div className="absolute right-0 mt-2 w-48 bg-white border rounded-xl shadow-xl z-50 overflow-hidden">
           {OPTIONS.map((opt) => (
             <button
               key={opt.code}
-              onClick={() => { setLanguage(opt.code); setOpen(false) }}
-              className={`w-full flex gap-3 px-4 py-2.5 text-sm text-left hover:bg-gray-50 ${opt.code === language ? 'bg-red-50 text-red-600 font-bold' : 'text-gray-700'}`}
+              onClick={() => {
+                setLanguage(opt.code)
+                setOpen(false)
+              }}
+              className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm text-left hover:bg-gray-50 transition ${opt.code === language ? 'bg-red-50 text-red-600 font-bold' : 'text-gray-700'}`}
             >
-              <span>{opt.flag}</span>
+              <span className="text-base">{opt.flag}</span>
               <span>{opt.full}</span>
               {opt.code === language && <span className="ml-auto">✓</span>}
             </button>
