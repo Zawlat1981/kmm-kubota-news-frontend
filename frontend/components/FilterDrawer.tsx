@@ -105,14 +105,14 @@ export default function FilterDrawer({ isOpen, onClose }: { isOpen: boolean; onC
 
   return (
     <>
-      <div className="fixed inset-0 bg-black/40 z-50 lg:hidden" onClick={onClose} />
-      <div className="fixed left-0 top-0 bottom-0 w-[85%] max-w-[340px] bg-white z-50 lg:hidden overflow-y-auto flex flex-col">
+      <div className="fixed inset-0 bg-black/40 z-[10005] lg:hidden" onClick={onClose} />
+      <div className="fixed left-0 top-0 bottom-0 w-[85%] max-w-[340px] bg-white z-[10010] lg:hidden overflow-y-auto flex flex-col shadow-2xl">
         <div className="bg-red-600 text-white p-4 flex justify-between items-center shrink-0">
           <span className="font-bold text-[16px]">FILTERS</span>
           <button onClick={onClose} className="p-1 active:bg-red-700 rounded"><X className="w-5 h-5" /></button>
         </div>
         
-        <div className="p-4 space-y-5 flex-1 overflow-y-auto">
+        <div className="p-4 space-y-5 flex-1 overflow-y-auto pb-4">
           {/* Search */}
           <div>
             <label className="text-sm font-semibold text-gray-800">Search by title or text</label>
@@ -178,13 +178,15 @@ export default function FilterDrawer({ isOpen, onClose }: { isOpen: boolean; onC
           </div>
         </div>
 
-        {/* Fixed bottom buttons */}
-        <div className="p-4 border-t bg-white shrink-0">
+        {/* Fixed bottom buttons - always visible above BottomNav */}
+        <div className="p-4 border-t bg-white shrink-0 sticky bottom-0 z-10 shadow-[0_-4px_12px_rgba(0,0,0,0.05)] pb-[calc(1rem+env(safe-area-inset-bottom))]">
           <div className="flex gap-2">
-            <button onClick={applyFilters} className="flex-1 bg-red-600 text-white py-3 rounded-xl text-sm font-bold active:bg-red-700 shadow-sm">Apply - စစ်မယ်</button>
-            <button onClick={clearFilters} className="flex-1 border border-gray-300 py-3 rounded-xl text-sm font-medium active:bg-gray-50">Clear - ရှင်းမယ်</button>
+            <button onClick={applyFilters} className="flex-1 bg-red-600 text-white py-3.5 rounded-xl text-[15px] font-bold active:bg-red-700 shadow-md touch-manipulation min-h-[48px]">Apply - စစ်မယ်</button>
+            <button onClick={clearFilters} className="flex-1 border border-gray-300 py-3.5 rounded-xl text-[14px] font-medium active:bg-gray-50 touch-manipulation min-h-[48px]">Clear - ရှင်းမယ်</button>
           </div>
           <p className="text-[10px] text-gray-400 text-center mt-2">Apply နှိပ်မှ filter အလုပ်လုပ်မယ်</p>
+          {/* Extra space to avoid BottomNav overlap on some devices */}
+          <div className="h-2 lg:hidden" />
         </div>
       </div>
     </>

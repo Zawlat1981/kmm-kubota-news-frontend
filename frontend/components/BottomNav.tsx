@@ -1,5 +1,5 @@
 "use client"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { Home, Newspaper, Trophy, BarChart3, Filter, Store, Users } from "lucide-react"
 import { client } from "@/lib/sanity"
@@ -24,8 +24,18 @@ export default function BottomNav({ onOpenFilter }: { onOpenFilter: () => void }
   const [stats, setStats] = useState<Stats | null>(null)
   const [loading, setLoading] = useState(false)
 
+  // Cache stats to avoid re-fetching on every open - useRef not useState (fix immutability error)
+  const statsCacheRef = useRef<{data: Stats | null, timestamp: number}>({data: null, timestamp: 0})
+
   useEffect(() => {
     async function fetchSales() {
+      // Use cache if less than 2 minutes old
+      const now = Date.now()
+      if (statsCacheRef.current.data && (now - statsCacheRef.current.timestamp) < 120000) {
+        setStats(statsCacheRef.current.data)
+        return
+      }
+      
       setLoading(true)
       try {
         const data: DailySale[] = await client.fetch(DAILY_SALES_QUERY)
@@ -37,7 +47,7 @@ export default function BottomNav({ onOpenFilter }: { onOpenFilter: () => void }
           const person = s.salesPerson || "Ye Lin Tun"
           personCounts[person] = (personCounts[person]||0)+1
         })
-        setStats({
+        const newStats = {
           total: calc.total,
           branchCounts: calc.branchCounts,
           topBranch: calc.topBranch,
@@ -48,21 +58,29 @@ export default function BottomNav({ onOpenFilter }: { onOpenFilter: () => void }
           thisMonth: calc.thisMonth,
           thisYear: calc.thisYear,
           currentYear: calc.currentYear,
-        })
+        }
+        setStats(newStats)
+        statsCacheRef.current.data = newStats
+        statsCacheRef.current.timestamp = now
       } catch (e) {
         console.error(e)
-        setStats({
-          total: 52,
-          branchCounts: { "KMM03": 27, "KMM02": 17, "KMM01": 8 },
-          topBranch: "KMM03",
-          regionCounts: {},
-          topPerson: ["Ye Lin Tun", 9],
-          personCounts: { "Ye Lin Tun": 9, "Hla Myo Oo": 8, "Nandar Hlai...": 5 },
-          thisWeek: 27,
-          thisMonth: 52,
-          thisYear: 52,
-          currentYear: 2026,
-        })
+        // Fallback only if no cache
+        if (!statsCacheRef.current.data) {
+          setStats({
+            total: 52,
+            branchCounts: { "KMM03": 27, "KMM02": 17, "KMM01": 8 },
+            topBranch: "KMM03",
+            regionCounts: {},
+            topPerson: ["Ye Lin Tun", 9],
+            personCounts: { "Ye Lin Tun": 9, "Hla Myo Oo": 8, "Nandar Hlai...": 5 },
+            thisWeek: 27,
+            thisMonth: 52,
+            thisYear: 52,
+            currentYear: 2026,
+          })
+        } else {
+          setStats(statsCacheRef.current.data)
+        }
       } finally {
         setLoading(false)
       }
@@ -97,7 +115,7 @@ export default function BottomNav({ onOpenFilter }: { onOpenFilter: () => void }
   return (
     <>
       <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-[9999] flex justify-around py-2 pb-safe shadow-[0_-2px_10px_rgba(0,0,0,0.05)]">
-        <button type="button" onClick={() => { window.scrollTo({top:0, behavior:"smooth"}); setActiveSheet(null)}} className="flex flex-col items-center px-2 py-1 min-w-[56px] active:bg-gray-100 rounded-lg cursor-pointer touch-manipulation">
+        <button type="button" onClick={() => { setActiveSheet(null); router.push("/"); window.scrollTo({top:0, behavior:"smooth"})}} className="flex flex-col items-center px-2 py-1 min-w-[56px] active:bg-gray-100 rounded-lg cursor-pointer touch-manipulation">
           <Home className="w-5 h-5 text-red-600" /><span className="text-[10px] mt-1 font-medium text-red-600">HOME</span>
         </button>
         <button type="button" onClick={() => setActiveSheet(activeSheet==='news' ? null : 'news')} className="flex flex-col items-center px-2 py-1 min-w-[56px] active:bg-gray-100 rounded-lg cursor-pointer touch-manipulation">

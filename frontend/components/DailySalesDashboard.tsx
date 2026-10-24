@@ -1,4 +1,5 @@
 "use client"
+/* eslint-disable @next/next/no-img-element */
 import { useState, useMemo } from "react"
 import Link from "next/link"
 import { Store, Users, MapPin, TrendingUp } from "lucide-react"
@@ -193,29 +194,88 @@ export default function DailySalesReport({ sales }: { sales: Sale[] }) {
           </div>
         </div>
 
-        {/* Recent Sales Table */}
+        {/* Recent Sales - Redesigned with Photos - Clear for Users */}
         <div className="bg-white rounded-2xl border shadow-sm overflow-hidden">
-          <div className="p-4 border-b flex justify-between">
-            <div><h3 className="font-bold text-sm">Sales Records</h3><p className="text-[11px] text-gray-400">All sales records • {stats.total} total</p></div>
-            <span className="text-xs text-gray-400">October 2026</span>
+          <div className="p-4 border-b flex justify-between items-center bg-gradient-to-r from-gray-50 to-white">
+            <div>
+              <h3 className="font-bold text-[15px] flex items-center gap-2">
+                <span className="w-1 h-4 bg-red-600 rounded-full inline-block"></span>
+                Sales Records - အရောင်းမှတ်တမ်းများ
+              </h3>
+              <p className="text-[11px] text-gray-500 mt-1 ml-3">All sales records • {stats.total} total • ပုံနှိပ်ကြည့်လို့ရ</p>
+            </div>
+            <span className="text-[11px] bg-red-50 text-red-600 px-2.5 py-1 rounded-full font-bold">October 2026</span>
           </div>
-          <div className="divide-y">
-            {displaySales.map((s) => (
-              <div key={s.id || s._id} className="p-3 flex justify-between items-center text-xs">
-                <div className="flex gap-3">
-                  <span className="font-bold text-red-600">{s.branch}</span>
-                  <span className="font-bold">{s.model}</span>
-                  <span className="text-gray-500 truncate max-w-[90px]">{s.customerName}</span>
+          
+          <div className="divide-y divide-gray-100">
+            {displaySales.map((s) => {
+              const photoUrl = s.photo?.asset?.url || s.photoUrl
+              const saleDate = s.saleDate ? new Date(s.saleDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : ''
+              return (
+                <div key={s.id || s._id} className="p-3 flex gap-3 hover:bg-gray-50 transition group">
+                  {/* Photo - Click to view large */}
+                  <div className="shrink-0">
+                    {photoUrl ? (
+                      <button 
+                        onClick={() => window.open(photoUrl, '_blank')}
+                        className="relative w-[64px] h-[64px] rounded-xl overflow-hidden bg-gray-100 border border-gray-200 group-hover:border-red-200 transition"
+                        title="Click to view full image - ပုံကြီးကြည့်ရန် နှိပ်ပါ"
+                      >
+                        <img src={photoUrl} alt={s.model} className="w-full h-full object-cover" loading="lazy" />
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition flex items-center justify-center">
+                          <span className="opacity-0 group-hover:opacity-100 text-white text-[10px] bg-black/60 px-1.5 py-0.5 rounded">👁️ View</span>
+                        </div>
+                      </button>
+                    ) : (
+                      <div className="w-[64px] h-[64px] rounded-xl bg-gray-50 border border-dashed border-gray-200 flex flex-col items-center justify-center">
+                        <span className="text-[16px]">📷</span>
+                        <span className="text-[8px] text-gray-400 mt-0.5">No Photo</span>
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* Sales Info - Clear Layout */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-600 text-white">{s.branch}</span>
+                          <span className="font-bold text-[13px] text-gray-900 truncate">{s.model}</span>
+                          {s.paymentType && (
+                            <span className="text-[9px] px-1.5 py-0.5 rounded bg-green-50 text-green-600 border border-green-100">{s.paymentType}</span>
+                          )}
+                        </div>
+                        <p className="text-[12px] text-gray-700 mt-1 truncate font-medium">👤 {s.customerName || 'Customer'}</p>
+                        <div className="flex items-center gap-2 mt-1 text-[11px] text-gray-500">
+                          <span className="flex items-center gap-1">📍 {s.regionDivision || s.division || 'Region'}</span>
+                          <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
+                          <span className="truncate">👨‍💼 {s.salesPerson || 'Sales'}</span>
+                        </div>
+                      </div>
+                      <div className="text-right shrink-0">
+                        <p className="text-[11px] text-gray-400">{saleDate}</p>
+                        {s.stockRemaining !== null && s.stockRemaining !== undefined && (
+                          <p className="text-[9px] mt-1 px-1.5 py-0.5 rounded bg-amber-50 text-amber-600 border">Stock: {s.stockRemaining}</p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <span className="text-gray-400">{s.regionDivision || s.division}</span>
-              </div>
-            ))}
+              )
+            })}
           </div>
+          
           {sales.length > 8 && (
-            <div className="p-3 text-center border-t">
-              <button onClick={()=>setShowAll(!showAll)} className="text-xs text-red-600 font-bold">{showAll ? "Show Less" : `Show ${sales.length - 8} More →`}</button>
+            <div className="p-3 text-center border-t bg-gray-50/50">
+              <button onClick={()=>setShowAll(!showAll)} className="text-xs text-red-600 font-bold bg-white border border-red-100 px-4 py-2 rounded-full hover:bg-red-50 transition">
+                {showAll ? "↑ Show Less" : `↓ Show ${sales.length - 8} More Records →`}
+              </button>
             </div>
           )}
+          
+          <div className="p-2.5 bg-blue-50/50 border-t text-[10px] text-gray-500 text-center">
+            💡 ပုံကို နှိပ်ပြီး အကြီးကြည့်လို့ရတယ် • {stats.total} စီး စုစုပေါင်း
+          </div>
         </div>
       </div>
     </div>
