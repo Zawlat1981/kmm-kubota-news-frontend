@@ -2,7 +2,7 @@
 /* eslint-disable @next/next/no-img-element */
 import { useState, useMemo } from "react"
 import Link from "next/link"
-import { Store, Users, MapPin, TrendingUp } from "lucide-react"
+import { Store, Users, MapPin, TrendingUp, Calendar, BarChart3, Filter, X, ChevronDown } from "lucide-react"
 
 interface Sale {
   id?: string
@@ -22,23 +22,68 @@ interface Sale {
 
 export default function DailySalesReport({ sales }: { sales: Sale[] }) {
   const [showAll, setShowAll] = useState(false)
+  const [selectedYear, setSelectedYear] = useState<number>(2026)
+  const [selectedMonth, setSelectedMonth] = useState<string>('ALL')
+  const [showDateFilter, setShowDateFilter] = useState(false)
+
+  // Get available years and months from data
+  const availableYears = useMemo(() => {
+    const years = new Set<number>()
+    sales.forEach(s => {
+      if (s.saleDate) {
+        const y = new Date(s.saleDate).getFullYear()
+        if (y) years.add(y)
+      }
+    })
+    if (years.size === 0) years.add(2026)
+    return Array.from(years).sort((a,b) => b - a)
+  }, [sales])
+
+  const availableMonths = useMemo(() => {
+    return [
+      { value: 'ALL', label: 'All Months - လအားလုံး' },
+      { value: '0', label: 'January - ဇန်နဝါရီ' },
+      { value: '1', label: 'February - ဖေဖော်ဝါရီ' },
+      { value: '2', label: 'March - မတ်' },
+      { value: '3', label: 'April - ဧပြီ' },
+      { value: '4', label: 'May - မေ' },
+      { value: '5', label: 'June - ဇွန်' },
+      { value: '6', label: 'July - ဇူလိုင်' },
+      { value: '7', label: 'August - သြဂုတ်' },
+      { value: '8', label: 'September - စက်တင်ဘာ' },
+      { value: '9', label: 'October - အောက်တိုဘာ' },
+      { value: '10', label: 'November - နိုဝင်ဘာ' },
+      { value: '11', label: 'December - ဒီဇင်ဘာ' },
+    ]
+  }, [])
+
+  // Filtered sales based on selected year/month
+  const filteredByDate = useMemo(() => {
+    return sales.filter(s => {
+      if (!s.saleDate) return true
+      const d = new Date(s.saleDate)
+      const y = d.getFullYear()
+      const m = d.getMonth()
+      if (y !== selectedYear) return false
+      if (selectedMonth !== 'ALL' && m !== parseInt(selectedMonth)) return false
+      return true
+    })
+  }, [sales, selectedYear, selectedMonth])
 
   const stats = useMemo(() => {
-    const total = sales.length
+    const total = filteredByDate.length
+    const totalAllTime = sales.length
     const branchCounts: Record<string, number> = {}
     const regionCounts: Record<string, number> = {}
     const personCounts: Record<string, number> = {}
     
-    sales.forEach(s => {
+    filteredByDate.forEach(s => {
       const b = s.branch || "KMM03"
       branchCounts[b] = (branchCounts[b]||0)+1
       const r = (s.regionDivision || s.division || "Mandalay").trim() || "Mandalay"
       regionCounts[r] = (regionCounts[r]||0)+1
-      const year = s.saleDate ? new Date(s.saleDate).getFullYear() : 2026
-      if (year === 2026) {
-        const p = s.salesPerson || "Ye Lin Tun"
-        personCounts[p] = (personCounts[p]||0)+1
-      }
+      const p = s.salesPerson || "Ye Lin Tun"
+      personCounts[p] = (personCounts[p]||0)+1
     })
 
     const topBranch = Object.entries(branchCounts).sort((a,b)=>b[1]-a[1])[0]?.[0] || "KMM03"
@@ -47,12 +92,33 @@ export default function DailySalesReport({ sales }: { sales: Sale[] }) {
 
     const now = new Date()
     const weekAgo = new Date(now); weekAgo.setDate(now.getDate()-7)
-    const thisWeek = sales.filter(s => s.saleDate && new Date(s.saleDate) >= weekAgo).length
+    const thisWeek = filteredByDate.filter(s => s.saleDate && new Date(s.saleDate) >= weekAgo).length
+    const thisMonthCount = filteredByDate.filter(s => {
+      if (!s.saleDate) return false
+      const d = new Date(s.saleDate)
+      return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear()
+    }).length
 
-    return { total, branchCounts, topBranch, regionCounts, topRegion, personCounts, topPerson, thisWeek }
-  }, [sales])
+    // Previous year comparison
+    const prevYearSales = sales.filter(s => {
+      if (!s.saleDate) return false
+      return new Date(s.saleDate).getFullYear() === selectedYear - 1
+    }).length
 
-  const displaySales = showAll ? sales : sales.slice(0, 8)
+    // All years data for archive
+    const yearStats: Record<number, number> = {}
+    sales.forEach(s => {
+      if (s.saleDate) {
+        const y = new Date(s.saleDate).getFullYear()
+        yearStats[y] = (yearStats[y]||0)+1
+      }
+    })
+
+    return { total, totalAllTime, branchCounts, topBranch, regionCounts, topRegion, personCounts, topPerson, thisWeek, thisMonthCount, prevYearSales, yearStats }
+  }, [filteredByDate, sales, selectedYear])
+
+  const displaySales = showAll ? filteredByDate : filteredByDate.slice(0, 8)
+  const monthLabel = selectedMonth === 'ALL' ? 'All Months' : availableMonths.find(m=>m.value===selectedMonth)?.label.split(' - ')[0] || ''
 
   if (sales.length === 0) {
     return (
@@ -77,7 +143,64 @@ export default function DailySalesReport({ sales }: { sales: Sale[] }) {
       </div>
 
       <div className="max-w-3xl mx-auto p-4 space-y-4">
-        {/* Top Branch */}
+        {/* 0. TOTAL SALES - First at top - Zaw requested */}
+        <div className="bg-gradient-to-br from-red-600 to-red-700 rounded-2xl shadow-lg p-5 text-white relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-10 -mt-10"></div>
+          <div className="absolute bottom-0 left-0 w-20 h-20 bg-white/5 rounded-full -ml-5 -mb-5"></div>
+          
+          <div className="relative z-10">
+            <div className="flex justify-between items-start">
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
+                    <BarChart3 className="w-4 h-4" />
+                  </div>
+                  <span className="text-xs tracking-widest opacity-80">TOTAL SALES - စုစုပေါင်းအရောင်း</span>
+                </div>
+                <h1 className="text-5xl font-black tracking-tight mt-2">{stats.totalAllTime}</h1>
+                <p className="text-[13px] opacity-90 mt-1">စီး • All Time Total</p>
+                
+                <div className="flex gap-3 mt-4">
+                  <div className="bg-white/20 rounded-xl px-3 py-2">
+                    <p className="text-[11px] opacity-70">This Filter</p>
+                    <p className="text-lg font-bold">{stats.total} စီး</p>
+                  </div>
+                  <div className="bg-white/15 rounded-xl px-3 py-2">
+                    <p className="text-[11px] opacity-70">This Week</p>
+                    <p className="text-lg font-bold">{stats.thisWeek} စီး</p>
+                  </div>
+                  <div className="bg-white/15 rounded-xl px-3 py-2">
+                    <p className="text-[11px] opacity-70">This Month</p>
+                    <p className="text-lg font-bold">{stats.thisMonthCount} စီး</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="text-right">
+                <div className="bg-white text-red-600 rounded-xl px-3 py-2 font-bold text-xs">
+                  {selectedYear} {monthLabel !== 'All Months' ? `- ${monthLabel}` : ''}
+                </div>
+                {stats.prevYearSales > 0 && (
+                  <p className="text-[10px] mt-2 opacity-70">{selectedYear-1}: {stats.prevYearSales} စီး</p>
+                )}
+                <p className="text-[10px] mt-3 opacity-60 text-right leading-tight">
+                  App started Aug 2026<br/>Resets Jan 1 2027<br/>Archive saved
+                </p>
+              </div>
+            </div>
+
+            {/* Year breakdown mini */}
+            <div className="mt-4 flex gap-2 overflow-x-auto pb-1">
+              {Object.entries(stats.yearStats).sort((a,b)=>parseInt(b[0])-parseInt(a[0])).map(([year, count]) => (
+                <div key={year} className={`shrink-0 px-3 py-1.5 rounded-full text-[11px] font-bold ${parseInt(year)===selectedYear ? 'bg-white text-red-600' : 'bg-white/20 text-white'}`}>
+                  {year}: {count} စီး
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* 1. Top Branch */}
         <div className="bg-white rounded-2xl border shadow-sm p-5">
           <div className="flex justify-between items-center mb-3">
             <div className="flex items-center gap-2">
@@ -115,7 +238,7 @@ export default function DailySalesReport({ sales }: { sales: Sale[] }) {
           </div>
         </div>
 
-        {/* Region Breakdown - NEW */}
+        {/* 2. Region Breakdown */}
         <div className="bg-white rounded-2xl border shadow-sm p-5">
           <div className="flex justify-between items-center mb-3">
             <div className="flex items-center gap-2">
@@ -154,18 +277,18 @@ export default function DailySalesReport({ sales }: { sales: Sale[] }) {
 
           <div className="mt-4 flex items-center gap-2 text-[11px] text-gray-400 bg-blue-50 rounded-lg p-2.5">
             <TrendingUp className="w-3.5 h-3.5" />
-            <span>Total {stats.total} စီး • {Object.keys(stats.regionCounts).length} Regions</span>
+            <span>Total {stats.total} စီး • {Object.keys(stats.regionCounts).length} Regions • Filter: {selectedYear} {monthLabel}</span>
           </div>
         </div>
 
-        {/* Top Sales Person */}
+        {/* 3. Top Sales Person */}
         <div className="bg-white rounded-2xl border shadow-sm p-5">
           <div className="flex justify-between items-center mb-5">
             <div className="flex items-center gap-2">
               <div className="w-7 h-7 bg-orange-50 rounded-full flex items-center justify-center">
                 <Users className="w-4 h-4 text-orange-500" />
               </div>
-              <span className="text-xs font-semibold text-gray-400">Top Sales Person (2026)</span>
+              <span className="text-xs font-semibold text-gray-400">Top Sales Person ({selectedYear})</span>
             </div>
             <span className="text-[11px] font-bold tracking-wider text-gray-400">YEARLY</span>
           </div>
@@ -176,7 +299,7 @@ export default function DailySalesReport({ sales }: { sales: Sale[] }) {
             </div>
             <div className="flex-1">
               <p className="font-bold text-[15px] leading-tight">{stats.topPerson?.[0] || "Ye Lin Tun"}</p>
-              <p className="text-[10px] text-gray-400 mt-1">◎ App started Aug 2026 • resets Jan 1 2027</p>
+              <p className="text-[10px] text-gray-400 mt-1">◎ App started Aug 2026 • resets Jan 1 2027 • Archive saved</p>
             </div>
             <div className="text-right">
               <p className="text-2xl font-bold leading-none">{stats.topPerson?.[1] || 5}</p>
@@ -194,7 +317,7 @@ export default function DailySalesReport({ sales }: { sales: Sale[] }) {
           </div>
         </div>
 
-        {/* Recent Sales - Redesigned with Photos - Clear for Users */}
+        {/* 4. Sales Records with Date Filter Button - Zaw requested clickable October 2026 box */}
         <div className="bg-white rounded-2xl border shadow-sm overflow-hidden">
           <div className="p-4 border-b flex justify-between items-center bg-gradient-to-r from-gray-50 to-white">
             <div>
@@ -202,24 +325,108 @@ export default function DailySalesReport({ sales }: { sales: Sale[] }) {
                 <span className="w-1 h-4 bg-red-600 rounded-full inline-block"></span>
                 Sales Records - အရောင်းမှတ်တမ်းများ
               </h3>
-              <p className="text-[11px] text-gray-500 mt-1 ml-3">All sales records • {stats.total} total • ပုံနှိပ်ကြည့်လို့ရ</p>
+              <p className="text-[11px] text-gray-500 mt-1 ml-3">All sales records • {stats.total} filtered / {stats.totalAllTime} total • ပုံနှိပ်ကြည့်လို့ရ</p>
             </div>
-            <span className="text-[11px] bg-red-50 text-red-600 px-2.5 py-1 rounded-full font-bold">October 2026</span>
+            
+            {/* Clickable Date Filter - October 2026 box that Zaw circled */}
+            <button 
+              onClick={() => setShowDateFilter(!showDateFilter)}
+              className="flex items-center gap-1.5 bg-red-50 hover:bg-red-100 border border-red-100 text-red-600 px-3 py-2 rounded-xl font-bold text-[12px] transition active:bg-red-200 touch-manipulation"
+            >
+              <Calendar className="w-3.5 h-3.5" />
+              <div className="text-left leading-tight">
+                <div>{monthLabel === 'All Months' ? 'All Months' : monthLabel}</div>
+                <div>{selectedYear}</div>
+              </div>
+              <ChevronDown className={`w-3.5 h-3.5 transition ${showDateFilter ? 'rotate-180' : ''}`} />
+            </button>
           </div>
+
+          {/* Date Filter Dropdown - Year + Month */}
+          {showDateFilter && (
+            <div className="p-4 bg-amber-50/50 border-b space-y-4 animate-in slide-in-from-top-2">
+              <div className="flex justify-between items-center">
+                <p className="text-xs font-bold text-gray-700 flex items-center gap-2">
+                  <Filter className="w-3.5 h-3.5" /> Filter by Year & Month - နှစ်နှင့် လအလိုက်
+                </p>
+                <button onClick={() => setShowDateFilter(false)} className="p-1 hover:bg-white rounded-full">
+                  <X className="w-4 h-4 text-gray-400" />
+                </button>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-[11px] font-bold text-gray-500">YEAR - နှစ်</label>
+                  <select 
+                    value={selectedYear} 
+                    onChange={(e) => setSelectedYear(parseInt(e.target.value))}
+                    className="w-full mt-1 border border-gray-300 rounded-xl px-3 py-2.5 text-sm bg-white focus:ring-2 focus:ring-red-500 focus:outline-none"
+                  >
+                    {availableYears.map(year => (
+                      <option key={year} value={year}>
+                        {year} {year === 2026 ? '(Current - လက်ရှိ)' : year === 2025 ? '(Last Year)' : ''} - {stats.yearStats[year] || 0} စီး
+                      </option>
+                    ))}
+                    <option value={2027}>2027 (Next Year - နောက်နှစ်) - New Start</option>
+                    <option value={2028}>2028 - Future</option>
+                  </select>
+                  <p className="text-[10px] text-gray-400 mt-1">နှစ်ကုန်ရင် {selectedYear+1} မှာ အသစ်ပြန်စ</p>
+                </div>
+                
+                <div>
+                  <label className="text-[11px] font-bold text-gray-500">MONTH - လ</label>
+                  <select 
+                    value={selectedMonth} 
+                    onChange={(e) => setSelectedMonth(e.target.value)}
+                    className="w-full mt-1 border border-gray-300 rounded-xl px-3 py-2.5 text-sm bg-white focus:ring-2 focus:ring-red-500 focus:outline-none"
+                  >
+                    {availableMonths.map(m => (
+                      <option key={m.value} value={m.value}>{m.label}</option>
+                    ))}
+                  </select>
+                  <p className="text-[10px] text-gray-400 mt-1">လအလိုက် ကြည့်လို့ရ</p>
+                </div>
+              </div>
+
+              <div className="flex gap-2">
+                <button 
+                  onClick={() => { setSelectedYear(2026); setSelectedMonth('ALL'); setShowDateFilter(false) }}
+                  className="flex-1 bg-white border border-gray-200 py-2.5 rounded-xl text-xs font-medium hover:bg-gray-50"
+                >
+                  Reset to 2026 All - ပြန်စ
+                </button>
+                <button 
+                  onClick={() => setShowDateFilter(false)}
+                  className="flex-1 bg-red-600 text-white py-2.5 rounded-xl text-xs font-bold hover:bg-red-700"
+                >
+                  Apply - {stats.total} စီး ကြည့်မယ်
+                </button>
+              </div>
+
+              <div className="bg-white rounded-xl p-3 border">
+                <p className="text-[11px] font-bold text-gray-600">📦 Archive Info - မှတ်တမ်းသိမ်းခြင်း:</p>
+                <div className="mt-2 space-y-1 text-[11px] text-gray-500">
+                  <p>• ဒီနှစ် {selectedYear}: {stats.totalAllTime} စီး total, {stats.total} စီး filtered</p>
+                  <p>• ပြီးခဲ့တဲ့နှစ်: ပြန်ကြည့်လို့ရ - Year ရွေးပါ</p>
+                  <p>• နှစ်ကုန်ရင် {selectedYear+1} မှာ Auto reset - ဒါပေမယ့် {selectedYear} data တွေ သိမ်းထားမယ်</p>
+                  <p>• Sanity Studio မှာ Year field ထည့်ထားရင် ပိုကောင်းမယ်</p>
+                </div>
+              </div>
+            </div>
+          )}
           
           <div className="divide-y divide-gray-100">
-            {displaySales.map((s) => {
+            {displaySales.length > 0 ? displaySales.map((s) => {
               const photoUrl = s.photo?.asset?.url || s.photoUrl
-              const saleDate = s.saleDate ? new Date(s.saleDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : ''
+              const saleDate = s.saleDate ? new Date(s.saleDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: s.saleDate ? new Date(s.saleDate).getFullYear() !== selectedYear ? 'numeric' : undefined : undefined }) : ''
               return (
                 <div key={s.id || s._id} className="p-3 flex gap-3 hover:bg-gray-50 transition group">
-                  {/* Photo - Click to view large */}
                   <div className="shrink-0">
                     {photoUrl ? (
                       <button 
                         onClick={() => window.open(photoUrl, '_blank')}
                         className="relative w-[64px] h-[64px] rounded-xl overflow-hidden bg-gray-100 border border-gray-200 group-hover:border-red-200 transition"
-                        title="Click to view full image - ပုံကြီးကြည့်ရန် နှိပ်ပါ"
+                        title="Click to view full image"
                       >
                         <img src={photoUrl} alt={s.model} className="w-full h-full object-cover" loading="lazy" />
                         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition flex items-center justify-center">
@@ -234,7 +441,6 @@ export default function DailySalesReport({ sales }: { sales: Sale[] }) {
                     )}
                   </div>
                   
-                  {/* Sales Info - Clear Layout */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex-1 min-w-0">
@@ -262,19 +468,25 @@ export default function DailySalesReport({ sales }: { sales: Sale[] }) {
                   </div>
                 </div>
               )
-            })}
+            }) : (
+              <div className="p-8 text-center text-gray-500">
+                <p className="text-sm">No sales for {selectedYear} {selectedMonth !== 'ALL' ? `Month ${selectedMonth}` : ''}</p>
+                <p className="text-xs mt-1">Try different year/month or reset filter</p>
+                <button onClick={() => { setSelectedYear(2026); setSelectedMonth('ALL') }} className="mt-3 text-xs bg-red-50 text-red-600 px-4 py-2 rounded-full">Reset to 2026 All</button>
+              </div>
+            )}
           </div>
           
-          {sales.length > 8 && (
+          {filteredByDate.length > 8 && (
             <div className="p-3 text-center border-t bg-gray-50/50">
               <button onClick={()=>setShowAll(!showAll)} className="text-xs text-red-600 font-bold bg-white border border-red-100 px-4 py-2 rounded-full hover:bg-red-50 transition">
-                {showAll ? "↑ Show Less" : `↓ Show ${sales.length - 8} More Records →`}
+                {showAll ? "↑ Show Less" : `↓ Show ${filteredByDate.length - 8} More Records →`}
               </button>
             </div>
           )}
           
           <div className="p-2.5 bg-blue-50/50 border-t text-[10px] text-gray-500 text-center">
-            💡 ပုံကို နှိပ်ပြီး အကြီးကြည့်လို့ရတယ် • {stats.total} စီး စုစုပေါင်း
+            💡 ပုံကို နှိပ်ပြီး အကြီးကြည့်လို့ရတယ် • {stats.total} စီး filtered / {stats.totalAllTime} စီး total • Year {selectedYear} • {monthLabel}
           </div>
         </div>
       </div>
