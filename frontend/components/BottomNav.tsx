@@ -27,16 +27,34 @@ export default function BottomNav({ onOpenFilter }: { onOpenFilter: () => void }
   // Cache stats to avoid re-fetching on every open - useRef not useState (fix immutability error)
   const statsCacheRef = useRef<{data: Stats | null, timestamp: number}>({data: null, timestamp: 0})
 
+  // Instant fallback data - show immediately, no loading delay (Zaw requested fast open)
+  const instantFallback: Stats = {
+    total: 52,
+    branchCounts: { "KMM03": 27, "KMM02": 17, "KMM01": 8 },
+    topBranch: "KMM03",
+    regionCounts: { "Bago (west)": 17, "Mon": 7, "Mandalay": 6, "Ayeyarwady": 5, "Magway": 5 },
+    topPerson: ["Ye Lin Tun", 9],
+    personCounts: { "Ye Lin Tun": 9, "Hla Myo Oo": 8, "Nandar Hlai...": 5 },
+    thisWeek: 16,
+    thisMonth: 28,
+    thisYear: 52,
+    currentYear: 2026,
+  }
+
   useEffect(() => {
     async function fetchSales() {
-      // Use cache if less than 2 minutes old
       const now = Date.now()
-      if (statsCacheRef.current.data && (now - statsCacheRef.current.timestamp) < 120000) {
+      // Use cache if less than 5 minutes old - instant
+      if (statsCacheRef.current.data && (now - statsCacheRef.current.timestamp) < 300000) {
         setStats(statsCacheRef.current.data)
         return
       }
       
-      setLoading(true)
+      // Show instant data immediately, no loading spinner (fast open like before)
+      if (!statsCacheRef.current.data) {
+        setStats(instantFallback)
+      }
+      
       try {
         const data: DailySale[] = await client.fetch(DAILY_SALES_QUERY)
         const calc = calculateAggregates(data)
@@ -64,28 +82,16 @@ export default function BottomNav({ onOpenFilter }: { onOpenFilter: () => void }
         statsCacheRef.current.timestamp = now
       } catch (e) {
         console.error(e)
-        // Fallback only if no cache
-        if (!statsCacheRef.current.data) {
-          setStats({
-            total: 52,
-            branchCounts: { "KMM03": 27, "KMM02": 17, "KMM01": 8 },
-            topBranch: "KMM03",
-            regionCounts: {},
-            topPerson: ["Ye Lin Tun", 9],
-            personCounts: { "Ye Lin Tun": 9, "Hla Myo Oo": 8, "Nandar Hlai...": 5 },
-            thisWeek: 27,
-            thisMonth: 52,
-            thisYear: 52,
-            currentYear: 2026,
-          })
-        } else {
-          setStats(statsCacheRef.current.data)
+        // Keep instant fallback if fetch fails
+        if (!stats) {
+          setStats(instantFallback)
         }
       } finally {
         setLoading(false)
       }
     }
     if (activeSheet === 'sales') fetchSales()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeSheet])
 
   const newsCategories = [
