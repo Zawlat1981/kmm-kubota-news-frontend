@@ -170,43 +170,43 @@ export default function BottomNav({ onOpenFilter }: { onOpenFilter: () => void }
                   <div className="text-center py-8"><p className="text-sm text-gray-500">Loading real data from Sanity...</p></div>
                 ) : stats ? (
                   <>
-                    <div className="bg-white border rounded-2xl p-4">
+                    <div className="bg-white border-2 border-gray-100 rounded-2xl p-4">
                       <div className="flex justify-between items-center mb-3">
                         <div className="flex items-center gap-2">
                           <div className="w-6 h-6 bg-red-50 rounded-full flex items-center justify-center"><Store className="w-3.5 h-3.5 text-red-500" /></div>
-                          <span className="text-xs font-semibold text-gray-400">Top Branch</span>
+                          <span className="text-xs font-black text-gray-900">Top Branch</span>
                         </div>
-                        <span className="text-[10px] font-bold tracking-wider text-gray-400">BRANCH PERFORMANCE</span>
+                        <span className="text-[10px] font-black tracking-wider text-gray-800">BRANCH PERFORMANCE</span>
                       </div>
                       <div className="flex items-baseline gap-2 mb-1">
                         <h2 className="text-[32px] font-serif font-bold text-red-600 tracking-tight">{stats.topBranch}</h2>
-                        <span className="text-xs text-gray-500">{stats.branchCounts[stats.topBranch] || 27} Records • {Math.round(((stats.branchCounts[stats.topBranch] || 27) / (stats.total || 52)) * 100)}% of total</span>
+                        <span className="text-xs font-bold text-gray-900">{stats.branchCounts[stats.topBranch] || 27} Records • {Math.round(((stats.branchCounts[stats.topBranch] || 27) / (stats.total || 52)) * 100)}% of total</span>
                       </div>
-                      <p className="text-[11px] font-bold tracking-wider text-gray-400 mt-3 mb-3">BRANCH BREAKDOWN</p>
+                      <p className="text-[11px] font-black tracking-wider text-black mt-3 mb-3">BRANCH BREAKDOWN</p>
                       <div className="space-y-2.5">
                         {Object.entries(stats.branchCounts).sort((a,b)=>b[1]-a[1]).map(([branch, count]) => {
                           const pct = Math.round((count / (stats.total || 1)) * 100)
                           return (
                             <div key={branch} className="flex items-center gap-2">
-                              <span className="text-xs font-bold w-[48px]">{branch}</span>
-                              <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
-                                <div className="h-2 bg-red-600 rounded-full" style={{width: `${pct}%`}} />
+                              <span className="text-xs font-black text-black w-[48px]">{branch}</span>
+                              <div className="flex-1 h-3 bg-gray-200 rounded-full overflow-hidden">
+                                <div className="h-3 bg-red-600 rounded-full" style={{width: `${pct}%`}} />
                               </div>
-                              <span className="text-[11px] text-gray-400 w-[28px]">{pct}%</span>
-                              <span className="text-xs text-gray-500 w-[44px] text-right">{count} sales</span>
+                              <span className="text-[12px] font-black text-black w-[28px]">{pct}%</span>
+                              <span className="text-xs font-black text-black w-[44px] text-right">{count} sales</span>
                             </div>
                           )
                         })}
                       </div>
                     </div>
 
-                    <div className="bg-white border rounded-2xl p-4">
+                    <div className="bg-white border-2 border-gray-100 rounded-2xl p-4">
                       <div className="flex justify-between items-center mb-4">
                         <div className="flex items-center gap-2">
                           <div className="w-6 h-6 bg-orange-50 rounded-full flex items-center justify-center"><Users className="w-3.5 h-3.5 text-orange-500" /></div>
-                          <span className="text-xs font-semibold text-gray-400">Top Sales Person ({stats.currentYear})</span>
+                          <span className="text-xs font-black text-gray-900">Top Sales Person ({stats.currentYear})</span>
                         </div>
-                        <span className="text-[10px] font-bold tracking-wider text-gray-400">YEARLY</span>
+                        <span className="text-[10px] font-black tracking-wider text-gray-800">YEARLY</span>
                       </div>
                       
                       <div className="flex items-center gap-3 mb-3">
@@ -216,13 +216,13 @@ export default function BottomNav({ onOpenFilter }: { onOpenFilter: () => void }
                         <div>
                           <p className="font-bold text-[15px]">{stats.topPerson?.[0] || "Ye Lin Tun"}</p>
                           <div className="flex items-center gap-1 mt-0.5">
-                            <span className="text-[10px] text-gray-400">◎ App started Aug 2026</span>
-                            <span className="text-[10px] text-gray-400">• resets Jan 1 2027</span>
+                            <span className="text-[10px] font-bold text-gray-800">◎ App started Aug 2026</span>
+                            <span className="text-[10px] font-bold text-gray-800">• resets Jan 1 2027</span>
                           </div>
                         </div>
                         <div className="ml-auto text-right">
                           <p className="text-2xl font-bold">{stats.topPerson?.[1] || 9}</p>
-                          <p className="text-[10px] text-gray-400 tracking-wider">SALES THIS YEAR</p>
+                          <p className="text-[10px] font-black tracking-wider text-gray-800">SALES THIS YEAR</p>
                         </div>
                       </div>
 
