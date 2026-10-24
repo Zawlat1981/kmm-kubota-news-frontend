@@ -29,87 +29,20 @@ export default function DailySalesReport({ sales }: { sales: Sale[] }) {
   const [showDateFilter, setShowDateFilter] = useState(false)
 
   const T = {
-    th: {
-      totalSales: 'ยอดขายรวม - စုစုပေါင်းအရောင်း',
-      allTimeTotal: 'คัน • ทั้งหมดสะสม',
-      thisFilter: 'ตัวกรองนี้',
-      thisWeek: 'สัปดาห์นี้',
-      thisMonth: 'เดือนนี้',
-      cars: 'คัน',
-      topBranch: 'สาขายอดเยี่ยม',
-      branchPerformance: 'ผลงานสาขา',
-      branchBreakdown: 'รายละเอียดสาขา',
-      topRegion: 'ภูมิภาคยอดเยี่ยม',
-      regionPerformance: 'ผลงานภูมิภาค',
-      regionBreakdown: 'รายละเอียดภูมิภาค - ภูมิภาคไหนกี่คัน',
-      topSalesPerson: 'พนักงานขายยอดเยี่ยม',
-      yearly: 'รายปี',
-      salesRecords: 'บันทึกการขาย - အရောင်းမှတ်တမ်း',
-      allRecords: 'บันทึกทั้งหมด',
-      clickPhoto: 'คลิกดูรูปใหญ่ได้ • ပုံနှိပ်ကြည့်လို့ရ',
-      sales: 'ขาย',
-      filterByYearMonth: 'กรองตามปีและเดือน - နှစ်နှင့် လအလိုက်',
-      year: 'ปี - နှစ်',
-      month: 'เดือน - လ',
-      allMonths: 'ทุกเดือน - လအားလုံး',
-      reset: 'รีเซ็ตเป็น 2026 ทั้งหมด - ပြန်စ',
-      apply: 'ใช้ - ดู',
-      archiveInfo: 'ข้อมูลเก็บถาวร - မှတ်တမ်းသိမ်းခြင်း',
-      thisYear: 'ปีนี้',
-      lastYear: 'ปีที่แล้วดูได้',
-      autoReset: 'สิ้นปีรีเซ็ตอัตโนมัติใน',
-      butSaved: 'แต่ข้อมูลปี',
-      saved: 'ยังเก็บไว้',
-      backToNews: 'กลับไปที่ข่าว',
-      managementDashboard: 'แดชบอร์ดผู้บริหาร',
-    },
-    my: {
-      totalSales: 'စုစုပေါင်းအရောင်း - TOTAL SALES',
-      allTimeTotal: 'စီး • All Time Total',
-      thisFilter: 'This Filter',
-      thisWeek: 'This Week',
-      thisMonth: 'This Month',
-      cars: 'စီး',
-      topBranch: 'Top Branch',
-      branchPerformance: 'BRANCH PERFORMANCE',
-      branchBreakdown: 'BRANCH BREAKDOWN',
-      topRegion: 'Top Region',
-      regionPerformance: 'REGION PERFORMANCE',
-      regionBreakdown: 'REGION BREAKDOWN - ဘယ် Region ဘယ်နှစ်စီး',
-      topSalesPerson: 'Top Sales Person',
-      yearly: 'YEARLY',
-      salesRecords: 'အရောင်းမှတ်တမ်းများ - Sales Records',
-      allRecords: 'All sales records',
-      clickPhoto: 'ပုံနှိပ်ကြည့်လို့ရ • Click to view',
-      sales: 'sales',
-      filterByYearMonth: 'နှစ်နှင့် လအလိုက် စစ်မယ်',
-      year: 'နှစ် - YEAR',
-      month: 'လ - MONTH',
-      allMonths: 'လအားလုံး - All Months',
-      reset: '2026 All ပြန်စ - Reset',
-      apply: 'ကြည့်မယ် - Apply',
-      archiveInfo: 'မှတ်တမ်းသိမ်းခြင်း - Archive',
-      thisYear: 'ဒီနှစ်',
-      lastYear: 'ပြီးခဲ့တဲ့နှစ် ပြန်ကြည့်လို့ရ',
-      autoReset: 'နှစ်ကုန်ရင် Auto reset',
-      butSaved: 'ဒါပေမယ့်',
-      saved: 'data သိမ်းထားမယ်',
-      backToNews: 'Back to News Portal',
-      managementDashboard: 'MANAGEMENT DASHBOARD',
-    },
     en: {
-      totalSales: 'TOTAL SALES - Total Sales',
-      allTimeTotal: 'units • All Time Total',
+      totalSales: 'TOTAL SALES',
+      allTimeTotal: 'All Time Total',
       thisFilter: 'This Filter',
       thisWeek: 'This Week',
       thisMonth: 'This Month',
       cars: 'units',
+      carShort: 'units',
       topBranch: 'Top Branch',
       branchPerformance: 'BRANCH PERFORMANCE',
       branchBreakdown: 'BRANCH BREAKDOWN',
       topRegion: 'Top Region',
       regionPerformance: 'REGION PERFORMANCE',
-      regionBreakdown: 'REGION BREAKDOWN - Sales by Region',
+      regionBreakdown: 'REGION BREAKDOWN',
       topSalesPerson: 'Top Sales Person',
       yearly: 'YEARLY',
       salesRecords: 'Sales Records',
@@ -121,19 +54,109 @@ export default function DailySalesReport({ sales }: { sales: Sale[] }) {
       month: 'MONTH',
       allMonths: 'All Months',
       reset: 'Reset to 2026 All',
-      apply: 'Apply - View',
+      apply: 'Apply',
       archiveInfo: 'Archive Info',
       thisYear: 'This Year',
       lastYear: 'Last year viewable',
-      autoReset: 'Year end auto reset in',
+      autoReset: 'Year end auto reset',
       butSaved: 'but',
       saved: 'data saved',
       backToNews: 'Back to News Portal',
       managementDashboard: 'MANAGEMENT DASHBOARD',
-    }
+      records: 'Records',
+      total: 'Total',
+      regions: 'Regions',
+      stock: 'Stock',
+      noPhoto: 'No Photo',
+      view: 'View',
+    },
+    th: {
+      totalSales: 'ยอดขายรวม',
+      allTimeTotal: 'ยอดสะสมทั้งหมด',
+      thisFilter: 'ตัวกรองนี้',
+      thisWeek: 'สัปดาห์นี้',
+      thisMonth: 'เดือนนี้',
+      cars: 'คัน',
+      carShort: 'คัน',
+      topBranch: 'สาขายอดเยี่ยม',
+      branchPerformance: 'ผลงานสาขา',
+      branchBreakdown: 'รายละเอียดสาขา',
+      topRegion: 'ภูมิภาคยอดเยี่ยม',
+      regionPerformance: 'ผลงานภูมิภาค',
+      regionBreakdown: 'รายละเอียดภูมิภาค',
+      topSalesPerson: 'พนักงานขายยอดเยี่ยม',
+      yearly: 'รายปี',
+      salesRecords: 'บันทึกการขาย',
+      allRecords: 'บันทึกทั้งหมด',
+      clickPhoto: 'คลิกดูรูปใหญ่',
+      sales: 'การขาย',
+      filterByYearMonth: 'กรองตามปีและเดือน',
+      year: 'ปี',
+      month: 'เดือน',
+      allMonths: 'ทุกเดือน',
+      reset: 'รีเซ็ตเป็น 2026 ทั้งหมด',
+      apply: 'ใช้',
+      archiveInfo: 'ข้อมูลเก็บถาวร',
+      thisYear: 'ปีนี้',
+      lastYear: 'ปีที่แล้ว',
+      autoReset: 'สิ้นปีรีเซ็ตอัตโนมัติ',
+      butSaved: 'แต่ข้อมูล',
+      saved: 'ยังเก็บไว้',
+      backToNews: 'กลับไปที่ข่าว',
+      managementDashboard: 'แดชบอร์ดผู้บริหาร',
+      records: 'รายการ',
+      total: 'รวม',
+      regions: 'ภูมิภาค',
+      stock: 'สต็อก',
+      noPhoto: 'ไม่มีรูป',
+      view: 'ดู',
+    },
+    my: {
+      totalSales: 'စုစုပေါင်းအရောင်း',
+      allTimeTotal: 'စုစုပေါင်းအချိန်အားလုံး',
+      thisFilter: 'ဒီ Filter',
+      thisWeek: 'ဒီအပတ်',
+      thisMonth: 'ဒီလ',
+      cars: 'စီး',
+      carShort: 'စီး',
+      topBranch: 'အကောင်းဆုံးဌာနခွဲ',
+      branchPerformance: 'ဌာနခွဲစွမ်းဆောင်ရည်',
+      branchBreakdown: 'ဌာနခွဲအသေးစိတ်',
+      topRegion: 'အကောင်းဆုံးဒေသ',
+      regionPerformance: 'ဒေသစွမ်းဆောင်ရည်',
+      regionBreakdown: 'ဒေသအသေးစိတ်',
+      topSalesPerson: 'အကောင်းဆုံးအရောင်းဝန်ထမ်း',
+      yearly: 'နှစ်အလိုက်',
+      salesRecords: 'အရောင်းမှတ်တမ်းများ',
+      allRecords: 'မှတ်တမ်းအားလုံး',
+      clickPhoto: 'ပုံကြီးကြည့်ရန် နှိပ်ပါ',
+      sales: 'အရောင်း',
+      filterByYearMonth: 'နှစ်နှင့်လအလိုက် စစ်မယ်',
+      year: 'နှစ်',
+      month: 'လ',
+      allMonths: 'လအားလုံး',
+      reset: '2026 All ပြန်စ',
+      apply: 'ကြည့်မယ်',
+      archiveInfo: 'မှတ်တမ်းသိမ်းခြင်း',
+      thisYear: 'ဒီနှစ်',
+      lastYear: 'ပြီးခဲ့တဲ့နှစ်',
+      autoReset: 'နှစ်ကုန်ရင် Auto reset',
+      butSaved: 'ဒါပေမယ့်',
+      saved: 'သိမ်းထားမယ်',
+      backToNews: 'သတင်းပေါ်တယ်သို့ ပြန်သွားမည်',
+      managementDashboard: 'စီမံခန့်ခွဲမှု ဒက်ရှ်ဘုတ်',
+      records: 'မှတ်တမ်း',
+      total: 'စုစုပေါင်း',
+      regions: 'ဒေသများ',
+      stock: 'စတော့',
+      noPhoto: 'ပုံမရှိ',
+      view: 'ကြည့်မယ်',
+    },
   }
 
-  const tt = T[language] || T.th
+  // Default to English base, fallback to English
+  const tt = T[language as keyof typeof T] || T.en
+
 
 
   // Get available years and months from data
@@ -246,7 +269,7 @@ export default function DailySalesReport({ sales }: { sales: Sale[] }) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20">
+    <div className="min-h-screen bg-gray-50 pb-28">
       <div className="bg-[#c00000] text-white px-4 py-3 flex justify-between items-center">
         <Link href="/" className="text-sm font-serif hover:underline font-bold">{tt.backToNews}</Link>
         <span className="text-xs tracking-widest opacity-80 font-bold">{tt.managementDashboard}</span>
@@ -268,20 +291,20 @@ export default function DailySalesReport({ sales }: { sales: Sale[] }) {
                   <span className="text-xs tracking-widest opacity-90 font-bold">{tt.totalSales}</span>
                 </div>
                 <h1 className="text-5xl font-black tracking-tight mt-2">{stats.totalAllTime}</h1>
-                <p className="text-[13px] opacity-90 mt-1 font-bold">{tt.cars} • {tt.allTimeTotal}</p>
+                <p className="text-[13px] opacity-90 mt-1 font-bold">{tt.allTimeTotal} • {stats.totalAllTime} {tt.cars}</p>
                 
                 <div className="flex gap-3 mt-4">
                   <div className="bg-white/20 rounded-xl px-3 py-2">
                     <p className="text-[11px] opacity-80 font-bold">{tt.thisFilter}</p>
-                    <p className="text-lg font-bold">{stats.total} စီး</p>
+                    <p className="text-lg font-bold">{stats.total} {tt.carShort}</p>
                   </div>
                   <div className="bg-white/15 rounded-xl px-3 py-2">
                     <p className="text-[11px] opacity-80 font-bold">{tt.thisWeek}</p>
-                    <p className="text-lg font-bold">{stats.thisWeek} စီး</p>
+                    <p className="text-lg font-bold">{stats.thisWeek} {tt.carShort}</p>
                   </div>
                   <div className="bg-white/15 rounded-xl px-3 py-2">
                     <p className="text-[11px] opacity-80 font-bold">{tt.thisMonth}</p>
-                    <p className="text-lg font-bold">{stats.thisMonthCount} စီး</p>
+                    <p className="text-lg font-bold">{stats.thisMonthCount} {tt.carShort}</p>
                   </div>
                 </div>
               </div>
@@ -291,7 +314,7 @@ export default function DailySalesReport({ sales }: { sales: Sale[] }) {
                   {selectedYear} {monthLabel !== 'All Months' ? `- ${monthLabel}` : ''}
                 </div>
                 {stats.prevYearSales > 0 && (
-                  <p className="text-[10px] mt-2 opacity-70">{selectedYear-1}: {stats.prevYearSales} စီး</p>
+                  <p className="text-[10px] mt-2 opacity-70">{selectedYear-1}: {stats.prevYearSales} {tt.carShort}</p>
                 )}
                 <p className="text-[10px] mt-3 opacity-60 text-right leading-tight">
                   App started Aug 2026<br/>Resets Jan 1 2027<br/>Archive saved
@@ -303,7 +326,7 @@ export default function DailySalesReport({ sales }: { sales: Sale[] }) {
             <div className="mt-4 flex gap-2 overflow-x-auto pb-1">
               {Object.entries(stats.yearStats).sort((a,b)=>parseInt(b[0])-parseInt(a[0])).map(([year, count]) => (
                 <div key={year} className={`shrink-0 px-3 py-1.5 rounded-full text-[11px] font-bold ${parseInt(year)===selectedYear ? 'bg-white text-[#FF6A00]' : 'bg-white/20 text-white'}`}>
-                  {year}: {count} စီး
+                  {year}: {count} {tt.carShort}
                 </div>
               ))}
             </div>
@@ -341,7 +364,7 @@ export default function DailySalesReport({ sales }: { sales: Sale[] }) {
                     <div className="h-3 bg-red-600 rounded-full" style={{ width: `${pct}%` }} />
                   </div>
                   <span className="text-[11px] font-bold text-gray-900 w-7">{pct}%</span>
-                  <span className="text-xs text-gray-800 font-medium w-12 text-right">{count} sales</span>
+                  <span className="text-xs text-gray-800 font-medium w-12 text-right">{count} {tt.sales}</span>
                 </div>
               )
             })}
@@ -367,7 +390,7 @@ export default function DailySalesReport({ sales }: { sales: Sale[] }) {
             </span>
           </div>
 
-          <p className="text-[11px] font-black tracking-wider text-gray-700 mt-5 mb-3">REGION BREAKDOWN - ဘယ် Region ဘယ်နှစ်စီး</p>
+          <p className="text-[11px] font-black tracking-wider text-gray-700 mt-5 mb-3">REGION {tt.regionBreakdown}</p>
 
           <div className="space-y-3">
             {Object.entries(stats.regionCounts).sort((a,b)=>b[1]-a[1]).map(([region, count]) => {
@@ -379,7 +402,7 @@ export default function DailySalesReport({ sales }: { sales: Sale[] }) {
                     <div className="h-3 bg-blue-600 rounded-full" style={{ width: `${pct}%` }} />
                   </div>
                   <span className="text-[11px] font-bold text-gray-900 w-7">{pct}%</span>
-                  <span className="text-xs text-gray-800 font-medium w-16 text-right">{count} စီး</span>
+                  <span className="text-xs text-gray-800 font-medium w-16 text-right">{count} {tt.carShort}</span>
                 </div>
               )
             })}
@@ -387,7 +410,7 @@ export default function DailySalesReport({ sales }: { sales: Sale[] }) {
 
           <div className="mt-4 flex items-center gap-2 text-[12px] font-bold text-gray-800 bg-blue-50 border border-blue-100 rounded-lg p-2.5">
             <TrendingUp className="w-3.5 h-3.5" />
-            <span>Total {stats.total} စီး • {Object.keys(stats.regionCounts).length} Regions • Filter: {selectedYear} {monthLabel}</span>
+            <span>Total {stats.total} {tt.cars} • {Object.keys(stats.regionCounts).length} {tt.regions} • Filter: {selectedYear} {monthLabel}</span>
           </div>
         </div>
 
@@ -474,7 +497,7 @@ export default function DailySalesReport({ sales }: { sales: Sale[] }) {
                   >
                     {availableYears.map(year => (
                       <option key={year} value={year}>
-                        {year} {year === 2026 ? '(Current - လက်ရှိ)' : year === 2025 ? '(Last Year)' : ''} - {stats.yearStats[year] || 0} စီး
+                        {year} {year === 2026 ? '(Current - လက်ရှိ)' : year === 2025 ? '(Last Year)' : ''} - {stats.yearStats[year] || 0} {tt.carShort}
                       </option>
                     ))}
                     <option value={2027}>2027 (Next Year - နောက်နှစ်) - New Start</option>
@@ -509,14 +532,14 @@ export default function DailySalesReport({ sales }: { sales: Sale[] }) {
                   onClick={() => setShowDateFilter(false)}
                   className="flex-1 bg-red-600 text-white py-2.5 rounded-xl text-xs font-bold hover:bg-red-700"
                 >
-                  Apply - {stats.total} စီး ကြည့်မယ်
+                  {tt.apply} - {stats.total} {tt.carShort}
                 </button>
               </div>
 
               <div className="bg-white rounded-xl p-3 border">
                 <p className="text-[11px] font-bold text-gray-600">📦 Archive Info - မှတ်တမ်းသိမ်းခြင်း:</p>
                 <div className="mt-2 space-y-1 text-[11px] text-gray-500">
-                  <p>• ဒီနှစ် {selectedYear}: {stats.totalAllTime} စီး total, {stats.total} စီး filtered</p>
+                  <p>• ဒီနှစ် {selectedYear}: {stats.totalAllTime} {tt.carShort} total, {stats.total} {tt.carShort} filtered</p>
                   <p>• ပြီးခဲ့တဲ့နှစ်: ပြန်ကြည့်လို့ရ - Year ရွေးပါ</p>
                   <p>• နှစ်ကုန်ရင် {selectedYear+1} မှာ Auto reset - ဒါပေမယ့် {selectedYear} data တွေ သိမ်းထားမယ်</p>
                   <p>• Sanity Studio မှာ Year field ထည့်ထားရင် ပိုကောင်းမယ်</p>
@@ -596,7 +619,7 @@ export default function DailySalesReport({ sales }: { sales: Sale[] }) {
           )}
           
           <div className="p-2.5 bg-blue-50/50 border-t text-[10px] text-gray-500 text-center">
-            💡 ပုံကို နှိပ်ပြီး အကြီးကြည့်လို့ရတယ် • {stats.total} စီး filtered / {stats.totalAllTime} စီး total • Year {selectedYear} • {monthLabel}
+            💡 ပုံကို နှိပ်ပြီး အကြီး• {stats.total} {tt.carShort} filtered / {stats.totalAllTime} {tt.carShort} total • Year {selectedYear} • {monthLabel}
           </div>
         </div>
       </div>

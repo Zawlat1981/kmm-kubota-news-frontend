@@ -3,7 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import SitePasswordGuard from "@/components/SitePasswordGuard";
-import ClientAppShell from "../components/ClientAppShell"
+import ClientAppShell from "@/components/ClientAppShell";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -26,7 +26,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-gray-50 pb- lg:pb-0">
+      <body className="min-h-full flex flex-col bg-gray-50 pb-[80px] lg:pb-0">
         <SitePasswordGuard>
           <LanguageProvider>
             <ClientAppShell>{children}</ClientAppShell>
@@ -36,3 +36,4 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     </html>
   );
 }
+
