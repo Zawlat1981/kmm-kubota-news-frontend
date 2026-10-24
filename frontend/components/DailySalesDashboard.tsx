@@ -144,7 +144,7 @@ export default function DailySalesReport({ sales }: { sales: Sale[] }) {
 
       <div className="max-w-3xl mx-auto p-4 space-y-4">
         {/* 0. TOTAL SALES - First at top - Zaw requested */}
-        <div className="bg-gradient-to-br from-red-600 to-red-700 rounded-2xl shadow-lg p-5 text-white relative overflow-hidden">
+        <div className="bg-gradient-to-br from-[#FF6A00] to-[#E55A00] rounded-2xl shadow-lg p-5 text-white relative overflow-hidden border border-orange-300">
           <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-10 -mt-10"></div>
           <div className="absolute bottom-0 left-0 w-20 h-20 bg-white/5 rounded-full -ml-5 -mb-5"></div>
           
@@ -177,7 +177,7 @@ export default function DailySalesReport({ sales }: { sales: Sale[] }) {
               </div>
               
               <div className="text-right">
-                <div className="bg-white text-red-600 rounded-xl px-3 py-2 font-bold text-xs">
+                <div className="bg-white text-[#FF6A00] rounded-xl px-3 py-2 font-bold text-xs">
                   {selectedYear} {monthLabel !== 'All Months' ? `- ${monthLabel}` : ''}
                 </div>
                 {stats.prevYearSales > 0 && (
@@ -192,7 +192,7 @@ export default function DailySalesReport({ sales }: { sales: Sale[] }) {
             {/* Year breakdown mini */}
             <div className="mt-4 flex gap-2 overflow-x-auto pb-1">
               {Object.entries(stats.yearStats).sort((a,b)=>parseInt(b[0])-parseInt(a[0])).map(([year, count]) => (
-                <div key={year} className={`shrink-0 px-3 py-1.5 rounded-full text-[11px] font-bold ${parseInt(year)===selectedYear ? 'bg-white text-red-600' : 'bg-white/20 text-white'}`}>
+                <div key={year} className={`shrink-0 px-3 py-1.5 rounded-full text-[11px] font-bold ${parseInt(year)===selectedYear ? 'bg-white text-[#FF6A00]' : 'bg-white/20 text-white'}`}>
                   {year}: {count} စီး
                 </div>
               ))}
@@ -201,37 +201,37 @@ export default function DailySalesReport({ sales }: { sales: Sale[] }) {
         </div>
 
         {/* 1. Top Branch */}
-        <div className="bg-white rounded-2xl border shadow-sm p-5">
+        <div className="bg-white rounded-2xl border-2 border-gray-100 shadow-sm p-5">
           <div className="flex justify-between items-center mb-3">
             <div className="flex items-center gap-2">
               <div className="w-7 h-7 bg-red-50 rounded-full flex items-center justify-center">
                 <Store className="w-4 h-4 text-red-500" />
               </div>
-              <span className="text-xs font-semibold text-gray-400">Top Branch</span>
+              <span className="text-xs font-black text-gray-800">Top Branch</span>
             </div>
-            <span className="text-[11px] font-bold tracking-wider text-gray-400">BRANCH PERFORMANCE</span>
+            <span className="text-[11px] font-black tracking-wider text-gray-700">BRANCH PERFORMANCE</span>
           </div>
 
           <div className="flex items-baseline gap-2">
-            <h2 className="text-4xl font-serif font-extrabold text-red-600 tracking-tight">{stats.topBranch}</h2>
-            <span className="text-xs text-gray-500">
+            <h2 className="text-4xl font-black text-red-600 tracking-tight">{stats.topBranch}</h2>
+            <span className="text-xs text-gray-800 font-medium">
               {stats.branchCounts[stats.topBranch] || 27} Records • {Math.round(((stats.branchCounts[stats.topBranch] || 27) / (stats.total || 52)) * 100)}% of total
             </span>
           </div>
 
-          <p className="text-[11px] font-bold tracking-wider text-gray-400 mt-5 mb-3">BRANCH BREAKDOWN</p>
+          <p className="text-[11px] font-black tracking-wider text-gray-700 mt-5 mb-3">BRANCH BREAKDOWN</p>
 
           <div className="space-y-3">
             {Object.entries(stats.branchCounts).sort((a,b)=>b[1]-a[1]).map(([branch, count]) => {
               const pct = Math.round((count / (stats.total || 1)) * 100)
               return (
                 <div key={branch} className="flex items-center gap-3">
-                  <span className="text-[13px] font-extrabold w-12">{branch}</span>
-                  <div className="flex-1 h-2.5 bg-gray-100 rounded-full overflow-hidden">
-                    <div className="h-2.5 bg-red-600 rounded-full" style={{ width: `${pct}%` }} />
+                  <span className="text-[13px] font-black text-black w-12">{branch}</span>
+                  <div className="flex-1 h-3 bg-gray-200 rounded-full overflow-hidden">
+                    <div className="h-3 bg-red-600 rounded-full" style={{ width: `${pct}%` }} />
                   </div>
-                  <span className="text-[11px] text-gray-400 w-7">{pct}%</span>
-                  <span className="text-xs text-gray-500 w-12 text-right">{count} sales</span>
+                  <span className="text-[11px] font-bold text-gray-900 w-7">{pct}%</span>
+                  <span className="text-xs text-gray-800 font-medium w-12 text-right">{count} sales</span>
                 </div>
               )
             })}
@@ -239,58 +239,58 @@ export default function DailySalesReport({ sales }: { sales: Sale[] }) {
         </div>
 
         {/* 2. Region Breakdown */}
-        <div className="bg-white rounded-2xl border shadow-sm p-5">
+        <div className="bg-white rounded-2xl border-2 border-gray-100 shadow-sm p-5">
           <div className="flex justify-between items-center mb-3">
             <div className="flex items-center gap-2">
               <div className="w-7 h-7 bg-blue-50 rounded-full flex items-center justify-center">
                 <MapPin className="w-4 h-4 text-blue-500" />
               </div>
-              <span className="text-xs font-semibold text-gray-400">Top Region</span>
+              <span className="text-xs font-black text-gray-800">Top Region</span>
             </div>
-            <span className="text-[11px] font-bold tracking-wider text-gray-400">REGION PERFORMANCE</span>
+            <span className="text-[11px] font-black tracking-wider text-gray-700">REGION PERFORMANCE</span>
           </div>
 
           <div className="flex items-baseline gap-2">
-            <h2 className="text-3xl font-serif font-extrabold text-blue-600 tracking-tight truncate">{stats.topRegion}</h2>
-            <span className="text-xs text-gray-500">
+            <h2 className="text-3xl font-black text-blue-700 tracking-tight truncate">{stats.topRegion}</h2>
+            <span className="text-xs text-gray-800 font-medium">
               {stats.regionCounts[stats.topRegion] || 0} Records • {Math.round(((stats.regionCounts[stats.topRegion] || 0) / (stats.total || 1)) * 100)}% of total
             </span>
           </div>
 
-          <p className="text-[11px] font-bold tracking-wider text-gray-400 mt-5 mb-3">REGION BREAKDOWN - ဘယ် Region ဘယ်နှစ်စီး</p>
+          <p className="text-[11px] font-black tracking-wider text-gray-700 mt-5 mb-3">REGION BREAKDOWN - ဘယ် Region ဘယ်နှစ်စီး</p>
 
           <div className="space-y-3">
             {Object.entries(stats.regionCounts).sort((a,b)=>b[1]-a[1]).map(([region, count]) => {
               const pct = Math.round((count / (stats.total || 1)) * 100)
               return (
                 <div key={region} className="flex items-center gap-3">
-                  <span className="text-[12px] font-bold w-24 truncate" title={region}>{region}</span>
-                  <div className="flex-1 h-2.5 bg-gray-100 rounded-full overflow-hidden">
-                    <div className="h-2.5 bg-blue-600 rounded-full" style={{ width: `${pct}%` }} />
+                  <span className="text-[12px] font-black text-gray-900 w-24 truncate" title={region}>{region}</span>
+                  <div className="flex-1 h-3 bg-gray-200 rounded-full overflow-hidden">
+                    <div className="h-3 bg-blue-600 rounded-full" style={{ width: `${pct}%` }} />
                   </div>
-                  <span className="text-[11px] text-gray-400 w-7">{pct}%</span>
-                  <span className="text-xs text-gray-500 w-16 text-right">{count} စီး</span>
+                  <span className="text-[11px] font-bold text-gray-900 w-7">{pct}%</span>
+                  <span className="text-xs text-gray-800 font-medium w-16 text-right">{count} စီး</span>
                 </div>
               )
             })}
           </div>
 
-          <div className="mt-4 flex items-center gap-2 text-[11px] text-gray-400 bg-blue-50 rounded-lg p-2.5">
+          <div className="mt-4 flex items-center gap-2 text-[12px] font-bold text-gray-800 bg-blue-50 border border-blue-100 rounded-lg p-2.5">
             <TrendingUp className="w-3.5 h-3.5" />
             <span>Total {stats.total} စီး • {Object.keys(stats.regionCounts).length} Regions • Filter: {selectedYear} {monthLabel}</span>
           </div>
         </div>
 
         {/* 3. Top Sales Person */}
-        <div className="bg-white rounded-2xl border shadow-sm p-5">
+        <div className="bg-white rounded-2xl border-2 border-gray-100 shadow-sm p-5">
           <div className="flex justify-between items-center mb-5">
             <div className="flex items-center gap-2">
               <div className="w-7 h-7 bg-orange-50 rounded-full flex items-center justify-center">
                 <Users className="w-4 h-4 text-orange-500" />
               </div>
-              <span className="text-xs font-semibold text-gray-400">Top Sales Person ({selectedYear})</span>
+              <span className="text-xs font-black text-gray-800">Top Sales Person ({selectedYear})</span>
             </div>
-            <span className="text-[11px] font-bold tracking-wider text-gray-400">YEARLY</span>
+            <span className="text-[11px] font-black tracking-wider text-gray-700">YEARLY</span>
           </div>
 
           <div className="flex items-center gap-3">
