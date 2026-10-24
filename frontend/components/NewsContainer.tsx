@@ -1,8 +1,8 @@
 ﻿'use client'
+/* eslint-disable react-hooks/set-state-in-effect */
 /* eslint-disable @next/next/no-img-element */
-
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, CalendarDays, Search, SlidersHorizontal, X } from 'lucide-react'
 import { urlFor } from '../lib/sanity'
@@ -105,7 +105,6 @@ function normalizeNewsCategory(category?: string) {
   return (category || '').toLowerCase().replace(/[^a-z0-9]/g, '').replace(/news$/, '').trim()
 }
 
-// FIX 2: STRICT CATEGORY MATCH - no more keyword search in title/body
 const categoryExactMap: Record<string, string[]> = {
   'myanmar-news': ['myanmar', 'myanmarnews', 'myanmar-news'],
   'fuel-prices': ['fuelprice', 'fuelprices', 'fuel'],
@@ -131,10 +130,7 @@ function isCategoryMatch(newsCategory: string | undefined, selectedCategory: str
   const normalizedSelected = normalizeNewsCategory(selectedCategory)
   if (!normalizedNews) return false
   if (normalizedNews === normalizedSelected) return true
-
   const allowed = categoryExactMap[selectedCategory] || []
-
-  // Special rules
   if (selectedCategory === 'kubota-news') {
     if (normalizedNews.includes('second')) return false
     return allowed.includes(normalizedNews) || normalizedNews === 'kubota'
@@ -148,7 +144,6 @@ function isCategoryMatch(newsCategory: string | undefined, selectedCategory: str
   if (selectedCategory === 'myanmar-news') {
     return normalizedNews === 'myanmar' || allowed.includes(normalizedNews)
   }
-
   return allowed.includes(normalizedNews)
 }
 
@@ -164,6 +159,7 @@ function CompanyCardField({ text }: { text: string }) {
 export default function NewsContainer({ newsList, companiesList, priceList = [] }: NewsContainerProps) {
   const { language } = useLanguage()
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedNewsCategory, setSelectedNewsCategory] = useState('ALL')
   const [selectedCompetitorCategory, setSelectedCompetitorCategory] = useState('ALL')
@@ -175,13 +171,27 @@ export default function NewsContainer({ newsList, companiesList, priceList = [] 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const [visibleCount, setVisibleCount] = useState(9)
 
-  // FIX: STRICT FILTER - only category exact match, no body keyword search
+  // FIX: Sync with URL query from BottomNav (phone) -> ?newsCategory= & ?competitor=
+  useEffect(() => {
+    const newsCat = searchParams.get('newsCategory')
+    const comp = searchParams.get('competitor')
+    if (newsCat) {
+      setSelectedNewsCategory(newsCat)
+      setSelectedCompetitorCategory('ALL')
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    }
+    if (comp) {
+      setSelectedCompetitorCategory(comp)
+      setSelectedNewsCategory('ALL')
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    }
+  }, [searchParams])
+
   const filteredNews = newsList.filter((news) => {
     const matchesSearch = news.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                           (news.body && news.body.toLowerCase().includes(searchTerm.toLowerCase()))
     const selectedCategory = selectedNewsCategory !== 'ALL' ? selectedNewsCategory : selectedCompetitorCategory
     const matchesCategory = selectedCategory === 'ALL' || isCategoryMatch(news.category, selectedCategory)
-
     let matchesDate = true
     if (selectedDate !== '' && news.publishedAt) {
       const newsDateOnly = news.publishedAt.split('T')[0]
@@ -239,7 +249,7 @@ export default function NewsContainer({ newsList, companiesList, priceList = [] 
   return (
     <div>
       <div className="overflow-x-auto rounded-2xl border border-gray-200 bg-white p-5 shadow-sm mb-8">
-        <div className="grid min-w-[980px] grid-cols-6 gap-4 items-stretch">
+        <div className="grid min-w- grid-cols-6 gap-4 items-stretch">
           <button type="button" onClick={() => setIsSidebarOpen(true)} aria-label="Open sidebar filters" className="flex h-11 items-center justify-center rounded-xl border border-red-200 bg-red-50 text-red-700 shadow-sm transition hover:bg-red-100">
             <SlidersHorizontal className="h-5 w-5" /><span className="sr-only">Open sidebar filters</span>
           </button>
