@@ -1,5 +1,16 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## Sanity chat cache
+
+The chat API caches a compact set of news, prices, products, sales, and company records on the server for up to one hour. Matching records are selected from that cache for each question. To expire the cache immediately after Sanity content changes, configure a Sanity webhook:
+
+- URL: `https://<your-app-domain>/api/sanity/revalidate`
+- Method/events: `POST` on document create, update, and delete
+- Filter: `_type in ["news", "newsPortal", "priceList", "productSpec", "productMarketing", "products", "dailySale", "dailySales", "sale", "sales", "company"]`
+- Header: `Authorization: Bearer <SANITY_REVALIDATE_SECRET>`
+
+Set `SANITY_REVALIDATE_SECRET` to a long random value in the app's server environment and use the same value in the webhook header. Keep it server-side; do not use a `NEXT_PUBLIC_` variable. If no webhook is configured, the cache refreshes automatically after its one-hour lifetime.
+
 ## Getting Started
 
 First, run the development server:

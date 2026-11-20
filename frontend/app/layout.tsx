@@ -4,6 +4,7 @@ import "./globals.css";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import SitePasswordGuard from "@/components/SitePasswordGuard";
 import ClientAppShell from "@/components/ClientAppShell";
+import KmmChatbot from "@/components/KmmChatbot";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -30,6 +31,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <SitePasswordGuard>
           <LanguageProvider>
             <ClientAppShell>{children}</ClientAppShell>
+            <KmmChatbot />
           </LanguageProvider>
         </SitePasswordGuard>
       </body>
