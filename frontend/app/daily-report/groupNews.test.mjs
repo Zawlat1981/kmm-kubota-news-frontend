@@ -25,7 +25,7 @@ test("groups categories in report order while preserving article order", () => {
       ["Kubota News", [2, 5, 10]],
       ["Other Brand News", [1, 8]],
       ["Myanmar News", [3]],
-      ["General Price List", [4, 6, 7]],
+      ["General Prices & News", [4, 6, 7]],
       ["Flood News", [9]],
     ],
   );

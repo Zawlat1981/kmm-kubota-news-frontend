@@ -7,7 +7,7 @@ const GROUPS = [
   "Kubota News",
   "Other Brand News",
   "Myanmar News",
-  "General Price List",
+  "General Prices & News",
   "Flood News",
 ] as const;
 
@@ -19,7 +19,7 @@ function getGroup(article: CategorizedArticle): (typeof GROUPS)[number] {
   if (category.includes("kubota")) return "Kubota News";
   if (category.includes("myanmar")) return "Myanmar News";
   if (category.includes("crop") || category.includes("fuel") || category.includes("exchange")) {
-    return "General Price List";
+    return "General Prices & News";
   }
   if (category.includes("flood")) return "Flood News";
   return "Other Brand News";
