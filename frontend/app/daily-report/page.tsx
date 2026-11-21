@@ -183,10 +183,10 @@ function DailyNewsReportContent() {
   const isMediumGrid = totalCount > 4 && totalCount <= 8;
 
   const thumbnailHeightClass = isDenseGrid
-    ? "h-[78px]"
+    ? "h-[85px]"
     : isMediumGrid
-    ? "h-[105px]"
-    : "h-[145px]";
+    ? "h-[115px]"
+    : "h-[155px]";
 
   const categorySummary = Object.values(
     (newsList || []).reduce((acc, item) => {
@@ -294,7 +294,7 @@ function DailyNewsReportContent() {
                 <h3 className="text-[22px] font-bold text-gray-800 mb-3">
                   {group.title}
                 </h3>
-                <div className="grid grid-cols-4 gap-4">
+                <div className="grid grid-cols-3 gap-4">
                   {group.articles.map((news) => {
                     const categoryName = normalizeCategoryTitle(
                       news.categoryText || news.categoryTitle
@@ -330,7 +330,7 @@ function DailyNewsReportContent() {
                               {formatEnglishDate(news.publishedAt || news._createdAt)}
                             </p>
                             {newsTitle && (
-                              <h4 className="text-[13px] font-bold text-gray-800 leading-snug line-clamp-2 mt-1.5">
+                              <h4 className="text-[12.5px] font-bold text-gray-800 leading-snug line-clamp-4 mt-1.5">
                                 {newsTitle}
                               </h4>
                             )}
