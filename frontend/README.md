@@ -1,5 +1,26 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## Site password and daily report
+
+Before deploying, set `SITE_PASSWORD` to the current shared website password and
+`SITE_SESSION_SECRET` to a separate, randomly generated secret of at least 32
+characters in the frontend server environment. For example, generate a secret
+locally with `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`.
+Do not use `NEXT_PUBLIC_` variables or commit these values. The site fails closed
+if either value is missing. Existing browser logins must sign in again; sessions
+expire after seven days and are invalidated when either value changes.
+
+The old password was present in client-side code and may already be known to
+others. Keeping it does not restore secrecy; replace it with a strong new
+password when possible. Configure rate limiting for `/api/auth/login` at the
+hosting platform. Sanity dataset access and the LINE and Sanity webhook
+endpoints are not protected by this website password.
+
+Set `SANITY_STUDIO_FRONTEND_URL` to the HTTPS frontend origin in the Sanity
+Studio build environment and rebuild/redeploy the Studio. Its Daily News Report
+menu opens the selected date on the frontend, where the normal website password
+is required and image/PDF downloads and link sharing remain available.
+
 ## Sanity chat cache
 
 The chat API caches a compact set of news, prices, products, sales, and company records on the server for up to one hour. Matching records are selected from that cache for each question. To expire the cache immediately after Sanity content changes, configure a Sanity webhook:

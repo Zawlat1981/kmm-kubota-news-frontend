@@ -4,6 +4,7 @@ import React, { Suspense, useState, useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { toPng } from "html-to-image";
+import { groupNewsArticles } from "./groupNews";
 
 interface NewsArticle {
   _id: string;
@@ -200,6 +201,7 @@ function DailyNewsReportContent() {
       return acc;
     }, {} as Record<string, { label: string; count: number }>)
   );
+  const newsGroups = groupNewsArticles(newsList);
 
   return (
     <div className="min-h-screen bg-gray-100 p-4 md:p-8 flex flex-col items-center">
@@ -242,39 +244,23 @@ function DailyNewsReportContent() {
       <div className="w-full overflow-x-auto flex justify-center pb-6">
         <div
           ref={reportRef}
-          className="w-[1080px] min-h-[1080px] shrink-0 bg-[#F5F4EF] p-9 flex flex-col justify-between font-sans text-gray-900 select-none box-border shadow-md"
+          className="w-[1080px] min-h-[1080px] shrink-0 bg-[#F5F4EF] p-9 flex flex-col font-sans text-gray-900 select-none box-border shadow-md"
         >
-          <div className="flex items-start justify-between gap-6">
-            <div>
-              <h1 className="text-[44px] font-extrabold tracking-tight leading-none whitespace-nowrap">
-                <span className="text-[#1E5631]">KMM GROUP / </span>
+          <div className="flex items-start gap-6 mb-6">
+            <div className="shrink-0">
+              <h1 className="flex items-center gap-3 text-[44px] font-extrabold tracking-tight leading-none whitespace-nowrap">
+                <img
+                  src="/kmm-logo.png"
+                  alt="KMM Kubota Logo"
+                  className="w-[72px] h-[44px] object-contain mix-blend-multiply"
+                />
                 <span className="text-[#D9531E]">News Report</span>
               </h1>
               <p className="text-[28px] font-bold text-gray-800 mt-2">
                 {formatThaiDate(selectedDate)}
               </p>
-              <p className="text-[19px] text-gray-600 mt-0.5">
-                สรุปรายงานข่าวประจำวัน • KMM Kubota News Portal
-              </p>
             </div>
-            <div className="bg-[#235838] text-white rounded-2xl px-7 py-4 text-center shadow-sm shrink-0">
-              <p className="text-[15px] font-medium opacity-90">ข่าวทั้งหมดวันนี้</p>
-              <p className="text-[38px] font-extrabold leading-tight my-0.5">
-                {totalCount} ข่าว
-              </p>
-              <p className="text-[14px] opacity-85">KMM News Team</p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-7 my-3">
-            <div className="w-[220px] h-[220px] flex items-center justify-center shrink-0">
-              <img
-                src="/kmm-logo.png"
-                alt="KMM Kubota Logo"
-                className="w-full h-full object-contain mix-blend-multiply"
-              />
-            </div>
-            <div className="flex-1 bg-[#FAF9F5] border border-gray-200/90 rounded-2xl px-7 py-5 shadow-xs">
+            <div className="flex-1 min-w-0 bg-[#FAF9F5] border border-gray-200/90 rounded-2xl px-7 py-5 shadow-xs">
               <h2 className="text-[22px] font-bold text-gray-800 mb-3">
                 สรุปประเภทข่าวที่ลงเผยแพร่
               </h2>
@@ -286,91 +272,84 @@ function DailyNewsReportContent() {
                 </p>
               ) : (
                 <div className="grid grid-cols-2 gap-x-10 gap-y-1.5 text-[18px]">
-                  {categorySummary.map((cat) => {
-                    const percent =
-                      totalCount > 0
-                        ? Number(((cat.count / totalCount) * 100).toFixed(1))
-                        : 0;
+                  {categorySummary.map((cat) => (
+                    <div
+                      key={cat.label}
+                      className="flex min-w-0 items-center justify-between text-gray-700"
+                    >
+                      <span className="font-medium truncate pr-2">{cat.label}</span>
+                      <span className="font-bold text-gray-900 whitespace-nowrap">
+                        {cat.count} news
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="border-t-2 border-[#B91C1C] pt-5 space-y-6">
+            {newsGroups.map((group) => (
+              <section key={group.title}>
+                <h3 className="text-[22px] font-bold text-gray-800 mb-3">
+                  {group.title}
+                </h3>
+                <div className="grid grid-cols-4 gap-4">
+                  {group.articles.map((news) => {
+                    const categoryName = normalizeCategoryTitle(
+                      news.categoryText || news.categoryTitle
+                    );
+                    const newsTitle = news.titleText || news.title || "";
+                    const displayImg = news.imageDataUrl || news.imageUrl || "";
+                    const detailSlug = news.slug?.current || news._id;
+
                     return (
                       <div
-                        key={cat.label}
-                        className="flex items-center justify-between text-gray-700"
+                        key={news._id}
+                        className="bg-white rounded-xl border border-gray-200/90 shadow-xs overflow-hidden flex flex-col justify-between"
                       >
-                        <span className="font-medium truncate pr-2">{cat.label}</span>
-                        <span className="font-bold text-gray-900 whitespace-nowrap">
-                          {cat.count} ({percent}%)
-                        </span>
+                        <div>
+                          <div className={`w-full ${thumbnailHeightClass} bg-gray-100 overflow-hidden`}>
+                            {displayImg ? (
+                              <img
+                                src={displayImg}
+                                alt={newsTitle}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">
+                                No Image
+                              </div>
+                            )}
+                          </div>
+                          <div className="p-3">
+                            <p className="text-[11px] font-extrabold text-[#B91C1C] tracking-wide truncate">
+                              {categoryName}
+                            </p>
+                            <p className="text-[11px] text-gray-400 mt-0.5">
+                              {formatEnglishDate(news.publishedAt || news._createdAt)}
+                            </p>
+                            {newsTitle && (
+                              <h4 className="text-[13px] font-bold text-gray-800 leading-snug line-clamp-2 mt-1.5">
+                                {newsTitle}
+                              </h4>
+                            )}
+                          </div>
+                        </div>
+                        <div className="px-3 pb-2.5 flex items-center justify-end">
+                          <Link
+                            href={`/news/${encodeURIComponent(detailSlug)}`}
+                            className="text-[11.5px] font-semibold text-[#1E5631] hover:underline"
+                          >
+                            Read Full Story →
+                          </Link>
+                        </div>
                       </div>
                     );
                   })}
                 </div>
-              )}
-              <div className="border-t border-gray-200 mt-3.5 pt-2.5 text-right">
-                <span className="text-[19px] font-bold text-gray-900">
-                  รวมข่าวทั้งหมด: {totalCount} ข่าว (100%)
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex-1 flex flex-col justify-end">
-            <h3 className="text-[24px] font-bold text-gray-800 mb-3.5">
-              รายการข่าวที่เผยแพร่วันนี้ ({totalCount} รายการ)
-            </h3>
-            <div className="grid grid-cols-4 gap-4">
-              {newsList.map((news) => {
-                const categoryName = normalizeCategoryTitle(
-                  news.categoryText || news.categoryTitle
-                );
-                const newsTitle = news.titleText || news.title || "";
-                const displayImg = news.imageDataUrl || news.imageUrl || "";
-                const detailSlug = news.slug?.current || news._id;
-
-                return (
-                  <div
-                    key={news._id}
-                    className="bg-white rounded-xl border border-gray-200/90 shadow-xs overflow-hidden flex flex-col justify-between"
-                  >
-                    <div>
-                      <div className={`w-full ${thumbnailHeightClass} bg-gray-100 overflow-hidden`}>
-                        {displayImg ? (
-                          <img
-                            src={displayImg}
-                            alt={newsTitle}
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">
-                            No Image
-                          </div>
-                        )}
-                      </div>
-                      <div className="p-3">
-                        <p className="text-[11px] font-extrabold text-[#B91C1C] tracking-wide truncate">
-                          {categoryName}
-                        </p>
-                        <p className="text-[11px] text-gray-400 mt-0.5">
-                          {formatEnglishDate(news.publishedAt || news._createdAt)}
-                        </p>
-                        {newsTitle && (
-                          <h4 className="text-[13px] font-bold text-gray-800 leading-snug line-clamp-2 mt-1.5">
-                            {newsTitle}
-                          </h4>
-                        )}
-                      </div>
-                    </div>
-                    <div className="px-3 pb-2.5 flex items-center justify-end">
-                      <Link
-                        href={`/news/${encodeURIComponent(detailSlug)}`}
-                        className="text-[11.5px] font-semibold text-[#1E5631] hover:underline"
-                      >
-                        Read Full Story →
-                      </Link>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+              </section>
+            ))}
           </div>
         </div>
       </div>

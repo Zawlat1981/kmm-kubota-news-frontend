@@ -1,6 +1,7 @@
 import { defineConfig } from 'sanity'
 import { structureTool } from 'sanity/structure'
 import { schemaTypes } from './schemas'
+import DailyNewsReport from './DailyNewsReport'
 
 export default defineConfig({
   name: 'kubota-web',
@@ -65,6 +66,17 @@ export default defineConfig({
                 S.documentTypeList('newsPortal').title('All News')
               ),
 
+            S.listItem()
+              .title('Daily News Report')
+              .icon(() => '📰')
+              .child(S.component(DailyNewsReport).title('Daily News Report')),
+
+            S.listItem()
+              .title('Daily Sales')
+              .icon(() => '📊')
+              .child(
+                S.documentTypeList('dailySale').title('Daily Sales Records')
+              ),
 
             // Settings
             S.divider(),
