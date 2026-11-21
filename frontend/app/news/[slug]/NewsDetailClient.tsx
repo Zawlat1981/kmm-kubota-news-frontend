@@ -9,7 +9,7 @@ import Link from 'next/link'
 
 type PortableTextChild = { text?: string }
 type PortableTextBlock = { _type: string; children?: PortableTextChild[] }
-type SanityImage = { _type: string; asset: { _ref: string; _type: string } }
+type SanityImage = { _key?: string; _type: string; asset: { _ref: string; _type: string } }
 
 interface NewsData {
   _id?: string
@@ -17,6 +17,7 @@ interface NewsData {
   category?: string
   publishedAt?: string
   mainImage?: SanityImage
+  gallery?: SanityImage[]
   body?: string | PortableTextBlock[]
   sourceUrl?: string
 }
@@ -117,6 +118,16 @@ export default function NewsDetailClient({ news }: { news: NewsData }) {
           <p className="text-gray-500">No content</p>
         )}
       </div>
+
+      {news.gallery && news.gallery.length > 0 && (
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-6">
+          {news.gallery.filter((image) => image?.asset?._ref).map((image, index) => (
+            <div key={image._key || image.asset._ref} className="rounded-lg overflow-hidden shadow-sm aspect-square">
+              <img src={urlFor(image).url()} alt={`${news.title} - ${index + 2}`} className="w-full h-full object-cover" />
+            </div>
+          ))}
+        </div>
+      )}
 
       {language !== 'th' && !isLoading && (
         <p className="text-xs text-gray-400 mt-8 italic">

@@ -96,7 +96,7 @@ function formatCategory(category?: string) {
   if (normalizedCategory.includes('kubota-zt')) return 'KUBOTA ZT NEWS'
   if (category.includes('Second') || category.includes('second') || category.includes('ဒုတိယလက်သုံး')) return 'KUBOTA SECOND NEWS'
   if (category.includes('kubota') || category.includes('Kubota')) return 'KUBOTA NEWS'
-  if (normalizedCategory.includes('yanmar')) return 'YANMAR NEWS'
+  if (normalizedCategory.includes('yanmar') || normalizedCategory.includes('yammar')) return 'YANMAR NEWS'
   if (normalizedCategory.includes('john') || normalizedCategory.includes('deere')) return 'JOHN DEERE NEWS'
   if (category.includes('Other Brand') || category.includes('အခြား')) return 'OTHER BRAND NEWS'
   return category.toUpperCase()
@@ -114,7 +114,7 @@ const categoryExactMap: Record<string, string[]> = {
   'kubota-news': ['kubota'],
   'kubota-second-news': ['kubotasecond', 'second', 'kubota2nd', 'kubotasecondhand', 'kubotasecondhandnews'],
   'kubota-zt-news': ['kubotazt', 'zt', 'kubotaztnews'],
-  'yanmar-news': ['yanmar', 'yanmarnews'],
+  'yanmar-news': ['yanmar', 'yanmarnews', 'yammar'],
   'john-deere-news': ['johndeere', 'jdeere', 'johndeerenews'],
   'new-holland-news': ['newholland', 'newhollandnews'],
   'yto-news': ['yto', 'ytonews'],

@@ -3,6 +3,7 @@ import NewsContainer from '@/components/NewsContainer'
 import LanguageSwitcher from '@/components/LanguageSwitcher'
 
 interface NewsItem {
+  _id: string
   title: string
   brand?: string
   slug: { current: string }
@@ -52,6 +53,7 @@ async function getData(): Promise<{
   priceList: PriceItem[]
 }> {
   const newsQuery = `*[_type == "newsPortal"] | order(publishedAt desc) {
+    _id,
     title,
     brand,
     slug,

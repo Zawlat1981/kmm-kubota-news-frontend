@@ -58,7 +58,7 @@ function normalizeCategoryTitle(rawCategory?: unknown): string {
   if (lower.includes("kubota") && lower.includes("zt")) return "Kubota ZT News";
   if (lower.includes("kubota") && lower.includes("second")) return "Kubota Second News";
   if (lower.includes("kubota")) return "Kubota News";
-  if (lower.includes("yanmar")) return "Yanmar News";
+  if (lower.includes("yanmar") || lower.includes("yammar")) return "Yanmar News";
   if (lower.includes("john deere")) return "John Deere News";
   if (lower.includes("new holland")) return "New Holland News";
   if (lower.includes("yto")) return "YTO News";

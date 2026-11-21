@@ -10,28 +10,9 @@ export default {
     },
     {
       name: 'brand',
-      title: 'Brand / Company Name (ကုမ္ပဏီ သို့မဟုတ် Brand နာမည်)',
+      title: 'News Source (သတင်းဌာနအမည်)',
       type: 'string',
-      description: 'List ထဲမှာ မပါရင် "Other" ကို ရွေးပြီး အောက်က box မှာ ကိုယ်တိုင်ရိုက်ထည့်ပါ',
-      options: {
-        list: [
-          { title: 'Kubota Myanmar', value: 'Kubota Myanmar' },
-          { title: 'Kubota GBS', value: 'Kubota GBS' },
-          { title: 'Kubota Aye Maga', value: 'Kubota Aye Maga' },
-          { title: 'LST Kubota Myanmar', value: 'LST Kubota Myanmar' },
-          { title: 'Royal Kubota Ayeyareaddy', value: 'Royal Kubota Ayeyareaddy' },
-          { title: 'Kubota Mya Taung-Hitachi', value: 'Kubota Mya Taung-Hitachi' },
-          { title: 'Kubota Myo Chit', value: 'Kubota Myo Chit' },
-          { title: 'Yanmar Myanmar', value: 'Yanmar Myanmar' },
-          { title: 'Win Shwe Wah (Kubota 2nd, Yanmar, YTO)', value: 'Win Shwe Wah' },
-          { title: 'John Deere Myanmar', value: 'John Deere Myanmar' },
-          { title: 'New Holland Myanmar', value: 'New Holland Myanmar' },
-          { title: 'Shwe Agriculture (Mahindra, Yamabisi)', value: 'Shwe Agriculture' },
-          { title: 'Swe Tun (Dongfeng)', value: 'Swe Tun' },
-          { title: 'IME International (YTO)', value: 'IME International' },
-          { title: 'Other (အခြား)', value: 'other' },
-        ]
-      }
+      description: 'သတင်းဌာန သို့မဟုတ် အရင်းအမြစ်အမည်ကို ကိုယ်တိုင်ရိုက်ထည့်ပါ',
     },
     {
       name: 'brandCustom',
@@ -41,14 +22,41 @@ export default {
       hidden: ({ parent }) => parent?.brand !== 'other',
     },
     {
+      name: 'slug',
+      title: 'Slug (လင့်ခ်အတွက်)',
+      type: 'slug',
+      options: {
+        source: 'title',
+        maxLength: 96,
+        slugify: (input) => {
+          const now = new Date()
+          const yyyy = now.getFullYear()
+          const mm = String(now.getMonth() + 1).padStart(2, '0')
+          const dd = String(now.getDate()).padStart(2, '0')
+          const hh = String(now.getHours()).padStart(2, '0')
+          const min = String(now.getMinutes()).padStart(2, '0')
+          const dateStamp = `${yyyy}${mm}${dd}${hh}${min}`
+          const base = (input || '')
+            .toLowerCase()
+            .replace(/[^\w\s-]/g, '')
+            .trim()
+            .replace(/\s+/g, '-')
+            .slice(0, 60)
+
+          return base ? `${base}-${dateStamp}` : dateStamp
+        },
+      },
+    },
+    {
       name: 'category',
       title: 'Category (သတင်းကဏ္ဍ)',
       type: 'string',
       options: {
         list: [
           { title: 'Kubota News', value: 'kubota-news' },
-          { title: 'Kubota Second News', value: 'kubota-second-news' }, 
-          { title: 'Yammar News', value: 'yammar-news' },
+          { title: 'Kubota ZT News', value: 'kubota-zt-news' },
+          { title: 'Kubota Second News', value: 'kubota-second-news' },
+          { title: 'Yanmar News', value: 'yanmar-news' },
           { title: 'John Deere News', value: 'john-deere-news' },
           { title: 'New Holland News', value: 'new-holland-news' },
           { title: 'YTO News', value: 'yto-news' },
@@ -56,11 +64,13 @@ export default {
           { title: 'Yamabisi News', value: 'yamabisi-news' },
           { title: 'Mahindra News', value: 'mahindra-news' },
           { title: 'Dongfeng News', value: 'dongfeng-news' },
-          { title: 'Crop Prices', value: 'crop-prices' },
-          { title: 'Fuel Prices', value: 'fuel-prices' },
+          { title: 'Mahindra and Dongfeng News', value: 'mahindra-dongfeng-news' },
+          { title: 'DeutzFhar & Matador News', value: 'deutzfar-matador-news' },
+          { title: 'Crop Price & News', value: 'crop-prices' },
+          { title: 'Fuel Price & News', value: 'fuel-prices' },
+          { title: 'Exchange Rates', value: 'exchange-rates' },
           { title: 'Myanmar News', value: 'myanmar-news' },
-          { title: 'Flood News (ရေးဘေးသတင်း)', value: 'flood-news' },
-          { title: 'Other (အခြား)', value: 'other' },
+          { title: 'Other Brand News', value: 'other-brand-news' },
         ],
       },
     },
@@ -70,6 +80,11 @@ export default {
       type: 'string',
       description: 'Category field မှာ "Other" ကို ရွေးထားမှသာ ဒီ box ကို ဖြည့်ပါ',
       hidden: ({ parent }) => parent?.category !== 'other',
+    },
+    {
+      name: 'publishedAt',
+      title: 'Published Date (တင်သည့်ရက်စွဲ)',
+      type: 'datetime',
     },
     {
       name: 'sourceUrl',
@@ -84,6 +99,13 @@ export default {
       options: {
         hotspot: true,
       },
+    },
+    {
+      name: 'gallery',
+      title: 'Additional Images (ပုံနောက်ထပ်များ)',
+      type: 'array',
+      of: [{ type: 'image', options: { hotspot: true } }],
+      description: 'Main Image အပြင် ထပ်ဖြည့်ချင်သော ပုံများ — အရေအတွက် ကန့်သတ်ချက် မရှိပါ',
     },
     {
       name: 'body',
