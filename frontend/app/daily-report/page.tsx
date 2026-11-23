@@ -183,10 +183,10 @@ function DailyNewsReportContent() {
   const isMediumGrid = totalCount > 4 && totalCount <= 8;
 
   const thumbnailHeightClass = isDenseGrid
-    ? "h-[85px]"
+    ? "h-[150px] sm:h-[85px]"
     : isMediumGrid
-    ? "h-[115px]"
-    : "h-[155px]";
+    ? "h-[150px] sm:h-[115px]"
+    : "h-[170px] sm:h-[155px]";
 
   const categorySummary = Object.values(
     (newsList || []).reduce((acc, item) => {
@@ -204,9 +204,9 @@ function DailyNewsReportContent() {
   const newsGroups = groupNewsArticles(newsList);
 
   return (
-    <div className="min-h-screen bg-gray-100 p-4 md:p-8 flex flex-col items-center">
-      <div className="w-full max-w-[1080px] bg-white rounded-2xl border border-gray-200 p-4 mb-6 shadow-xs flex flex-wrap items-center justify-between gap-4 print:hidden">
-        <div className="flex items-center gap-3">
+    <div className="min-h-screen bg-gray-100 p-2 sm:p-4 md:p-8 flex flex-col items-center">
+      <div className="w-full max-w-[1080px] bg-white rounded-2xl border border-gray-200 p-3 sm:p-4 mb-4 sm:mb-6 shadow-xs flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center justify-between gap-3 sm:gap-4 print:hidden">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
           <label className="font-bold text-gray-700 text-sm sm:text-base">
             📅 ရက်စွဲရွေးရန်:
           </label>
@@ -217,51 +217,51 @@ function DailyNewsReportContent() {
             className="border border-gray-300 rounded-lg px-3 py-2 text-sm font-medium text-gray-800"
           />
         </div>
-        <div className="flex flex-wrap items-center gap-2.5">
+        <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2.5">
           <button
             onClick={handleDownloadImage}
             disabled={exporting}
-            className="bg-[#235838] hover:bg-[#1a432a] text-white text-sm font-semibold px-4 py-2.5 rounded-xl cursor-pointer disabled:opacity-50"
+            className="bg-[#235838] hover:bg-[#1a432a] text-white text-sm font-semibold px-2 sm:px-4 py-2.5 rounded-xl cursor-pointer disabled:opacity-50"
           >
             🖼️ {exporting ? "Exporting..." : "Download Image"}
           </button>
           <button
             onClick={handleDownloadPDF}
             disabled={exporting}
-            className="bg-[#D9531E] hover:bg-[#b84315] text-white text-sm font-semibold px-4 py-2.5 rounded-xl cursor-pointer disabled:opacity-50"
+            className="bg-[#D9531E] hover:bg-[#b84315] text-white text-sm font-semibold px-2 sm:px-4 py-2.5 rounded-xl cursor-pointer disabled:opacity-50"
           >
             📄 Download PDF
           </button>
           <button
             onClick={handleCopyLink}
-            className="bg-gray-800 hover:bg-gray-900 text-white text-sm font-semibold px-4 py-2.5 rounded-xl cursor-pointer"
+            className="col-span-2 sm:col-span-1 bg-gray-800 hover:bg-gray-900 text-white text-sm font-semibold px-2 sm:px-4 py-2.5 rounded-xl cursor-pointer"
           >
             {copied ? "✅ Link Copied!" : "🔗 Copy Link"}
           </button>
         </div>
       </div>
 
-      <div className="w-full overflow-x-auto flex justify-center pb-6">
+      <div className="w-full flex justify-center pb-6">
         <div
           ref={reportRef}
-          className="w-[1080px] min-h-[1080px] shrink-0 bg-[#F5F4EF] p-9 flex flex-col font-sans text-gray-900 select-none box-border shadow-md"
+          className="w-full max-w-[1080px] min-w-0 md:min-h-[1080px] bg-[#F5F4EF] p-4 sm:p-6 md:p-9 flex flex-col font-sans text-gray-900 select-none box-border shadow-md"
         >
-          <div className="flex items-start gap-6 mb-6">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-start gap-4 sm:gap-6 mb-6">
             <div className="shrink-0">
-              <h1 className="flex items-center gap-3 text-[44px] font-extrabold tracking-tight leading-none whitespace-nowrap">
+              <h1 className="flex items-center gap-2 sm:gap-3 text-[30px] sm:text-[44px] font-extrabold tracking-tight leading-none whitespace-nowrap">
                 <img
                   src="/kmm-logo.png"
                   alt="KMM Kubota Logo"
-                  className="w-[72px] h-[44px] object-contain mix-blend-multiply"
+                  className="w-[48px] h-[32px] sm:w-[72px] sm:h-[44px] object-contain mix-blend-multiply"
                 />
                 <span className="text-[#D9531E]">News Report</span>
               </h1>
-              <p className="text-[28px] font-bold text-gray-800 mt-2">
+              <p className="text-[22px] sm:text-[28px] font-bold text-gray-800 mt-2">
                 {formatThaiDate(selectedDate)}
               </p>
             </div>
-            <div className="flex-1 min-w-0 bg-[#FAF9F5] border border-gray-200/90 rounded-2xl px-7 py-5 shadow-xs">
-              <h2 className="text-[22px] font-bold text-gray-800 mb-3">
+            <div className="flex-1 min-w-0 bg-[#FAF9F5] border border-gray-200/90 rounded-2xl px-4 py-4 sm:px-7 sm:py-5 shadow-xs">
+              <h2 className="text-[18px] sm:text-[22px] font-bold text-gray-800 mb-3">
                 สรุปประเภทข่าวที่ลงเผยแพร่
               </h2>
               {loading ? (
@@ -271,7 +271,7 @@ function DailyNewsReportContent() {
                   ยังไม่มีรายการข่าวสำหรับวันที่เลือก
                 </p>
               ) : (
-                <div className="grid grid-cols-2 gap-x-10 gap-y-1.5 text-[18px]">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-1.5 text-[14px] sm:text-[18px]">
                   {categorySummary.map((cat) => (
                     <div
                       key={cat.label}
@@ -294,7 +294,7 @@ function DailyNewsReportContent() {
                 <h3 className="text-[22px] font-bold text-gray-800 mb-3">
                   {group.title}
                 </h3>
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {group.articles.map((news) => {
                     const categoryName = normalizeCategoryTitle(
                       news.categoryText || news.categoryTitle
