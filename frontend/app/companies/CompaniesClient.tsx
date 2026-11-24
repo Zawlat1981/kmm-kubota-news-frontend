@@ -4,6 +4,9 @@ import Image from 'next/image'
 import imageUrlBuilder from '@sanity/image-url'
 import { client } from '@/lib/sanity'
 import { Company, SanityImage } from './page'
+import { useLanguage } from '@/contexts/LanguageContext'
+import { t } from '@/lib/i18n/uiText'
+import { extraText } from '@/lib/i18n/extraText'
 
 const builder = imageUrlBuilder(client)
 
@@ -12,6 +15,8 @@ function urlFor(source: SanityImage) {
 }
 
 export default function CompaniesDetailClient({ company }: { company: Company }) {
+  const { language } = useLanguage()
+  const text = extraText(language)
   const branches = company.branchOffices?.filter(b => b.address && b.address !== 'No address') || []
   const imageSource = company.mainImage || company.companyImage
 
@@ -19,7 +24,7 @@ export default function CompaniesDetailClient({ company }: { company: Company })
     <div className="min-h-screen bg-gray-50">
       <div className="max-w- mx-auto p-4">
         <Link href="/companies" className="inline-flex items-center gap-1 text- text-red-600 bg-white px-4 py-2 rounded-full border shadow-sm mb-4 hover:bg-gray-50">
-          ← Back to Menu
+          ← {t('backToMenu', language)}
         </Link>
 
         <div className="bg-white rounded-2xl overflow-hidden shadow-sm border">
@@ -45,7 +50,7 @@ export default function CompaniesDetailClient({ company }: { company: Company })
                 <div className="flex gap-3">
                   <span>🏷️</span>
                   <div>
-                    <p className="text- text-gray-400 font-bold uppercase tracking-wider">BRAND</p>
+                    <p className="text- text-gray-400 font-bold uppercase tracking-wider">{t('brand', language)}</p>
                     <p className="text- text-gray-800">{company.brand}</p>
                   </div>
                 </div>
@@ -55,7 +60,7 @@ export default function CompaniesDetailClient({ company }: { company: Company })
                 <div className="flex gap-3">
                   <span>📁</span>
                   <div>
-                    <p className="text- text-gray-400 font-bold uppercase tracking-wider">COMPANY GROUP</p>
+                    <p className="text- text-gray-400 font-bold uppercase tracking-wider">{text.companyGroup}</p>
                     <p className="text- text-gray-800">{company.companyGroup}</p>
                   </div>
                 </div>
@@ -65,7 +70,7 @@ export default function CompaniesDetailClient({ company }: { company: Company })
                 <div className="flex gap-3">
                   <span>📄</span>
                   <div>
-                    <p className="text- text-gray-400 font-bold uppercase tracking-wider">CATEGORY</p>
+                    <p className="text- text-gray-400 font-bold uppercase tracking-wider">{text.category}</p>
                     <p className="text- text-gray-800">{company.category}</p>
                   </div>
                 </div>
@@ -77,7 +82,7 @@ export default function CompaniesDetailClient({ company }: { company: Company })
                     <span className="mt-0.5">📍</span>
                     <div className="flex-1 min-w-0">
                       <p className="text- text-gray-400 font-bold uppercase tracking-wider">
-                        LOCATION & ADDRESS {branches.length > 1 ? `#${idx+1}` : ''}
+                        {text.location} {branches.length > 1 ? `#${idx+1}` : ''}
                       </p>
                       <p className="text- text-gray-800 mt-1 leading-snug break-words">
                         {branch.address}
@@ -102,7 +107,7 @@ export default function CompaniesDetailClient({ company }: { company: Company })
                 <div className="flex gap-3">
                   <span className="mt-0.5">📍</span>
                   <div className="flex-1">
-                    <p className="text- text-gray-400 font-bold uppercase">LOCATION & ADDRESS</p>
+                    <p className="text- text-gray-400 font-bold uppercase">{text.location}</p>
                     <p className="text- text-gray-800 mt-1">
                       {[company.township, company.state].filter(Boolean).join(', ') || company.location || company.address}
                     </p>
@@ -119,7 +124,7 @@ export default function CompaniesDetailClient({ company }: { company: Company })
                 <div className="flex gap-3">
                   <span>✉️</span>
                   <div>
-                    <p className="text- text-gray-400 font-bold uppercase">EMAIL ADDRESS</p>
+                    <p className="text- text-gray-400 font-bold uppercase">{text.email}</p>
                     <a href={`mailto:${company.email}`} className="text- text-blue-600 hover:underline break-all">
                       {company.email}
                     </a>

@@ -1,11 +1,12 @@
 'use client'
 import { useState, useRef, useEffect } from 'react'
 import { useLanguage, SiteLanguage } from '@/contexts/LanguageContext'
+import { extraText } from '@/lib/i18n/extraText'
 
 const OPTIONS: { code: SiteLanguage; label: string; flag: string; full: string }[] = [
-  { code: 'th', label: 'ไทย', flag: '🇹🇭', full: 'ไทย (ต้นฉบับ)' },
-  { code: 'my', label: 'မြန်မာ', flag: '🇲🇲', full: 'မြန်မာလို' },
   { code: 'en', label: 'EN', flag: '🇬🇧', full: 'English' },
+  { code: 'th', label: 'ไทย', flag: '🇹🇭', full: 'ไทย' },
+  { code: 'my', label: 'မြန်မာ', flag: '🇲🇲', full: 'မြန်မာ' },
 ]
 
 export default function LanguageSwitcher() {
@@ -27,6 +28,9 @@ export default function LanguageSwitcher() {
     <div className="relative" ref={ref}>
       <button
         onClick={() => setOpen((v) => !v)}
+        type="button"
+        aria-label={extraText(language).language}
+        aria-expanded={open}
         className="flex items-center gap-2 px-3 py-1.5 rounded-full border bg-white text-sm font-medium shadow-sm hover:bg-gray-50"
       >
         <span>{current.flag}</span>

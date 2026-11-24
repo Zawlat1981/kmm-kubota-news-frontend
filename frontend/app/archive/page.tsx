@@ -1,5 +1,7 @@
 import { client } from '../../lib/sanity'
 import Link from 'next/link'
+import { ExtraText, LocalizedDate, UiText } from '@/components/LocalizedText'
+import NewsTitle from '@/components/NewsTitle'
 
 interface NewsItem {
   title: string
@@ -44,14 +46,14 @@ export default async function ArchivePage() {
         {/* Header Section */}
         <div className="mb-8 flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Monthly Archive</h1>
-            <p className="text-sm text-gray-500 mt-1">คุณสามารถอ่านข่าวสารย้อนหลังทั้งหมดที่จัดระเบียบตามเดือนและวันที่ได้ใน Monthly Archive</p>
+            <h1 className="text-2xl font-bold text-gray-900"><ExtraText textKey="archive" /></h1>
+            <p className="text-sm text-gray-500 mt-1"><ExtraText textKey="archiveDesc" /></p>
           </div>
           <Link 
             href="/" 
             className="px-4 py-2 bg-white border border-gray-300 text-gray-700 text-sm font-medium rounded-lg shadow-sm hover:bg-gray-100 transition"
           >
-            ← Back to Home
+            <UiText textKey="backToHome" />
           </Link>
         </div>
 
@@ -76,14 +78,14 @@ export default async function ArchivePage() {
             return (
               <div key={monthYear} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
                 <h2 className="text-xl font-bold text-red-600 border-b border-gray-100 pb-3 mb-4 flex items-center">
-                  📅 {monthYear} <span className="ml-2 text-xs font-normal text-gray-500">({items.length} news)</span>
+                  📅 <LocalizedDate value={items[0].publishedAt!} monthOnly /> <span className="ml-2 text-xs font-normal text-gray-500">({items.length} <ExtraText textKey="newsCount" />)</span>
                 </h2>
 
                 {/* Day-by-Day breakdown inside the month */}
                 <div className="space-y-6">
                   {Object.entries(groupedByDay).map(([dayStr, dayNewsList]) => (
                     <div key={dayStr} className="border-l-2 border-red-500 pl-4 ml-2">
-                      <h3 className="text-sm font-semibold text-gray-700 mb-2">{dayStr}</h3>
+                      <h3 className="text-sm font-semibold text-gray-700 mb-2"><LocalizedDate value={dayNewsList[0].publishedAt!} /></h3>
                       <ul className="space-y-2">
                         {dayNewsList.map((news, idx) => (
                           <li key={idx}>
@@ -91,8 +93,8 @@ export default async function ArchivePage() {
                               href={`/news/${news.slug?.current}`}
                               className="text-gray-900 hover:text-red-600 font-medium text-sm transition flex items-center justify-between group"
                             >
-                              <span className="line-clamp-1 group-hover:underline">• {news.title}</span>
-                              <span className="text-xs text-blue-600 ml-4 whitespace-nowrap">Read →</span>
+                              <span className="min-w-0 group-hover:underline">• <NewsTitle title={news.title} textClassName="line-clamp-1" /></span>
+                              <span className="text-xs text-blue-600 ml-4 whitespace-nowrap"><ExtraText textKey="read" /> →</span>
                             </Link>
                           </li>
                         ))}
@@ -105,7 +107,7 @@ export default async function ArchivePage() {
           })
         ) : (
           <div className="text-center py-12 bg-white rounded-xl border border-gray-200 text-gray-500">
-            No archived news available.
+            <ExtraText textKey="noArchived" />
           </div>
         )}
 

@@ -2,8 +2,11 @@
 
 /* eslint-disable @next/next/no-img-element */
 import { useLanguage, SiteLanguage } from '@/contexts/LanguageContext'
-import { useTranslatedTexts } from '@/hooks/useTranslatedTexts'
 import { t } from '@/lib/i18n/uiText'
+import { extraText } from '@/lib/i18n/extraText'
+import { formatLocalizedDate } from '@/lib/i18n/date'
+import { newsCategoryKey } from '@/lib/i18n/newsCategory'
+import { useTranslatedTexts } from '@/hooks/useTranslatedTexts'
 import { urlFor } from '@/lib/sanity'
 import Link from 'next/link'
 
@@ -36,23 +39,15 @@ function blocksToPlainText(blocks: string | PortableTextBlock[] | undefined): st
 }
 
 function formatCategory(category: string | undefined, language: SiteLanguage): string {
-  if (!category) return t('newsCategoryDefault', language) || 'NEWS'
-  const n = category.toLowerCase()
-  if (n.includes('myanmar')) return t('myanmarNews', language)
-  if (n.includes('fuel')) return t('fuelPrices', language)
-  if (n.includes('crop')) return t('cropPrices', language)
-  if (n.includes('exchange')) return t('exchangeRates', language)
-  if (n.includes('kubota')) return t('kubotaNews', language)
-  return category.toUpperCase()
+  const key = newsCategoryKey(category)
+  return key ? t(key, language) : category || ''
 }
 
 export default function NewsDetailClient({ news }: { news: NewsData }) {
   const { language } = useLanguage()
   const plainBody = blocksToPlainText(news.body)
-  const { texts, isLoading } = useTranslatedTexts([news.title || '', plainBody || ''])
-  const translatedTitle = texts[0] || news.title
-  const translatedBodyRaw = texts[1] || plainBody
-  const paragraphs = translatedBodyRaw.split('\n\n').filter(Boolean)
+  const { texts, isLoading, error } = useTranslatedTexts([news.title, plainBody], true)
+  const paragraphs = texts[1].split('\n\n').filter(Boolean)
 
   // Source label text based on language
   const sourceLabel = language === 'my' ? 'မူရင်းသတင်း' : language === 'th' ? 'แหล่งข่าวต้นฉบับ' : 'Source'
@@ -70,15 +65,16 @@ export default function NewsDetailClient({ news }: { news: NewsData }) {
       )}
 
       <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3 leading-tight">
-        {translatedTitle}
-        {isLoading && <span className="ml-2 text-sm font-normal text-gray-400 animate-pulse">•</span>}
+        {texts[0]}
       </h1>
+      {isLoading && <p role="status" className="text-sm text-gray-500 mb-3">{extraText(language).translating}</p>}
+      {error && <p role="alert" className="text-sm text-red-700 mb-3">{extraText(language).translationError}</p>}
 
       {/* DATE + SOURCE LINK - RED BOX AREA FROM YOUR IMAGE */}
       <div className="flex flex-wrap items-center gap-3 mb-6 text-sm">
         {news.publishedAt && (
           <span className="text-gray-400">
-            {new Date(news.publishedAt).toLocaleDateString(language === 'my' ? 'my-MM' : 'en-US', {
+            {formatLocalizedDate(new Date(news.publishedAt), language, {
               year: 'numeric',
               month: 'long',
               day: 'numeric',
@@ -115,7 +111,7 @@ export default function NewsDetailClient({ news }: { news: NewsData }) {
             </p>
           ))
         ) : (
-          <p className="text-gray-500">No content</p>
+          <p className="text-gray-500">{extraText(language).noContent}</p>
         )}
       </div>
 
@@ -129,11 +125,6 @@ export default function NewsDetailClient({ news }: { news: NewsData }) {
         </div>
       )}
 
-      {language !== 'th' && !isLoading && (
-        <p className="text-xs text-gray-400 mt-8 italic">
-          {language === 'my' ? 'မူရင်းထိုင်းဘာသာမှ အလိုအလျောက် ဘာသာပြန်ထားသည်' : 'Auto-translated from Thai original'}
-        </p>
-      )}
     </main>
   )
 }

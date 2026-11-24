@@ -3,10 +3,14 @@
 import { useState, type FormEvent } from 'react';
 import { useChat } from '@ai-sdk/react';
 import { DefaultChatTransport } from 'ai';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { extraText } from '@/lib/i18n/extraText';
 
 export default function KmmChatbot() {
   const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState('');
+  const { language } = useLanguage();
+  const text = extraText(language);
   const { messages, sendMessage, status, error } = useChat({
     transport: new DefaultChatTransport({ api: '/api/chat' }),
   });
@@ -29,10 +33,11 @@ export default function KmmChatbot() {
           <div className="bg-[#F36F21] text-white px-4 py-3 flex justify-between items-center">
             <div>
               <h3 className="font-bold text-sm">KMM AI Assistant</h3>
-              <p className="text-xs text-orange-100">KMM Kubota Myanmar • News & Sales</p>
+              <p className="text-xs text-orange-100">KMM Kubota Myanmar • {text.chatSubtitle}</p>
             </div>
             <button
               onClick={() => setIsOpen(false)}
+              aria-label={text.close}
               className="text-white hover:bg-orange-600 rounded-lg px-2 py-1 text-sm"
             >
               ✕
@@ -43,9 +48,9 @@ export default function KmmChatbot() {
           <div className="flex-1 p-4 overflow-y-auto space-y-3 bg-gray-50 text-sm">
             {messages.length === 0 && (
               <div className="text-gray-500 text-center mt-10">
-                <p className="font-medium text-gray-700">မင်္ဂလာပါ ခင်ဗျာ 👋</p>
+                <p className="font-medium text-gray-700">{text.hello}</p>
                 <p className="text-xs mt-1">
-                  KMM သတင်းများ၊ ထွန်စက်ဈေးနှုန်းများနှင့် အရောင်းစာရင်းများကို မေးမြန်းနိုင်ပါသည်။
+                  {text.chatDescription}
                 </p>
               </div>
             )}
@@ -79,12 +84,12 @@ export default function KmmChatbot() {
             })}
 
             {isLoading && (
-              <div className="text-xs text-gray-400 italic">AI ရှာဖွေဖြေကြားနေပါသည်...</div>
+              <div className="text-xs text-gray-400 italic">{text.chatLoading}</div>
             )}
 
             {error && (
               <div className="text-xs text-red-600 bg-red-50 p-2 rounded-lg border border-red-200">
-                Error: {error.message}
+                {text.chatError}: {error.message}
               </div>
             )}
           </div>
@@ -94,7 +99,7 @@ export default function KmmChatbot() {
             <input
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="မေးခွန်းရိုက်ထည့်ပါ..."
+              placeholder={text.chatPlaceholder}
               className="flex-1 text-sm border border-gray-300 rounded-xl px-3 py-2 focus:outline-none focus:border-[#F36F21]"
             />
             <button
@@ -102,7 +107,7 @@ export default function KmmChatbot() {
               disabled={isLoading || !input.trim()}
               className="bg-[#F36F21] hover:bg-orange-600 disabled:bg-gray-300 text-white px-4 py-2 rounded-xl text-sm font-medium transition"
             >
-              ပို့မည်
+              {text.send}
             </button>
           </form>
         </div>
@@ -114,7 +119,7 @@ export default function KmmChatbot() {
         className="bg-[#F36F21] hover:bg-orange-600 text-white rounded-full px-5 py-3.5 shadow-lg flex items-center gap-2 font-medium text-sm transition ml-auto"
       >
         <span>💬</span>
-        <span>{isOpen ? 'ပိတ်မည်' : 'KMM AI မေးရန်'}</span>
+        <span>{isOpen ? text.close : text.askAi}</span>
       </button>
     </div>
   );

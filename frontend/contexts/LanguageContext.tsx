@@ -6,23 +6,31 @@ export type SiteLanguage = 'th' | 'my' | 'en'
 interface LanguageContextType {
   language: SiteLanguage
   setLanguage: (lang: SiteLanguage) => void
+  isLanguageReady: boolean
 }
 
 const LanguageContext = createContext<LanguageContextType>({
-  language: 'th',
+  language: 'en',
   setLanguage: () => {},
+  isLanguageReady: false,
 })
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [language, setLanguageState] = useState<SiteLanguage>('th')
+  const [language, setLanguageState] = useState<SiteLanguage>('en')
+  const [isLanguageReady, setLanguageReady] = useState(false)
 
   useEffect(() => {
     const saved = localStorage.getItem('site-language') as SiteLanguage | null
-    if (saved && ['th', 'my', 'en'].includes(saved)) {
-      const t = setTimeout(() => setLanguageState(saved), 0)
-      return () => clearTimeout(t)
-    }
+    const timer = setTimeout(() => {
+      if (saved && ['th', 'my', 'en'].includes(saved)) setLanguageState(saved)
+      setLanguageReady(true)
+    }, 0)
+    return () => clearTimeout(timer)
   }, [])
+
+  useEffect(() => {
+    document.documentElement.lang = language
+  }, [language])
 
   const setLanguage = (lang: SiteLanguage) => {
     setLanguageState(lang)
@@ -30,7 +38,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <LanguageContext.Provider value={{ language, setLanguage }}>
+    <LanguageContext.Provider value={{ language, setLanguage, isLanguageReady }}>
       {children}
     </LanguageContext.Provider>
   )

@@ -1,5 +1,8 @@
 import { client } from '@/lib/sanity'
-import CompaniesDetailClient from './CompaniesClient'
+import Link from 'next/link'
+import CompanyCards from '@/components/CompanyCards'
+import { UiText } from '@/components/LocalizedText'
+import { normalizeCompany, type CompanyRecord } from '@/lib/company'
 
 export interface BranchOffice {
   address?: string
@@ -34,38 +37,29 @@ export interface Company {
   slug?: string
 }
 
-const query = `*[_type == "company" && slug.current == $slug][0]{
+const query = `*[_type == "company"] | order(companyName asc) {
   _id,
-  "name": coalesce(companyName, name),
-  brand,
+  slug,
   companyGroup,
+  companyName,
   category,
-  "state": stateRegion,
-  "township": cityTownship,
-  location,
-  address,
-  email,
-  mainImage,
+  brand,
+  stateRegion,
+  cityTownship,
   companyImage,
-  googleMapUrl,
-  "slug": slug.current,
-  branchOffices[]{
-    address,
-    phone,
-    googleMapUrl
-  }
 }`
 
-export default async function Page({ params }: { params: { slug: string } }) {
-  const company: Company | null = await client.fetch(query, { slug: params.slug }, { cache: 'no-store' })
-
-  if (!company) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p>Company not found: {params.slug}</p>
+export default async function Page() {
+  const companies = await client.fetch<CompanyRecord[]>(query, {}, { cache: 'no-store' })
+  return (
+    <main className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto">
+        <Link href="/" className="inline-flex items-center text-sm font-semibold text-red-600 hover:text-red-700 bg-white px-4 py-2 rounded-lg border border-gray-200 shadow-sm transition">
+          ← <UiText textKey="backToMenu" />
+        </Link>
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 my-6"><UiText textKey="companyBannerTitle" /></h1>
+        <CompanyCards companies={companies.map(normalizeCompany)} />
       </div>
-    )
-  }
-
-  return <CompaniesDetailClient company={company} />
+    </main>
+  )
 }

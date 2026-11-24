@@ -1,5 +1,5 @@
 /**
- * lib/translate.ts - Groq with model fallback + cert bypass + EN/MY/TH
+ * lib/translate.ts - Groq with model fallback + EN/MY/TH
  */
 export type TargetLanguage = 'my' | 'th' | 'en'
 
@@ -19,10 +19,6 @@ async function translateWithGroq(text: string, target: TargetLanguage): Promise<
   if (!apiKey) throw new Error('GROQ_API_KEY is not set')
   const targetName = LANGUAGE_NAMES[target]
 
-  if (process.env.NODE_ENV === 'development') {
-    process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
-  }
-
   const models = [
     'llama-3.1-8b-instant',
     'llama-3.1-70b-versatile',
@@ -40,7 +36,7 @@ async function translateWithGroq(text: string, target: TargetLanguage): Promise<
         body: JSON.stringify({
           model,
           messages: [
-            { role: 'system', content: `Translate Thai to ${targetName}. Output only translation. Preserve formatting, bullets (•), line breaks. Translate FULL content, don't summarize.` },
+            { role: 'system', content: `Translate the text to ${targetName}. Detect the source language. Output only the translation. Preserve company and brand names, model codes, numbers, currencies, formatting, bullets and line breaks. Translate the full content without summarizing.` },
             { role: 'user', content: text },
           ],
           temperature: 0.2,
@@ -53,6 +49,9 @@ async function translateWithGroq(text: string, target: TargetLanguage): Promise<
         throw new Error(err)
       }
       const data = await response.json()
+      if (data.choices?.[0]?.finish_reason === 'length') {
+        throw new Error('Translation was truncated')
+      }
       const translated = data.choices?.[0]?.message?.content?.trim()
       if (translated) return translated
     } catch (e: unknown) {
@@ -74,7 +73,7 @@ export async function translateText(text: string, target: TargetLanguage): Promi
   return translated
 }
 
-export async function translateBatch(texts: string[], target: TargetLanguage): Promise<string[]> {
+export async function translateBatch(texts: string[], target: TargetLanguage, strict = false): Promise<string[]> {
   const results: string[] = []
   for (const t of texts) {
     if (!t || !t.trim()) { results.push(t); continue }
@@ -86,7 +85,8 @@ export async function translateBatch(texts: string[], target: TargetLanguage): P
       memoryCache.set(key, translated)
       results.push(translated)
     } catch (e: unknown) {
-      console.error('Translate fail:', t.slice(0, 50), e)
+      console.error('Translation failed:', e)
+      if (strict) throw e
       results.push(t)
     }
   }

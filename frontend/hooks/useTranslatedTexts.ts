@@ -2,106 +2,55 @@
 import { useState, useEffect } from 'react'
 import { useLanguage } from '@/contexts/LanguageContext'
 
-type TargetLang = 'my' | 'en'
 const cache = new Map<string, string[]>()
 
-export function useTranslatedTitle(originalTitle: string) {
-  const { language } = useLanguage()
-  const [title, setTitle] = useState(originalTitle)
-  useEffect(() => {
-    if (language === 'th' || typeof originalTitle !== 'string' || !originalTitle?.trim()) {
-      const id = setTimeout(() => setTitle(typeof originalTitle === 'string' ? originalTitle : ''), 0)
-      return () => clearTimeout(id)
-    }
-    const cacheKey = `title:${language}:${originalTitle}`
-    if (cache.has(cacheKey)) {
-      const cached = cache.get(cacheKey)![0]
-      const id = setTimeout(() => setTitle(cached), 0)
-      return () => clearTimeout(id)
-    }
-    const target: TargetLang = language === 'my' ? 'my' : 'en'
-    let cancelled = false
-    fetch('/api/translate', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ texts: [originalTitle], target }),
-    }).then(r => r.json()).then(data => {
-      if (cancelled) return
-      const t = data.translated?.[0] || data.texts?.[0] || originalTitle
-      cache.set(cacheKey, [t])
-      setTitle(t)
-    }).catch(() => { if (!cancelled) setTitle(originalTitle) })
-    return () => { cancelled = true }
-  }, [language, originalTitle])
-  return title
-}
-
-// ✅ FIX: any မသုံးဘူး - unknown သုံး → ESLint Error 0
-export function useTranslatedTexts(originalTexts: string[]) {
-  const { language } = useLanguage()
-  const cleanInput = Array.isArray(originalTexts) 
-    ? originalTexts.filter((t): t is string => typeof t === 'string')
-    : []
-  
-  const [texts, setTexts] = useState<string[]>(cleanInput)
-  const [isLoading, setIsLoading] = useState(false)
-  const key = cleanInput.join('|||')
+export function useTranslatedTexts(originalTexts: string[], preserveThai = false) {
+  const { language, isLanguageReady } = useLanguage()
+  const showOriginal = preserveThai && language === 'th'
+  const key = JSON.stringify(originalTexts)
+  const cacheKey = `full:${language}:${key}`
+  const [result, setResult] = useState<{ key: string; texts: string[]; error: boolean } | null>(null)
+  const hasText = originalTexts.some((text) => text.trim())
 
   useEffect(() => {
-    // Brand Reset က object/undefined ဖြစ်ရင် string ပဲယူ
-    const safeTexts = Array.isArray(originalTexts)
-      ? originalTexts.filter((t): t is string => typeof t === 'string' && t.trim().length > 0)
-      : []
-
-    if (language === 'th') {
-      const id = setTimeout(() => { 
-        setTexts(Array.isArray(originalTexts) ? originalTexts.filter((t): t is string => typeof t === 'string') : [])
-        setIsLoading(false) 
-      }, 0)
+    const source: string[] = JSON.parse(key)
+    if (!isLanguageReady || showOriginal || !source.some((text) => text.trim()) || result?.key === cacheKey) return
+    const controller = new AbortController()
+    const cached = cache.get(cacheKey)
+    if (cached) {
+      const id = setTimeout(() => setResult({ key: cacheKey, texts: cached, error: false }), 0)
       return () => clearTimeout(id)
     }
-
-    if (!safeTexts.length) {
-      const id = setTimeout(() => {
-        setTexts(Array.isArray(originalTexts) ? originalTexts.filter((t): t is string => typeof t === 'string') : [])
-      }, 0)
-      return () => clearTimeout(id)
-    }
-
-    const cacheKey = `full:${language}:${key}`
-    if (cache.has(cacheKey)) {
-      const cached = cache.get(cacheKey)!
-      if (cached.length === safeTexts.length) {
-        const id = setTimeout(() => setTexts(cached), 0)
-        return () => clearTimeout(id)
-      }
-    }
-
-    const target: TargetLang = language === 'my' ? 'my' : 'en'
-    let cancelled = false
-    const loadingId = setTimeout(() => { if (!cancelled) setIsLoading(true) }, 0)
 
     fetch('/api/translate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ texts: safeTexts, target }),
-    }).then(r => r.json()).then(data => {
-      if (cancelled) return
-      const translated = data.translated || data.texts || safeTexts
-      if (Array.isArray(translated)) { 
-        cache.set(cacheKey, translated as string[])
-        setTexts(translated as string[]) 
+      body: JSON.stringify({ texts: source, target: language, strict: true }),
+      signal: controller.signal,
+    }).then(async (response) => {
+      if (!response.ok) throw new Error(`Translation HTTP error ${response.status}`)
+      const data = await response.json()
+      if (!Array.isArray(data.translated) || data.translated.length !== source.length ||
+          !data.translated.every((text: unknown, index: number) =>
+            typeof text === 'string' && (!source[index].trim() || text.trim()))) {
+        throw new Error('Invalid translation response')
       }
-    }).catch(() => { 
-      if (!cancelled) setTexts(safeTexts) 
-    }).finally(() => { 
-      if (!cancelled) setIsLoading(false) 
+      const translated: string[] = data.translated
+      if (controller.signal.aborted) return
+      cache.set(cacheKey, translated)
+      setResult({ key: cacheKey, texts: translated, error: false })
+    }).catch((error) => {
+      if (controller.signal.aborted) return
+      console.error('Translation failed:', error)
+      setResult({ key: cacheKey, texts: source, error: true })
     })
+    return () => controller.abort()
+  }, [cacheKey, key, language, result?.key, showOriginal, isLanguageReady])
 
-    return () => { cancelled = true; clearTimeout(loadingId) }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [language, key])
-
-  return { texts, isLoading }
+  return {
+    texts: isLanguageReady && !showOriginal && result?.key === cacheKey ? result.texts : originalTexts,
+    isLoading: hasText && (!isLanguageReady || (!showOriginal && result?.key !== cacheKey)),
+    error: isLanguageReady && !showOriginal && result?.key === cacheKey && result.error,
+  }
 }
 

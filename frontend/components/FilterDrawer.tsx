@@ -3,11 +3,18 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useState, useEffect } from "react"
 import { X, Search } from "lucide-react"
-import { useRouter, useSearchParams } from "next/navigation"
+import { usePathname, useRouter, useSearchParams } from "next/navigation"
+import { useLanguage } from "@/contexts/LanguageContext"
+import { t } from "@/lib/i18n/uiText"
+import { extraText } from "@/lib/i18n/extraText"
+import { PRICE_BRANDS } from "@/lib/prices"
 
 export default function FilterDrawer({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const router = useRouter()
+  const { language } = useLanguage()
+  const text = extraText(language)
   const searchParams = useSearchParams()
+  const pathname = usePathname()
   const [searchText, setSearchText] = useState("")
   const [dateFilter, setDateFilter] = useState("")
   const [fbPage, setFbPage] = useState("")
@@ -59,11 +66,9 @@ export default function FilterDrawer({ isOpen, onClose }: { isOpen: boolean; onC
     }
 
     const queryString = params.toString()
-    if (queryString) {
-      router.push(`/?${queryString}`)
-    } else {
-      router.push("/")
-    }
+    const url = queryString ? `/?${queryString}` : "/"
+    if (pathname === "/") window.history.pushState(null, "", url)
+    else router.push(url)
     
     // If Facebook page selected, open it
     if (fbPage) {
@@ -86,7 +91,8 @@ export default function FilterDrawer({ isOpen, onClose }: { isOpen: boolean; onC
     setFbPage("")
     setBrandPrice("")
     setCompany("")
-    router.push("/")
+    if (pathname === "/") window.history.pushState(null, "", "/")
+    else router.push("/")
     onClose()
   }
 
@@ -108,22 +114,21 @@ export default function FilterDrawer({ isOpen, onClose }: { isOpen: boolean; onC
       <div className="fixed inset-0 bg-black/40 z-[10005] lg:hidden" onClick={onClose} />
       <div className="fixed left-0 top-0 bottom-0 w-[85%] max-w-[340px] bg-white z-[10010] lg:hidden overflow-y-auto flex flex-col shadow-2xl">
         <div className="bg-red-600 text-white p-4 flex justify-between items-center shrink-0">
-          <span className="font-bold text-[16px]">FILTERS</span>
-          <button onClick={onClose} className="p-1 active:bg-red-700 rounded"><X className="w-5 h-5" /></button>
+          <span className="font-bold text-[16px]">{text.filters}</span>
+          <button onClick={onClose} aria-label={text.close} className="p-1 active:bg-red-700 rounded"><X className="w-5 h-5" /></button>
         </div>
         
         <div className="p-4 space-y-5 flex-1 overflow-y-auto pb-4">
           {/* Search */}
           <div>
-            <label className="text-sm font-semibold text-gray-800">Search by title or text</label>
-            <p className="text-[11px] text-gray-400 mt-1">ခေါင်းစဉ် သို့မဟုတ် စာသားဖြင့် ရှာမယ်</p>
+            <label className="text-sm font-semibold text-gray-800">{t('searchByTitleOrText', language)}</label>
             <div className="relative mt-2">
               <Search className="absolute left-3 top-3 w-4 h-4 text-gray-400" />
               <input 
                 value={searchText}
                 onChange={(e) => setSearchText(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && applyFilters()}
-                placeholder="Search news... ex: Kubota" 
+                placeholder={t('searchPlaceholder', language)}
                 className="w-full border border-gray-300 rounded-xl pl-9 pr-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500" 
               />
             </div>
@@ -131,8 +136,7 @@ export default function FilterDrawer({ isOpen, onClose }: { isOpen: boolean; onC
 
           {/* Date */}
           <div>
-            <label className="text-sm font-semibold text-gray-800">Filter by date</label>
-            <p className="text-[11px] text-gray-400 mt-1">ရက်စွဲဖြင့် စစ်မယ်</p>
+            <label className="text-sm font-semibold text-gray-800">{t('dateFilter', language)}</label>
             <input 
               type="date" 
               value={dateFilter}
@@ -143,9 +147,9 @@ export default function FilterDrawer({ isOpen, onClose }: { isOpen: boolean; onC
 
           {/* Facebook Pages */}
           <div>
-            <label className="text-sm font-semibold text-gray-800">KMM Kubota Facebook Pages</label>
+            <label className="text-sm font-semibold text-gray-800">{t('kmmKubotaFacebookPages', language)}</label>
             <select value={fbPage} onChange={(e) => handleFbChange(e.target.value)} className="w-full border border-gray-300 rounded-xl px-3 py-2.5 text-sm mt-2 focus:outline-none focus:ring-2 focus:ring-red-500 bg-white">
-              <option value="">Select Facebook Page</option>
+              <option value="">{t('selectFacebookPage', language)}</option>
               <option value="mawlamyine">KMM Kubota Mawlamyine</option>
               <option value="tharyarwaddy">KMM Kubota Tharyarwaddy</option>
               <option value="nawnghkio">KMM Kubota Nawnghkio</option>
@@ -154,26 +158,20 @@ export default function FilterDrawer({ isOpen, onClose }: { isOpen: boolean; onC
 
           {/* Brand Prices */}
           <div>
-            <label className="text-sm font-semibold text-gray-800">All Brand Prices</label>
-            <p className="text-[11px] text-gray-400 mt-1">Brand ဈေးနှုန်းများ ကြည့်မယ်</p>
+            <label className="text-sm font-semibold text-gray-800">{t('allBrandPricesDefault', language)}</label>
             <select value={brandPrice} onChange={(e) => setBrandPrice(e.target.value)} className="w-full border border-gray-300 rounded-xl px-3 py-2.5 text-sm mt-2 focus:outline-none focus:ring-2 focus:ring-red-500 bg-white">
-              <option value="">Select Brand</option>
-              <option value="Kubota">Kubota - Models & Prices</option>
-              <option value="Yanmar">Yanmar</option>
-              <option value="John Deere">John Deere</option>
-              <option value="New Holland">New Holland</option>
-              <option value="YTO">YTO</option>
+              <option value="">{text.selectBrand}</option>
+              {PRICE_BRANDS.map((brand) => <option key={brand} value={brand}>{brand}</option>)}
             </select>
           </div>
 
           {/* Companies */}
           <div>
-            <label className="text-sm font-semibold text-gray-800">All Companies</label>
-            <p className="text-[11px] text-gray-400 mt-1">Company များကြည့်မယ်</p>
+            <label className="text-sm font-semibold text-gray-800">{t('allCompaniesDefault', language)}</label>
             <select value={company} onChange={(e) => setCompany(e.target.value)} className="w-full border border-gray-300 rounded-xl px-3 py-2.5 text-sm mt-2 focus:outline-none focus:ring-2 focus:ring-red-500 bg-white">
-              <option value="">Select Company</option>
-              <option value="kubota">Kubota Companies</option>
-              <option value="other">Other Brand Companies</option>
+              <option value="">{text.selectCompany}</option>
+              <option value="kubota">{t('kubotaCompaniesOption', language)}</option>
+              <option value="other">{t('otherBrandCompaniesOption', language)}</option>
             </select>
           </div>
         </div>
@@ -181,10 +179,10 @@ export default function FilterDrawer({ isOpen, onClose }: { isOpen: boolean; onC
         {/* Fixed bottom buttons - always visible above BottomNav */}
         <div className="p-4 border-t bg-white shrink-0 sticky bottom-0 z-10 shadow-[0_-4px_12px_rgba(0,0,0,0.05)] pb-[calc(1rem+env(safe-area-inset-bottom))]">
           <div className="flex gap-2">
-            <button onClick={applyFilters} className="flex-1 bg-red-600 text-white py-3.5 rounded-xl text-[15px] font-bold active:bg-red-700 shadow-md touch-manipulation min-h-[48px]">Apply - စစ်မယ်</button>
-            <button onClick={clearFilters} className="flex-1 border border-gray-300 py-3.5 rounded-xl text-[14px] font-medium active:bg-gray-50 touch-manipulation min-h-[48px]">Clear - ရှင်းမယ်</button>
+            <button onClick={applyFilters} className="flex-1 bg-red-600 text-white py-3.5 rounded-xl text-[15px] font-bold active:bg-red-700 shadow-md touch-manipulation min-h-[48px]">{text.apply}</button>
+            <button onClick={clearFilters} className="flex-1 border border-gray-300 py-3.5 rounded-xl text-[14px] font-medium active:bg-gray-50 touch-manipulation min-h-[48px]">{text.clear}</button>
           </div>
-          <p className="text-[10px] text-gray-400 text-center mt-2">Apply နှိပ်မှ filter အလုပ်လုပ်မယ်</p>
+          <p className="text-[10px] text-gray-400 text-center mt-2">{text.applyHint}</p>
           {/* Extra space to avoid BottomNav overlap on some devices */}
           <div className="h-2 lg:hidden" />
         </div>

@@ -21,6 +21,39 @@ Studio build environment and rebuild/redeploy the Studio. Its Daily News Report
 menu opens the selected date on the frontend, where the normal website password
 is required and image/PDF downloads and link sharing remain available.
 
+## Languages
+
+The language selector supports English, Thai, and Myanmar. English is the default
+when no preference is saved; the selected language is stored in the browser.
+Thai news titles and bodies remain unchanged when Thai is selected. They are
+translated when English or Myanmar is selected, including titles on the daily
+report. Translation of news and other supported content
+requires `GROQ_API_KEY` on the server; a visible warning appears if it fails.
+News text, company locations, and machinery notes are sent to Groq for
+translation. Do not put private information in those CMS fields. Contact
+details, sales records, and brand/model names are not sent for translation.
+Known sales regions are translated locally; unrecognized region names remain
+unchanged.
+
+## Company directory
+
+The directory shows company type, brands, and location. A company detail page
+groups available location, company contacts, and sales contacts separately.
+It displays the contact and social fields supplied in Sanity; empty fields are
+omitted. Web links must use HTTP or HTTPS. Viber values that are not web links
+are shown as text. Multiple web links in a field are separated by a comma and
+space.
+
+## Machinery prices
+
+The price filter always lists the supported brands, including those without
+published prices. Prices and machine categories come from Sanity `priceList`
+records; unpublished prices are not estimated. Models are grouped by category,
+and implements are shown with their matching machine. Implements without a
+matching model appear separately. Unknown named brands are grouped under
+Other Brand. Totals require a machine price and, for selected implements,
+matching, specified currencies and prices.
+
 ## Sanity chat cache
 
 The chat API caches a compact set of news, prices, products, sales, and company records on the server for up to one hour. Matching records are selected from that cache for each question. To expire the cache immediately after Sanity content changes, configure a Sanity webhook:

@@ -4,6 +4,10 @@ import { useState, useMemo } from "react"
 import Link from "next/link"
 import { Store, Users, MapPin, TrendingUp, Calendar, BarChart3, Filter, X, ChevronDown } from "lucide-react"
 import { useLanguage } from "@/contexts/LanguageContext"
+import { extraText } from "@/lib/i18n/extraText"
+import { t } from "@/lib/i18n/uiText"
+import { formatLocalizedDate } from "@/lib/i18n/date"
+import { localizeRegion } from "@/lib/i18n/region"
 
 interface Sale {
   id?: string
@@ -23,6 +27,7 @@ interface Sale {
 
 export default function DailySalesReport({ sales }: { sales: Sale[] }) {
   const { language } = useLanguage()
+  const text = extraText(language)
   const [showAll, setShowAll] = useState(false)
   const [selectedYear, setSelectedYear] = useState<number>(2026)
   const [selectedMonth, setSelectedMonth] = useState<string>('ALL')
@@ -69,6 +74,16 @@ export default function DailySalesReport({ sales }: { sales: Sale[] }) {
       stock: 'Stock',
       noPhoto: 'No Photo',
       view: 'View',
+      noSalesYet: 'No Sales Data Yet',
+      studioHelp: 'Sanity Studio → Daily Sales → Add → Publish',
+      checkType: 'Check _type: dailySale and Published (not Draft green dot)',
+      filtered: 'filtered', filter: 'Filter', noSalesFor: 'No sales for',
+      tryFilter: 'Try a different year/month or reset the filter',
+      showMore: 'Show more records', nextYear: 'Next year', future: 'Future',
+      yearReset: 'New year starts in', monthHint: 'View records by month',
+      archiveYear: 'Select a year to view past records',
+      archiveReset: 'Records are saved when the year resets',
+      archiveField: 'A Year field in Sanity Studio is recommended',
     },
     th: {
       totalSales: 'ยอดขายรวม',
@@ -110,6 +125,16 @@ export default function DailySalesReport({ sales }: { sales: Sale[] }) {
       stock: 'สต็อก',
       noPhoto: 'ไม่มีรูป',
       view: 'ดู',
+      noSalesYet: 'ยังไม่มีข้อมูลยอดขาย',
+      studioHelp: 'Sanity Studio → ยอดขายรายวัน → เพิ่ม → เผยแพร่',
+      checkType: 'ตรวจสอบ _type: dailySale และเผยแพร่แล้ว (ไม่ใช่ฉบับร่าง)',
+      filtered: 'กรองแล้ว', filter: 'ตัวกรอง', noSalesFor: 'ไม่มียอดขายสำหรับ',
+      tryFilter: 'ลองเลือกปีหรือเดือนอื่น หรือรีเซ็ตตัวกรอง',
+      showMore: 'แสดงรายการเพิ่มเติม', nextYear: 'ปีหน้า', future: 'อนาคต',
+      yearReset: 'เริ่มปีใหม่ใน', monthHint: 'ดูรายการตามเดือน',
+      archiveYear: 'เลือกปีเพื่อดูรายการย้อนหลัง',
+      archiveReset: 'ข้อมูลจะถูกเก็บไว้เมื่อเริ่มปีใหม่',
+      archiveField: 'แนะนำให้เพิ่มช่องปีใน Sanity Studio',
     },
     my: {
       totalSales: 'စုစုပေါင်းအရောင်း',
@@ -151,11 +176,21 @@ export default function DailySalesReport({ sales }: { sales: Sale[] }) {
       stock: 'စတော့',
       noPhoto: 'ပုံမရှိ',
       view: 'ကြည့်မယ်',
+      noSalesYet: 'အရောင်းအချက်အလက် မရှိသေးပါ',
+      studioHelp: 'Sanity Studio → နေ့စဉ်အရောင်း → ထည့်ရန် → ထုတ်ပြန်ရန်',
+      checkType: '_type: dailySale နှင့် ထုတ်ပြန်ပြီးဖြစ်ကြောင်း စစ်ဆေးပါ',
+      filtered: 'စစ်ထုတ်ထားသည်', filter: 'စစ်ထုတ်မှု', noSalesFor: 'အရောင်းစာရင်းမရှိပါ',
+      tryFilter: 'အခြားနှစ်၊ လကို ရွေးပါ သို့မဟုတ် ပြန်စပါ',
+      showMore: 'မှတ်တမ်းများ ထပ်ကြည့်ရန်', nextYear: 'နောက်နှစ်', future: 'နောင်နှစ်',
+      yearReset: 'နှစ်သစ်ပြန်စမည့်နှစ်', monthHint: 'လအလိုက် မှတ်တမ်းကြည့်ရန်',
+      archiveYear: 'ယခင်မှတ်တမ်းကြည့်ရန် နှစ်ရွေးပါ',
+      archiveReset: 'နှစ်သစ်စသော်လည်း မှတ်တမ်းများ သိမ်းထားပါမည်',
+      archiveField: 'Sanity Studio တွင် Year field ထည့်ထားရန် အကြံပြုပါသည်',
     },
   }
 
   // Default to English base, fallback to English
-  const tt = T[language as keyof typeof T] || T.en
+  const tt = T[language]
 
 
 
@@ -174,21 +209,13 @@ export default function DailySalesReport({ sales }: { sales: Sale[] }) {
 
   const availableMonths = useMemo(() => {
     return [
-      { value: 'ALL', label: 'All Months - လအားလုံး' },
-      { value: '0', label: 'January - ဇန်နဝါရီ' },
-      { value: '1', label: 'February - ဖေဖော်ဝါရီ' },
-      { value: '2', label: 'March - မတ်' },
-      { value: '3', label: 'April - ဧပြီ' },
-      { value: '4', label: 'May - မေ' },
-      { value: '5', label: 'June - ဇွန်' },
-      { value: '6', label: 'July - ဇူလိုင်' },
-      { value: '7', label: 'August - သြဂုတ်' },
-      { value: '8', label: 'September - စက်တင်ဘာ' },
-      { value: '9', label: 'October - အောက်တိုဘာ' },
-      { value: '10', label: 'November - နိုဝင်ဘာ' },
-      { value: '11', label: 'December - ဒီဇင်ဘာ' },
+      { value: 'ALL', label: tt.allMonths },
+      ...Array.from({ length: 12 }, (_, month) => ({
+        value: String(month),
+        label: formatLocalizedDate(new Date(2026, month, 1), language, { month: 'long' }),
+      })),
     ]
-  }, [])
+  }, [language, tt.allMonths])
 
   // Filtered sales based on selected year/month
   const filteredByDate = useMemo(() => {
@@ -251,7 +278,7 @@ export default function DailySalesReport({ sales }: { sales: Sale[] }) {
   }, [filteredByDate, sales, selectedYear])
 
   const displaySales = showAll ? filteredByDate : filteredByDate.slice(0, 8)
-  const monthLabel = selectedMonth === 'ALL' ? 'All Months' : availableMonths.find(m=>m.value===selectedMonth)?.label.split(' - ')[0] || ''
+  const monthLabel = availableMonths.find(m => m.value === selectedMonth)?.label || ''
 
   if (sales.length === 0) {
     return (
@@ -259,9 +286,9 @@ export default function DailySalesReport({ sales }: { sales: Sale[] }) {
         <div className="bg-[#c00000] text-white px-4 py-3 flex justify-between"><Link href="/" className="text-sm font-bold">{tt.backToNews}</Link><span className="text-xs opacity-80 font-bold">{tt.managementDashboard}</span></div>
         <div className="max-w-3xl mx-auto p-6">
           <div className="bg-yellow-50 border border-yellow-200 rounded-2xl p-8 text-center">
-            <p className="font-bold">No Sales Data Yet</p>
-            <p className="text-sm text-gray-600 mt-2">Sanity Studio → Daily Sales (နေ့စဉ်အရောင်း) → Add → Publish</p>
-            <p className="text-xs text-gray-400 mt-2">Check _type: dailySale and Published (not Draft green dot)</p>
+            <p className="font-bold">{tt.noSalesYet}</p>
+            <p className="text-sm text-gray-600 mt-2">{tt.studioHelp}</p>
+            <p className="text-xs text-gray-400 mt-2">{tt.checkType}</p>
           </div>
         </div>
       </div>
@@ -311,13 +338,13 @@ export default function DailySalesReport({ sales }: { sales: Sale[] }) {
               
               <div className="text-right">
                 <div className="bg-white text-[#FF6A00] rounded-xl px-3 py-2 font-bold text-xs">
-                  {selectedYear} {monthLabel !== 'All Months' ? `- ${monthLabel}` : ''}
+                  {selectedYear} {selectedMonth !== 'ALL' ? `- ${monthLabel}` : ''}
                 </div>
                 {stats.prevYearSales > 0 && (
                   <p className="text-[10px] mt-2 opacity-70">{selectedYear-1}: {stats.prevYearSales} {tt.carShort}</p>
                 )}
                 <p className="text-[10px] mt-3 opacity-60 text-right leading-tight">
-                  App started Aug 2026<br/>Resets Jan 1 2027<br/>Archive saved
+                  {text.appStarted}<br/>{text.resets}<br/>{text.archiveSaved}
                 </p>
               </div>
             </div>
@@ -342,17 +369,17 @@ export default function DailySalesReport({ sales }: { sales: Sale[] }) {
               </div>
               <span className="text-xs font-black text-gray-900">{tt.topBranch}</span>
             </div>
-            <span className="text-[11px] font-black tracking-wider text-gray-700">BRANCH PERFORMANCE</span>
+            <span className="text-[11px] font-black tracking-wider text-gray-700">{tt.branchPerformance}</span>
           </div>
 
           <div className="flex items-baseline gap-2">
             <h2 className="text-4xl font-black text-red-600 tracking-tight">{stats.topBranch}</h2>
             <span className="text-xs text-gray-800 font-medium">
-              {stats.branchCounts[stats.topBranch] || 27} Records • {Math.round(((stats.branchCounts[stats.topBranch] || 27) / (stats.total || 52)) * 100)}% of total
+              {stats.branchCounts[stats.topBranch] || 27} {tt.records} • {Math.round(((stats.branchCounts[stats.topBranch] || 27) / (stats.total || 52)) * 100)}% {text.ofTotal}
             </span>
           </div>
 
-          <p className="text-[11px] font-black tracking-wider text-gray-700 mt-5 mb-3">BRANCH BREAKDOWN</p>
+          <p className="text-[11px] font-black tracking-wider text-gray-700 mt-5 mb-3">{tt.branchBreakdown}</p>
 
           <div className="space-y-3">
             {Object.entries(stats.branchCounts).sort((a,b)=>b[1]-a[1]).map(([branch, count]) => {
@@ -378,26 +405,26 @@ export default function DailySalesReport({ sales }: { sales: Sale[] }) {
               <div className="w-7 h-7 bg-blue-50 rounded-full flex items-center justify-center">
                 <MapPin className="w-4 h-4 text-blue-500" />
               </div>
-              <span className="text-xs font-black text-gray-800">Top Region</span>
+              <span className="text-xs font-black text-gray-800">{tt.topRegion}</span>
             </div>
-            <span className="text-[11px] font-black tracking-wider text-gray-700">REGION PERFORMANCE</span>
+            <span className="text-[11px] font-black tracking-wider text-gray-700">{tt.regionPerformance}</span>
           </div>
 
           <div className="flex items-baseline gap-2">
-            <h2 className="text-3xl font-black text-blue-700 tracking-tight truncate">{stats.topRegion}</h2>
+            <h2 className="text-3xl font-black text-blue-700 tracking-tight truncate">{localizeRegion(stats.topRegion, language)}</h2>
             <span className="text-xs text-gray-800 font-medium">
-              {stats.regionCounts[stats.topRegion] || 0} Records • {Math.round(((stats.regionCounts[stats.topRegion] || 0) / (stats.total || 1)) * 100)}% of total
+              {stats.regionCounts[stats.topRegion] || 0} {tt.records} • {Math.round(((stats.regionCounts[stats.topRegion] || 0) / (stats.total || 1)) * 100)}% {text.ofTotal}
             </span>
           </div>
 
-          <p className="text-[11px] font-black tracking-wider text-gray-700 mt-5 mb-3">REGION {tt.regionBreakdown}</p>
+          <p className="text-[11px] font-black tracking-wider text-gray-700 mt-5 mb-3">{tt.regionBreakdown}</p>
 
           <div className="space-y-3">
             {Object.entries(stats.regionCounts).sort((a,b)=>b[1]-a[1]).map(([region, count]) => {
               const pct = Math.round((count / (stats.total || 1)) * 100)
               return (
                 <div key={region} className="flex items-center gap-3">
-                  <span className="text-[12px] font-black text-gray-900 w-24 truncate" title={region}>{region}</span>
+                  <span className="text-[12px] font-black text-gray-900 w-24 truncate" title={localizeRegion(region, language)}>{localizeRegion(region, language)}</span>
                   <div className="flex-1 h-3 bg-gray-200 rounded-full overflow-hidden">
                     <div className="h-3 bg-blue-600 rounded-full" style={{ width: `${pct}%` }} />
                   </div>
@@ -410,7 +437,7 @@ export default function DailySalesReport({ sales }: { sales: Sale[] }) {
 
           <div className="mt-4 flex items-center gap-2 text-[12px] font-bold text-gray-800 bg-blue-50 border border-blue-100 rounded-lg p-2.5">
             <TrendingUp className="w-3.5 h-3.5" />
-            <span>Total {stats.total} {tt.cars} • {Object.keys(stats.regionCounts).length} {tt.regions} • Filter: {selectedYear} {monthLabel}</span>
+            <span>{tt.total} {stats.total} {tt.cars} • {Object.keys(stats.regionCounts).length} {tt.regions} • {tt.filter}: {selectedYear} {monthLabel}</span>
           </div>
         </div>
 
@@ -421,9 +448,9 @@ export default function DailySalesReport({ sales }: { sales: Sale[] }) {
               <div className="w-7 h-7 bg-orange-50 rounded-full flex items-center justify-center">
                 <Users className="w-4 h-4 text-orange-500" />
               </div>
-              <span className="text-xs font-black text-gray-800">Top Sales Person ({selectedYear})</span>
+              <span className="text-xs font-black text-gray-800">{tt.topSalesPerson} ({selectedYear})</span>
             </div>
-            <span className="text-[11px] font-black tracking-wider text-gray-700">YEARLY</span>
+            <span className="text-[11px] font-black tracking-wider text-gray-700">{tt.yearly}</span>
           </div>
 
           <div className="flex items-center gap-3">
@@ -432,11 +459,11 @@ export default function DailySalesReport({ sales }: { sales: Sale[] }) {
             </div>
             <div className="flex-1">
               <p className="font-bold text-[15px] leading-tight">{stats.topPerson?.[0] || "Ye Lin Tun"}</p>
-              <p className="text-[10px] text-gray-400 mt-1">◎ App started Aug 2026 • resets Jan 1 2027 • Archive saved</p>
+              <p className="text-[10px] text-gray-400 mt-1">◎ {text.appStarted} • {text.resets} • {text.archiveSaved}</p>
             </div>
             <div className="text-right">
               <p className="text-2xl font-bold leading-none">{stats.topPerson?.[1] || 5}</p>
-              <p className="text-[10px] tracking-wider text-gray-400 mt-1">SALES THIS YEAR</p>
+              <p className="text-[10px] tracking-wider text-gray-400 mt-1">{text.salesThisYear}</p>
             </div>
           </div>
 
@@ -444,7 +471,7 @@ export default function DailySalesReport({ sales }: { sales: Sale[] }) {
             {Object.entries(stats.personCounts).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([person, count], idx) => (
               <div key={person} className={`rounded-xl p-3 ${idx===0 ? 'bg-black text-white' : 'bg-gray-50 text-gray-700'} `}>
                 <p className="text-xs font-bold truncate">{person}</p>
-                <p className="text-[11px] mt-1 opacity-80">{count} sales</p>
+                <p className="text-[11px] mt-1 opacity-80">{count} {tt.sales}</p>
               </div>
             ))}
           </div>
@@ -456,9 +483,9 @@ export default function DailySalesReport({ sales }: { sales: Sale[] }) {
             <div>
               <h3 className="font-bold text-[15px] flex items-center gap-2">
                 <span className="w-1 h-4 bg-red-600 rounded-full inline-block"></span>
-                Sales Records - အရောင်းမှတ်တမ်းများ
+                {tt.salesRecords}
               </h3>
-              <p className="text-[11px] text-gray-500 mt-1 ml-3">All sales records • {stats.total} filtered / {stats.totalAllTime} total • ပုံနှိပ်ကြည့်လို့ရ</p>
+              <p className="text-[11px] text-gray-500 mt-1 ml-3">{tt.allRecords} • {stats.total} {tt.filtered} / {stats.totalAllTime} {tt.total} • {tt.clickPhoto}</p>
             </div>
             
             {/* Clickable Date Filter - October 2026 box that Zaw circled */}
@@ -468,7 +495,7 @@ export default function DailySalesReport({ sales }: { sales: Sale[] }) {
             >
               <Calendar className="w-3.5 h-3.5" />
               <div className="text-left leading-tight">
-                <div>{monthLabel === 'All Months' ? 'All Months' : monthLabel}</div>
+                <div>{monthLabel}</div>
                 <div>{selectedYear}</div>
               </div>
               <ChevronDown className={`w-3.5 h-3.5 transition ${showDateFilter ? 'rotate-180' : ''}`} />
@@ -480,7 +507,7 @@ export default function DailySalesReport({ sales }: { sales: Sale[] }) {
             <div className="p-4 bg-amber-50/50 border-b space-y-4 animate-in slide-in-from-top-2">
               <div className="flex justify-between items-center">
                 <p className="text-xs font-bold text-gray-700 flex items-center gap-2">
-                  <Filter className="w-3.5 h-3.5" /> Filter by Year & Month - နှစ်နှင့် လအလိုက်
+                  <Filter className="w-3.5 h-3.5" /> {tt.filterByYearMonth}
                 </p>
                 <button onClick={() => setShowDateFilter(false)} className="p-1 hover:bg-white rounded-full">
                   <X className="w-4 h-4 text-gray-400" />
@@ -489,7 +516,7 @@ export default function DailySalesReport({ sales }: { sales: Sale[] }) {
               
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-[11px] font-bold text-gray-500">YEAR - နှစ်</label>
+                  <label className="text-[11px] font-bold text-gray-500">{tt.year}</label>
                   <select 
                     value={selectedYear} 
                     onChange={(e) => setSelectedYear(parseInt(e.target.value))}
@@ -497,17 +524,17 @@ export default function DailySalesReport({ sales }: { sales: Sale[] }) {
                   >
                     {availableYears.map(year => (
                       <option key={year} value={year}>
-                        {year} {year === 2026 ? '(Current - လက်ရှိ)' : year === 2025 ? '(Last Year)' : ''} - {stats.yearStats[year] || 0} {tt.carShort}
+                        {year} - {stats.yearStats[year] || 0} {tt.carShort}
                       </option>
                     ))}
-                    <option value={2027}>2027 (Next Year - နောက်နှစ်) - New Start</option>
-                    <option value={2028}>2028 - Future</option>
+                    <option value={2027}>2027 - {tt.nextYear}</option>
+                    <option value={2028}>2028 - {tt.future}</option>
                   </select>
-                  <p className="text-[10px] text-gray-400 mt-1">နှစ်ကုန်ရင် {selectedYear+1} မှာ အသစ်ပြန်စ</p>
+                  <p className="text-[10px] text-gray-400 mt-1">{tt.yearReset} {selectedYear+1}</p>
                 </div>
                 
                 <div>
-                  <label className="text-[11px] font-bold text-gray-500">MONTH - လ</label>
+                  <label className="text-[11px] font-bold text-gray-500">{tt.month}</label>
                   <select 
                     value={selectedMonth} 
                     onChange={(e) => setSelectedMonth(e.target.value)}
@@ -517,7 +544,7 @@ export default function DailySalesReport({ sales }: { sales: Sale[] }) {
                       <option key={m.value} value={m.value}>{m.label}</option>
                     ))}
                   </select>
-                  <p className="text-[10px] text-gray-400 mt-1">လအလိုက် ကြည့်လို့ရ</p>
+                  <p className="text-[10px] text-gray-400 mt-1">{tt.monthHint}</p>
                 </div>
               </div>
 
@@ -526,7 +553,7 @@ export default function DailySalesReport({ sales }: { sales: Sale[] }) {
                   onClick={() => { setSelectedYear(2026); setSelectedMonth('ALL'); setShowDateFilter(false) }}
                   className="flex-1 bg-white border border-gray-200 py-2.5 rounded-xl text-xs font-medium hover:bg-gray-50"
                 >
-                  Reset to 2026 All - ပြန်စ
+                  {tt.reset}
                 </button>
                 <button 
                   onClick={() => setShowDateFilter(false)}
@@ -537,12 +564,12 @@ export default function DailySalesReport({ sales }: { sales: Sale[] }) {
               </div>
 
               <div className="bg-white rounded-xl p-3 border">
-                <p className="text-[11px] font-bold text-gray-600">📦 Archive Info - မှတ်တမ်းသိမ်းခြင်း:</p>
+                <p className="text-[11px] font-bold text-gray-600">📦 {tt.archiveInfo}:</p>
                 <div className="mt-2 space-y-1 text-[11px] text-gray-500">
-                  <p>• ဒီနှစ် {selectedYear}: {stats.totalAllTime} {tt.carShort} total, {stats.total} {tt.carShort} filtered</p>
-                  <p>• ပြီးခဲ့တဲ့နှစ်: ပြန်ကြည့်လို့ရ - Year ရွေးပါ</p>
-                  <p>• နှစ်ကုန်ရင် {selectedYear+1} မှာ Auto reset - ဒါပေမယ့် {selectedYear} data တွေ သိမ်းထားမယ်</p>
-                  <p>• Sanity Studio မှာ Year field ထည့်ထားရင် ပိုကောင်းမယ်</p>
+                  <p>• {selectedYear}: {stats.totalAllTime} {tt.carShort} {tt.total}, {stats.total} {tt.carShort} {tt.filtered}</p>
+                  <p>• {tt.archiveYear}</p>
+                  <p>• {tt.archiveReset}</p>
+                  <p>• {tt.archiveField}</p>
                 </div>
               </div>
             </div>
@@ -551,7 +578,7 @@ export default function DailySalesReport({ sales }: { sales: Sale[] }) {
           <div className="divide-y divide-gray-100">
             {displaySales.length > 0 ? displaySales.map((s) => {
               const photoUrl = s.photo?.asset?.url || s.photoUrl
-              const saleDate = s.saleDate ? new Date(s.saleDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: s.saleDate ? new Date(s.saleDate).getFullYear() !== selectedYear ? 'numeric' : undefined : undefined }) : ''
+              const saleDate = s.saleDate ? formatLocalizedDate(new Date(s.saleDate), language, { month: 'short', day: 'numeric', year: new Date(s.saleDate).getFullYear() !== selectedYear ? 'numeric' : undefined }) : ''
               return (
                 <div key={s.id || s._id} className="p-3 flex gap-3 hover:bg-gray-50 transition group">
                   <div className="shrink-0">
@@ -559,17 +586,17 @@ export default function DailySalesReport({ sales }: { sales: Sale[] }) {
                       <button 
                         onClick={() => window.open(photoUrl, '_blank')}
                         className="relative w-[64px] h-[64px] rounded-xl overflow-hidden bg-gray-100 border border-gray-200 group-hover:border-red-200 transition"
-                        title="Click to view full image"
+                        title={tt.clickPhoto}
                       >
                         <img src={photoUrl} alt={s.model} className="w-full h-full object-cover" loading="lazy" />
                         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition flex items-center justify-center">
-                          <span className="opacity-0 group-hover:opacity-100 text-white text-[10px] bg-black/60 px-1.5 py-0.5 rounded">👁️ View</span>
+                          <span className="opacity-0 group-hover:opacity-100 text-white text-[10px] bg-black/60 px-1.5 py-0.5 rounded">👁️ {tt.view}</span>
                         </div>
                       </button>
                     ) : (
                       <div className="w-[64px] h-[64px] rounded-xl bg-gray-50 border border-dashed border-gray-200 flex flex-col items-center justify-center">
                         <span className="text-[16px]">📷</span>
-                        <span className="text-[8px] text-gray-400 mt-0.5">No Photo</span>
+                        <span className="text-[8px] text-gray-400 mt-0.5">{tt.noPhoto}</span>
                       </div>
                     )}
                   </div>
@@ -581,20 +608,20 @@ export default function DailySalesReport({ sales }: { sales: Sale[] }) {
                           <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-600 text-white">{s.branch}</span>
                           <span className="font-bold text-[13px] text-gray-900 truncate">{s.model}</span>
                           {s.paymentType && (
-                            <span className="text-[9px] px-1.5 py-0.5 rounded bg-green-50 text-green-600 border border-green-100">{s.paymentType}</span>
+                            <span className="text-[9px] px-1.5 py-0.5 rounded bg-green-50 text-green-600 border border-green-100">{s.paymentType.toLowerCase() === 'cash' ? text.cash : s.paymentType.toLowerCase() === 'installment' ? text.installment : s.paymentType}</span>
                           )}
                         </div>
-                        <p className="text-[12px] text-gray-700 mt-1 truncate font-medium">👤 {s.customerName || 'Customer'}</p>
+                        <p className="text-[12px] text-gray-700 mt-1 truncate font-medium">👤 {s.customerName || t('customerLabel', language)}</p>
                         <div className="flex items-center gap-2 mt-1 text-[11px] text-gray-500">
-                          <span className="flex items-center gap-1">📍 {s.regionDivision || s.division || 'Region'}</span>
+                          <span className="flex items-center gap-1">📍 {s.regionDivision || s.division ? localizeRegion(s.regionDivision || s.division || '', language) : t('regionLabel', language)}</span>
                           <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
-                          <span className="truncate">👨‍💼 {s.salesPerson || 'Sales'}</span>
+                          <span className="truncate">👨‍💼 {s.salesPerson || text.salesPerson}</span>
                         </div>
                       </div>
                       <div className="text-right shrink-0">
                         <p className="text-[11px] text-gray-400">{saleDate}</p>
                         {s.stockRemaining !== null && s.stockRemaining !== undefined && (
-                          <p className="text-[9px] mt-1 px-1.5 py-0.5 rounded bg-amber-50 text-amber-600 border">Stock: {s.stockRemaining}</p>
+                          <p className="text-[9px] mt-1 px-1.5 py-0.5 rounded bg-amber-50 text-amber-600 border">{tt.stock}: {s.stockRemaining}</p>
                         )}
                       </div>
                     </div>
@@ -603,9 +630,9 @@ export default function DailySalesReport({ sales }: { sales: Sale[] }) {
               )
             }) : (
               <div className="p-8 text-center text-gray-500">
-                <p className="text-sm">No sales for {selectedYear} {selectedMonth !== 'ALL' ? `Month ${selectedMonth}` : ''}</p>
-                <p className="text-xs mt-1">Try different year/month or reset filter</p>
-                <button onClick={() => { setSelectedYear(2026); setSelectedMonth('ALL') }} className="mt-3 text-xs bg-red-50 text-red-600 px-4 py-2 rounded-full">Reset to 2026 All</button>
+                <p className="text-sm">{tt.noSalesFor} {selectedYear} {selectedMonth !== 'ALL' ? monthLabel : ''}</p>
+                <p className="text-xs mt-1">{tt.tryFilter}</p>
+                <button onClick={() => { setSelectedYear(2026); setSelectedMonth('ALL') }} className="mt-3 text-xs bg-red-50 text-red-600 px-4 py-2 rounded-full">{tt.reset}</button>
               </div>
             )}
           </div>
@@ -613,13 +640,13 @@ export default function DailySalesReport({ sales }: { sales: Sale[] }) {
           {filteredByDate.length > 8 && (
             <div className="p-3 text-center border-t bg-gray-50/50">
               <button onClick={()=>setShowAll(!showAll)} className="text-xs text-red-600 font-bold bg-white border border-red-100 px-4 py-2 rounded-full hover:bg-red-50 transition">
-                {showAll ? "↑ Show Less" : `↓ Show ${filteredByDate.length - 8} More Records →`}
+                {showAll ? `↑ ${t('showLess', language)}` : `↓ ${tt.showMore} (${filteredByDate.length - 8}) →`}
               </button>
             </div>
           )}
           
           <div className="p-2.5 bg-blue-50/50 border-t text-[10px] text-gray-500 text-center">
-            💡 ပုံကို နှိပ်ပြီး အကြီး• {stats.total} {tt.carShort} filtered / {stats.totalAllTime} {tt.carShort} total • Year {selectedYear} • {monthLabel}
+            💡 {tt.clickPhoto} • {stats.total} {tt.carShort} {tt.filtered} / {stats.totalAllTime} {tt.carShort} {tt.total} • {tt.year} {selectedYear} • {monthLabel}
           </div>
         </div>
       </div>

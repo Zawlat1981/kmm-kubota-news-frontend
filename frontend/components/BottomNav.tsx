@@ -4,6 +4,9 @@ import { useRouter } from "next/navigation"
 import { Home, Newspaper, Trophy, BarChart3, Filter, Store, Users } from "lucide-react"
 import { client } from "@/lib/sanity"
 import { DAILY_SALES_QUERY, calculateAggregates, DailySale } from "@/lib/sanityQueries"
+import { useLanguage } from "@/contexts/LanguageContext"
+import { t, type UiKey } from "@/lib/i18n/uiText"
+import { extraText } from "@/lib/i18n/extraText"
 
 interface Stats {
   total: number
@@ -20,6 +23,8 @@ interface Stats {
 
 export default function BottomNav({ onOpenFilter }: { onOpenFilter: () => void }) {
   const router = useRouter()
+  const { language } = useLanguage()
+  const text = extraText(language)
   const [activeSheet, setActiveSheet] = useState<string | null>(null)
   const [stats, setStats] = useState<Stats | null>(null)
   const [loading, setLoading] = useState(false)
@@ -95,46 +100,46 @@ export default function BottomNav({ onOpenFilter }: { onOpenFilter: () => void }
   }, [activeSheet])
 
   const newsCategories = [
-    { name: "Myanmar News", icon: "🇲🇲", query: "myanmar-news" },
-    { name: "Exchange Rates", icon: "💱", query: "exchange-rates" },
-    { name: "Fuel Prices", icon: "⛽", query: "fuel-prices" },
-    { name: "Crop Prices", icon: "🌾", query: "crop-prices" },
-  ]
+    { key: "myanmarNews", icon: "🇲🇲", query: "myanmar-news" },
+    { key: "exchangeRates", icon: "💱", query: "exchange-rates" },
+    { key: "fuelPrices", icon: "⛽", query: "fuel-prices" },
+    { key: "cropPrices", icon: "🌾", query: "crop-prices" },
+  ] satisfies { key: UiKey; icon: string; query: string }[]
 
   const competitorBrands = [
-    { label: "Kubota News", query: "kubota-news" },
-    { label: "Kubota ZT News", query: "kubota-zt-news" },
-    { label: "Kubota Second Hand", query: "kubota-second-news" },
-    { label: "Yanmar News", query: "yanmar-news" },
-    { label: "John Deere News", query: "john-deere-news" },
-    { label: "New Holland News", query: "new-holland-news" },
-    { label: "YTO News", query: "yto-news" },
-    { label: "Sonalika News", query: "sonalika-news" },
-    { label: "Yamabisi News", query: "yamabisi-news" },
-    { label: "Mahindra News", query: "mahindra-news" },
-    { label: "Dongfeng News", query: "dongfeng-news" },
-    { label: "Mahindra and Dongfeng News", query: "mahindra-dongfeng-news" },
-    { label: "Deutz-Fahr and Matador News", query: "deutz-fahr-matador-news" },
-    { label: "Other Brand", query: "other-brand-news" },
-  ]
+    { key: "kubotaNews", query: "kubota-news" },
+    { key: "kubotaZtNews", query: "kubota-zt-news" },
+    { key: "kubotaSecondNews", query: "kubota-second-news" },
+    { key: "yanmarNews", query: "yanmar-news" },
+    { key: "johnDeereNews", query: "john-deere-news" },
+    { key: "newHollandNews", query: "new-holland-news" },
+    { key: "ytoNews", query: "yto-news" },
+    { key: "sonalikaNews", query: "sonalika-news" },
+    { key: "yamabisiNews", query: "yamabisi-news" },
+    { key: "mahindraNews", query: "mahindra-news" },
+    { key: "dongfengNews", query: "dongfeng-news" },
+    { key: "mahindraDongfengNews", query: "mahindra-dongfeng-news" },
+    { key: "deutzfarMatadorNews", query: "deutz-fahr-matador-news" },
+    { key: "otherBrandNews", query: "other-brand-news" },
+  ] satisfies { key: UiKey; query: string }[]
 
   return (
     <>
       <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-[9999] flex justify-around py-2 pb-safe shadow-[0_-2px_10px_rgba(0,0,0,0.05)]">
         <button type="button" onClick={() => { setActiveSheet(null); router.push("/"); window.scrollTo({top:0, behavior:"smooth"})}} className="flex flex-col items-center px-2 py-1 min-w-[56px] active:bg-gray-100 rounded-lg cursor-pointer touch-manipulation">
-          <Home className="w-5 h-5 text-red-600" /><span className="text-[10px] mt-1 font-medium text-red-600">HOME</span>
+          <Home className="w-5 h-5 text-red-600" /><span className="text-[10px] mt-1 font-medium text-red-600">{t('home', language)}</span>
         </button>
         <button type="button" onClick={() => setActiveSheet(activeSheet==='news' ? null : 'news')} className="flex flex-col items-center px-2 py-1 min-w-[56px] active:bg-gray-100 rounded-lg cursor-pointer touch-manipulation">
-          <Newspaper className={`w-5 h-5 ${activeSheet==='news' ? 'text-red-600' : 'text-gray-600'}`} /><span className={`text-[10px] mt-1 ${activeSheet==='news' ? 'text-red-600' : 'text-gray-600'}`}>News</span>
+          <Newspaper className={`w-5 h-5 ${activeSheet==='news' ? 'text-red-600' : 'text-gray-600'}`} /><span className={`text-[10px] mt-1 ${activeSheet==='news' ? 'text-red-600' : 'text-gray-600'}`}>{t('news', language)}</span>
         </button>
         <button type="button" onClick={() => setActiveSheet(activeSheet==='competitor' ? null : 'competitor')} className="flex flex-col items-center px-2 py-1 min-w-[56px] active:bg-gray-100 rounded-lg cursor-pointer touch-manipulation">
-          <Trophy className={`w-5 h-5 ${activeSheet==='competitor' ? 'text-red-600' : 'text-gray-600'}`} /><span className={`text-[10px] mt-1 ${activeSheet==='competitor' ? 'text-red-600' : 'text-gray-600'}`}>Competitor</span>
+          <Trophy className={`w-5 h-5 ${activeSheet==='competitor' ? 'text-red-600' : 'text-gray-600'}`} /><span className={`text-[10px] mt-1 ${activeSheet==='competitor' ? 'text-red-600' : 'text-gray-600'}`}>{text.competitor}</span>
         </button>
         <button type="button" onClick={() => setActiveSheet(activeSheet==='sales' ? null : 'sales')} className="flex flex-col items-center px-2 py-1 min-w-[56px] active:bg-gray-100 rounded-lg cursor-pointer touch-manipulation">
-          <BarChart3 className={`w-5 h-5 ${activeSheet==='sales' ? 'text-red-600' : 'text-gray-600'}`} /><span className={`text-[10px] mt-1 ${activeSheet==='sales' ? 'text-red-600' : 'text-gray-600'}`}>Daily Sales</span>
+          <BarChart3 className={`w-5 h-5 ${activeSheet==='sales' ? 'text-red-600' : 'text-gray-600'}`} /><span className={`text-[10px] mt-1 ${activeSheet==='sales' ? 'text-red-600' : 'text-gray-600'}`}>{t('dailySales', language)}</span>
         </button>
         <button type="button" onClick={onOpenFilter} className="flex flex-col items-center px-2 py-1 min-w-[48px] active:bg-gray-100 rounded-lg cursor-pointer touch-manipulation">
-          <Filter className="w-5 h-5 text-gray-600" /><span className="text-[10px] mt-1 text-gray-600">Filters</span>
+          <Filter className="w-5 h-5 text-gray-600" /><span className="text-[10px] mt-1 text-gray-600">{text.filters}</span>
         </button>
       </div>
 
@@ -146,11 +151,11 @@ export default function BottomNav({ onOpenFilter }: { onOpenFilter: () => void }
             
             {activeSheet==='news' && (
               <div className="space-y-3">
-                <h3 className="font-bold text-lg">News Categories</h3>
+                <h3 className="font-bold text-lg">{text.newsCategories}</h3>
                 <div className="space-y-2">
                   {newsCategories.map(item => (
-                    <button key={item.name} type="button" onClick={() => { router.push(`/?newsCategory=${item.query}`); setActiveSheet(null)}} className="w-full flex items-center gap-3 p-3 border rounded-xl text-left hover:bg-red-50 min-h-[48px] cursor-pointer touch-manipulation active:bg-red-100">
-                      <span className="text-xl">{item.icon}</span><span className="text-[14px] font-medium flex-1">{item.name}</span><span className="text-gray-400">→</span>
+                    <button key={item.query} type="button" onClick={() => { router.push(`/?newsCategory=${item.query}`); setActiveSheet(null)}} className="w-full flex items-center gap-3 p-3 border rounded-xl text-left hover:bg-red-50 min-h-[48px] cursor-pointer touch-manipulation active:bg-red-100">
+                      <span className="text-xl">{item.icon}</span><span className="text-[14px] font-medium flex-1">{t(item.key, language)}</span><span className="text-gray-400">→</span>
                     </button>
                   ))}
                 </div>
@@ -159,11 +164,11 @@ export default function BottomNav({ onOpenFilter }: { onOpenFilter: () => void }
 
             {activeSheet==='competitor' && (
               <div className="space-y-3">
-                <h3 className="font-bold text-lg">Competitor News - 14 Brands</h3>
+                <h3 className="font-bold text-lg">{text.competitorBrands}</h3>
                 <div className="grid grid-cols-1 gap-2">
                   {competitorBrands.map(b=>(
                     <button key={b.query} type="button" onClick={() => { router.push(`/?competitor=${b.query}`); setActiveSheet(null)}} className="border rounded-xl p-3 text-left text-[13px] font-medium min-h-[48px] hover:bg-red-50 cursor-pointer touch-manipulation active:bg-red-100">
-                      {b.label}
+                      {t(b.key, language)}
                     </button>
                   ))}
                 </div>
@@ -173,22 +178,22 @@ export default function BottomNav({ onOpenFilter }: { onOpenFilter: () => void }
             {activeSheet==='sales' && (
               <div className="space-y-4">
                 {loading ? (
-                  <div className="text-center py-8"><p className="text-sm text-gray-500">Loading real data from Sanity...</p></div>
+                  <div className="text-center py-8"><p className="text-sm text-gray-500">{text.loadingSales}</p></div>
                 ) : stats ? (
                   <>
                     <div className="bg-white border-2 border-gray-100 rounded-2xl p-4">
                       <div className="flex justify-between items-center mb-3">
                         <div className="flex items-center gap-2">
                           <div className="w-6 h-6 bg-red-50 rounded-full flex items-center justify-center"><Store className="w-3.5 h-3.5 text-red-500" /></div>
-                          <span className="text-xs font-black text-gray-900">Top Branch</span>
+                          <span className="text-xs font-black text-gray-900">{t('topBranch', language)}</span>
                         </div>
-                        <span className="text-[10px] font-black tracking-wider text-gray-800">BRANCH PERFORMANCE</span>
+                        <span className="text-[10px] font-black tracking-wider text-gray-800">{text.branchPerformance}</span>
                       </div>
                       <div className="flex items-baseline gap-2 mb-1">
                         <h2 className="text-[32px] font-serif font-bold text-red-600 tracking-tight">{stats.topBranch}</h2>
-                        <span className="text-xs font-bold text-gray-900">{stats.branchCounts[stats.topBranch] || 27} Records • {Math.round(((stats.branchCounts[stats.topBranch] || 27) / (stats.total || 52)) * 100)}% of total</span>
+                        <span className="text-xs font-bold text-gray-900">{stats.branchCounts[stats.topBranch] || 27} {t('records', language)} • {Math.round(((stats.branchCounts[stats.topBranch] || 27) / (stats.total || 52)) * 100)}% {text.ofTotal}</span>
                       </div>
-                      <p className="text-[11px] font-black tracking-wider text-black mt-3 mb-3">BRANCH BREAKDOWN</p>
+                      <p className="text-[11px] font-black tracking-wider text-black mt-3 mb-3">{text.branchBreakdown}</p>
                       <div className="space-y-2.5">
                         {Object.entries(stats.branchCounts).sort((a,b)=>b[1]-a[1]).map(([branch, count]) => {
                           const pct = Math.round((count / (stats.total || 1)) * 100)
@@ -199,7 +204,7 @@ export default function BottomNav({ onOpenFilter }: { onOpenFilter: () => void }
                                 <div className="h-3 bg-red-600 rounded-full" style={{width: `${pct}%`}} />
                               </div>
                               <span className="text-[12px] font-black text-black w-[28px]">{pct}%</span>
-                              <span className="text-xs font-black text-black w-[44px] text-right">{count} sales</span>
+                              <span className="text-xs font-black text-black w-[44px] text-right">{count} {text.sales}</span>
                             </div>
                           )
                         })}
@@ -210,9 +215,9 @@ export default function BottomNav({ onOpenFilter }: { onOpenFilter: () => void }
                       <div className="flex justify-between items-center mb-4">
                         <div className="flex items-center gap-2">
                           <div className="w-6 h-6 bg-orange-50 rounded-full flex items-center justify-center"><Users className="w-3.5 h-3.5 text-orange-500" /></div>
-                          <span className="text-xs font-black text-gray-900">Top Sales Person ({stats.currentYear})</span>
+                          <span className="text-xs font-black text-gray-900">{t('topSalesPerson', language)} ({stats.currentYear})</span>
                         </div>
-                        <span className="text-[10px] font-black tracking-wider text-gray-800">YEARLY</span>
+                        <span className="text-[10px] font-black tracking-wider text-gray-800">{text.yearly}</span>
                       </div>
                       
                       <div className="flex items-center gap-3 mb-3">
@@ -222,13 +227,13 @@ export default function BottomNav({ onOpenFilter }: { onOpenFilter: () => void }
                         <div>
                           <p className="font-bold text-[15px]">{stats.topPerson?.[0] || "Ye Lin Tun"}</p>
                           <div className="flex items-center gap-1 mt-0.5">
-                            <span className="text-[10px] font-bold text-gray-800">◎ App started Aug 2026</span>
-                            <span className="text-[10px] font-bold text-gray-800">• resets Jan 1 2027</span>
+                            <span className="text-[10px] font-bold text-gray-800">◎ {text.appStarted}</span>
+                            <span className="text-[10px] font-bold text-gray-800">• {text.resets}</span>
                           </div>
                         </div>
                         <div className="ml-auto text-right">
                           <p className="text-2xl font-bold">{stats.topPerson?.[1] || 9}</p>
-                          <p className="text-[10px] font-black tracking-wider text-gray-800">SALES THIS YEAR</p>
+                          <p className="text-[10px] font-black tracking-wider text-gray-800">{text.salesThisYear}</p>
                         </div>
                       </div>
 
@@ -238,7 +243,7 @@ export default function BottomNav({ onOpenFilter }: { onOpenFilter: () => void }
                           return (
                             <div key={person} className={`rounded-xl p-2.5 text-center ${isTop ? 'bg-black text-white' : 'bg-gray-50 text-gray-600'}`}>
                               <p className="text-xs font-bold truncate">{person}</p>
-                              <p className="text-[11px] mt-1">{count} sales</p>
+                              <p className="text-[11px] mt-1">{count} {text.sales}</p>
                             </div>
                           )
                         })}
@@ -246,11 +251,11 @@ export default function BottomNav({ onOpenFilter }: { onOpenFilter: () => void }
                     </div>
 
                     <button type="button" onClick={() => { router.push("/daily-sales"); setActiveSheet(null)}} className="w-full bg-red-600 text-white py-3 rounded-xl font-medium text-sm cursor-pointer touch-manipulation active:bg-red-700">
-                      Open Daily Sales →
+                      {t('openDailySales', language)} →
                     </button>
                   </>
                 ) : (
-                  <p className="text-sm text-gray-500 text-center py-8">No Sales Data</p>
+                  <p className="text-sm text-gray-500 text-center py-8">{text.noSalesData}</p>
                 )}
               </div>
             )}

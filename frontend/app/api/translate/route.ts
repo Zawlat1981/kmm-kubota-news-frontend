@@ -4,23 +4,23 @@ import { translateBatch, TargetLanguage } from '@/lib/translate'
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
-    const { texts, target } = body as { texts: string[]; target: TargetLanguage }
+    const { texts, target, strict } = body as { texts: string[]; target: TargetLanguage; strict?: boolean }
 
-    if (!Array.isArray(texts) || !target) {
+    if (!Array.isArray(texts) || !texts.every((text) => typeof text === 'string')) {
       return NextResponse.json(
-        { error: 'Request must include "texts" (array) and "target" ("my" or "th")' },
+        { error: 'Request must include "texts" as an array of strings' },
         { status: 400 }
       )
     }
 
-    if (target !== 'my' && target !== 'th') {
+    if (target !== 'my' && target !== 'th' && target !== 'en') {
       return NextResponse.json(
-        { error: 'target must be "my" or "th"' },
+        { error: 'target must be "my", "th", or "en"' },
         { status: 400 }
       )
     }
 
-    const translated = await translateBatch(texts, target)
+    const translated = await translateBatch(texts, target, strict === true)
 
     return NextResponse.json({ translated })
   } catch (error) {

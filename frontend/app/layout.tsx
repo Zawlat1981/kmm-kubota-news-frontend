@@ -31,14 +31,14 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-gray-50 pb-[80px] lg:pb-0">
-        {authenticated ? (
-          <LanguageProvider>
+        <LanguageProvider>
+          {authenticated ? (
             <ClientAppShell>{children}</ClientAppShell>
-            <KmmChatbot />
-          </LanguageProvider>
-        ) : (
-          <SitePasswordGuard />
-        )}
+          ) : (
+            <SitePasswordGuard />
+          )}
+          {authenticated && <KmmChatbot />}
+        </LanguageProvider>
       </body>
     </html>
   );

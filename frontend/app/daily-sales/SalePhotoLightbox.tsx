@@ -4,6 +4,7 @@ import Image from 'next/image'
 import { useEffect, useState } from 'react'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { t } from '@/lib/i18n/uiText'
+import { extraText } from '@/lib/i18n/extraText'
 
 interface SalePhotoLightboxProps {
   src: string
@@ -39,7 +40,7 @@ export default function SalePhotoLightbox({ src, alt, salesPerson, customerName,
         type="button"
         onClick={() => setIsOpen(true)}
         className="group relative block w-full aspect-[16/10] cursor-zoom-in overflow-hidden bg-slate-100"
-        aria-label={`View larger photo: ${alt}`}
+        aria-label={`${t('viewPhoto', language)}: ${alt}`}
       >
         <Image src={src} alt={alt} fill unoptimized className="object-cover transition duration-300 group-hover:scale-105" />
         <span className="absolute bottom-3 right-3 rounded-full bg-black/65 px-3 py-1.5 text-xs font-semibold text-white opacity-0 transition group-hover:opacity-100">
@@ -52,7 +53,7 @@ export default function SalePhotoLightbox({ src, alt, salesPerson, customerName,
           className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/85 p-4 sm:p-8"
           role="dialog"
           aria-modal="true"
-          aria-label={`${alt} enlarged photo`}
+          aria-label={`${t('viewPhoto', language)}: ${alt}`}
           onClick={() => setIsOpen(false)}
         >
           <div className="relative max-h-full max-w-6xl" onClick={(event) => event.stopPropagation()}>
@@ -67,7 +68,7 @@ export default function SalePhotoLightbox({ src, alt, salesPerson, customerName,
             <div className="absolute inset-x-0 bottom-0 rounded-b-lg bg-slate-950/75 px-4 py-3 text-white backdrop-blur-sm sm:px-5">
               <div className="flex flex-wrap gap-2">
                 <span className="rounded-full border border-white/20 bg-white/10 px-3.5 py-1.5 text-sm font-semibold">
-                  Customer Name: {customerName}
+                  {t('customerLabel', language)}: {customerName}
                 </span>
                 <span className="rounded-full border border-white/20 bg-white/10 px-3.5 py-1.5 text-sm font-semibold">
                   {t('modelTag', language)}: {model}
@@ -76,7 +77,7 @@ export default function SalePhotoLightbox({ src, alt, salesPerson, customerName,
                   {t('regionTag', language)}: {region}
                 </span>
                 <span className="rounded-full border border-white/20 bg-white/10 px-3.5 py-1.5 text-sm font-semibold">
-                  Sales Person: {salesPerson}
+                  {extraText(language).salesPerson}: {salesPerson}
                 </span>
               </div>
             </div>

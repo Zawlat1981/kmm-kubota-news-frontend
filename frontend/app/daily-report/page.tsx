@@ -5,6 +5,12 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { toPng } from "html-to-image";
 import { groupNewsArticles } from "./groupNews";
+import { reportText, translateCategory, translateGroup } from "./reportText";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { t } from "@/lib/i18n/uiText";
+import { formatLocalizedDate } from "@/lib/i18n/date";
+import { extraText } from "@/lib/i18n/extraText";
+import { useTranslatedTexts } from "@/hooks/useTranslatedTexts";
 
 interface NewsArticle {
   _id: string;
@@ -50,7 +56,7 @@ function normalizeCategoryTitle(rawCategory?: unknown): string {
   );
   if (exactMatch) return exactMatch;
 
-  const lower = cleaned.toLowerCase();
+  const lower = cleaned.toLowerCase().replace(/[-_]+/g, " ");
   if (lower.includes("myanmar")) return "Myanmar News";
   if (lower.includes("exchange")) return "Exchange Rates";
   if (lower.includes("crop")) return "Crop Price & News";
@@ -84,6 +90,7 @@ function DailyNewsReportContent() {
   };
 
   const searchParams = useSearchParams();
+  const { language } = useLanguage();
   const queryDate = searchParams.get("date");
   const [selectedDate, setSelectedDate] = useState<string>(() =>
     queryDate && /^\d{4}-\d{2}-\d{2}$/.test(queryDate)
@@ -95,6 +102,10 @@ function DailyNewsReportContent() {
   const [copied, setCopied] = useState<boolean>(false);
   const [exporting, setExporting] = useState<boolean>(false);
   const reportRef = useRef<HTMLDivElement>(null);
+  const text = reportText[language];
+  const { texts: translatedTitles, isLoading: translating, error: translationError } =
+    useTranslatedTexts(newsList.map((news) => news.titleText || news.title || ""), true);
+  const titlesById = new Map(newsList.map((news, index) => [news._id, translatedTitles[index]]));
 
   useEffect(() => {
     if (!selectedDate) return;
@@ -125,22 +136,22 @@ function DailyNewsReportContent() {
     };
   }, [selectedDate]);
 
-  const formatThaiDate = (dateStr: string) => {
+  const formatReportDate = (dateStr: string) => {
     if (!dateStr) return "";
     const date = new Date(dateStr + "T00:00:00");
     if (isNaN(date.getTime())) return dateStr;
-    return date.toLocaleDateString("th-TH", {
+    return formatLocalizedDate(date, language, {
       day: "numeric",
       month: "short",
       year: "numeric",
     });
   };
 
-  const formatEnglishDate = (dateStr?: string) => {
+  const formatArticleDate = (dateStr?: string) => {
     if (!dateStr) return "";
     const date = new Date(dateStr);
     if (isNaN(date.getTime())) return dateStr;
-    return date.toLocaleDateString("en-US", {
+    return formatLocalizedDate(date, language, {
       month: "long",
       day: "numeric",
       year: "numeric",
@@ -196,10 +207,10 @@ function DailyNewsReportContent() {
       const label = item.categoryCode
         ? `${item.categoryCode} ${normalizedTitle}`
         : normalizedTitle;
-      if (!acc[label]) acc[label] = { label, count: 0 };
+      if (!acc[label]) acc[label] = { label, category: normalizedTitle, code: item.categoryCode, count: 0 };
       acc[label].count += 1;
       return acc;
-    }, {} as Record<string, { label: string; count: number }>)
+    }, {} as Record<string, { label: string; category: string; code?: string; count: number }>)
   );
   const newsGroups = groupNewsArticles(newsList);
 
@@ -207,10 +218,11 @@ function DailyNewsReportContent() {
     <div className="min-h-screen bg-gray-100 p-2 sm:p-4 md:p-8 flex flex-col items-center">
       <div className="w-full max-w-[1080px] bg-white rounded-2xl border border-gray-200 p-3 sm:p-4 mb-4 sm:mb-6 shadow-xs flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center justify-between gap-3 sm:gap-4 print:hidden">
         <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-          <label className="font-bold text-gray-700 text-sm sm:text-base">
-            📅 ရက်စွဲရွေးရန်:
+          <label htmlFor="report-date" className="font-bold text-gray-700 text-sm sm:text-base">
+            📅 {text.date}
           </label>
           <input
+            id="report-date"
             type="date"
             value={selectedDate}
             onChange={(e) => setSelectedDate(e.target.value)}
@@ -220,26 +232,28 @@ function DailyNewsReportContent() {
         <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2.5">
           <button
             onClick={handleDownloadImage}
-            disabled={exporting}
+            disabled={exporting || loading || translating}
             className="bg-[#235838] hover:bg-[#1a432a] text-white text-sm font-semibold px-2 sm:px-4 py-2.5 rounded-xl cursor-pointer disabled:opacity-50"
           >
-            🖼️ {exporting ? "Exporting..." : "Download Image"}
+            🖼️ {exporting ? text.exporting : text.image}
           </button>
           <button
             onClick={handleDownloadPDF}
-            disabled={exporting}
+            disabled={exporting || loading || translating}
             className="bg-[#D9531E] hover:bg-[#b84315] text-white text-sm font-semibold px-2 sm:px-4 py-2.5 rounded-xl cursor-pointer disabled:opacity-50"
           >
-            📄 Download PDF
+            📄 {text.pdf}
           </button>
           <button
             onClick={handleCopyLink}
             className="col-span-2 sm:col-span-1 bg-gray-800 hover:bg-gray-900 text-white text-sm font-semibold px-2 sm:px-4 py-2.5 rounded-xl cursor-pointer"
           >
-            {copied ? "✅ Link Copied!" : "🔗 Copy Link"}
+            {copied ? `✅ ${text.copied}` : `🔗 ${text.copy}`}
           </button>
         </div>
       </div>
+      {translating && <p role="status" className="mb-3 text-sm text-gray-600 print:hidden">{extraText(language).translating}</p>}
+      {translationError && <p role="alert" className="mb-3 text-sm text-red-700">{extraText(language).translationError}</p>}
 
       <div className="w-full overflow-x-auto pb-6">
         <div
@@ -254,21 +268,21 @@ function DailyNewsReportContent() {
                   alt="KMM Kubota Logo"
                   className="w-[72px] h-[44px] object-contain mix-blend-multiply"
                 />
-                <span className="text-[#D9531E]">News Report</span>
+                <span className="text-[#D9531E]">{text.title}</span>
               </h1>
               <p className="text-[28px] font-bold text-gray-800 mt-2">
-                {formatThaiDate(selectedDate)}
+                {formatReportDate(selectedDate)}
               </p>
             </div>
             <div className="flex-1 min-w-0 bg-[#FAF9F5] border border-gray-200/90 rounded-2xl px-7 py-5 shadow-xs">
               <h2 className="text-[22px] font-bold text-gray-800 mb-3">
-                สรุปประเภทข่าวที่ลงเผยแพร่
+                {text.summary}
               </h2>
               {loading ? (
-                <p className="text-gray-500 text-[17px] py-4">กำลังโหลดข้อมูลข่าว...</p>
+                <p className="text-gray-500 text-[17px] py-4">{text.loading}</p>
               ) : categorySummary.length === 0 ? (
                 <p className="text-gray-400 text-[17px] py-4">
-                  ยังไม่มีรายการข่าวสำหรับวันที่เลือก
+                  {text.empty}
                 </p>
               ) : (
                 <div className="grid grid-cols-2 gap-x-10 gap-y-1.5 text-[18px]">
@@ -277,9 +291,9 @@ function DailyNewsReportContent() {
                       key={cat.label}
                       className="flex min-w-0 items-center justify-between text-gray-700"
                     >
-                      <span className="font-medium truncate pr-2">{cat.label}</span>
+                      <span className="font-medium truncate pr-2">{cat.code ? `${cat.code} ` : ""}{translateCategory(cat.category, language)}</span>
                       <span className="font-bold text-gray-900 whitespace-nowrap">
-                        {cat.count} news
+                        {cat.count} {text.count}
                       </span>
                     </div>
                   ))}
@@ -292,14 +306,14 @@ function DailyNewsReportContent() {
             {newsGroups.map((group) => (
               <section key={group.title}>
                 <h3 className="text-[22px] font-bold text-gray-800 mb-3">
-                  {group.title}
+                  {translateGroup(group.title, language)}
                 </h3>
                 <div className="grid grid-cols-3 gap-4">
                   {group.articles.map((news) => {
                     const categoryName = normalizeCategoryTitle(
                       news.categoryText || news.categoryTitle
                     );
-                    const newsTitle = news.titleText || news.title || "";
+                    const newsTitle = titlesById.get(news._id) || news.titleText || news.title || "";
                     const displayImg = news.imageDataUrl || news.imageUrl || "";
                     const detailSlug = news.slug?.current || news._id;
 
@@ -318,16 +332,16 @@ function DailyNewsReportContent() {
                               />
                             ) : (
                               <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">
-                                No Image
+                                {text.noImage}
                               </div>
                             )}
                           </div>
                           <div className="min-h-[130px] p-3">
                             <p className="text-[11px] font-extrabold text-[#B91C1C] tracking-wide truncate">
-                              {categoryName}
+                              {translateCategory(categoryName, language)}
                             </p>
                             <p className="text-[11px] text-gray-400 mt-0.5">
-                              {formatEnglishDate(news.publishedAt || news._createdAt)}
+                              {formatArticleDate(news.publishedAt || news._createdAt)}
                             </p>
                             {newsTitle && (
                               <h4 className="text-[12.5px] font-bold text-gray-800 leading-snug line-clamp-5 mt-1.5">
@@ -341,7 +355,7 @@ function DailyNewsReportContent() {
                             href={`/news/${encodeURIComponent(detailSlug)}`}
                             className="text-[11.5px] font-semibold text-[#1E5631] hover:underline"
                           >
-                            Read Full Story →
+                            {t("readFullStory", language)} →
                           </Link>
                         </div>
                       </div>

@@ -1,6 +1,7 @@
 ﻿import { client } from '@/lib/sanity'
 import NewsContainer from '@/components/NewsContainer'
-import LanguageSwitcher from '@/components/LanguageSwitcher'
+import { normalizeCompany, type CompanyItem, type CompanyRecord } from '@/lib/company'
+import type { PriceItem } from '@/lib/prices'
 
 interface NewsItem {
   _id: string
@@ -11,40 +12,6 @@ interface NewsItem {
   publishedAt?: string
   mainImage?: Record<string, unknown>
   body?: string
-}
-
-interface CompanyItem {
-  _id: string
-  slug?: { current: string }
-  companyGroup?: string
-  companyName?: string
-  category?: string
-  brand?: string
-  stateRegion?: string
-  cityTownship?: string
-  companyImage?: Record<string, unknown>
-  phone?: string
-  address?: string
-  website?: string
-  email?: string
-}
-
-interface PriceItem {
-  _id: string
-  brand?: string
-  modelName?: string
-  itemType?: 'machine' | 'implement'
-  category?: string
-  series?: string
-  parentModel?: string
-  frontDozer?: 'with-front-dozer' | 'without-front-dozer'
-  specialDozer?: 'with-special-dozer'
-  frontLoader?: 'with-front-loader'
-  horsepower?: number
-  price?: number
-  currency?: string
-  image?: Record<string, unknown>
-  notes?: string
 }
 
 async function getData(): Promise<{
@@ -100,11 +67,11 @@ async function getData(): Promise<{
 
   const [newsList, companiesList, priceList] = await Promise.all([
     client.fetch(newsQuery),
-    client.fetch(companiesQuery),
+    client.fetch<CompanyRecord[]>(companiesQuery),
     client.fetch(priceListQuery),
   ])
 
-  return { newsList, companiesList, priceList }
+  return { newsList, companiesList: companiesList.map(normalizeCompany), priceList }
 }
 
 export const dynamic = 'force-dynamic'
@@ -131,7 +98,6 @@ export default async function Home() {
               KMM Kubota News Portal
             </h1>
           </div>
-          <LanguageSwitcher />
         </div>
         
         <NewsContainer
