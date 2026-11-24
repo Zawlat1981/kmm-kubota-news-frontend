@@ -183,10 +183,10 @@ function DailyNewsReportContent() {
   const isMediumGrid = totalCount > 4 && totalCount <= 8;
 
   const thumbnailHeightClass = isDenseGrid
-    ? "h-[150px] sm:h-[85px]"
+    ? "h-[75px]"
     : isMediumGrid
-    ? "h-[150px] sm:h-[115px]"
-    : "h-[170px] sm:h-[155px]";
+    ? "h-[100px]"
+    : "h-[135px]";
 
   const categorySummary = Object.values(
     (newsList || []).reduce((acc, item) => {
@@ -241,27 +241,27 @@ function DailyNewsReportContent() {
         </div>
       </div>
 
-      <div className="w-full flex justify-center pb-6">
+      <div className="w-full overflow-x-auto pb-6">
         <div
           ref={reportRef}
-          className="w-full max-w-[1080px] min-w-0 md:min-h-[1080px] bg-[#F5F4EF] p-4 sm:p-6 md:p-9 flex flex-col font-sans text-gray-900 select-none box-border shadow-md"
+          className="mx-auto w-[1080px] min-h-[1080px] shrink-0 bg-[#F5F4EF] p-9 flex flex-col font-sans text-gray-900 select-none box-border shadow-md"
         >
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-start gap-4 sm:gap-6 mb-6">
+          <div className="flex items-start gap-6 mb-6">
             <div className="shrink-0">
-              <h1 className="flex items-center gap-2 sm:gap-3 text-[30px] sm:text-[44px] font-extrabold tracking-tight leading-none whitespace-nowrap">
+              <h1 className="flex items-center gap-3 text-[44px] font-extrabold tracking-tight leading-none whitespace-nowrap">
                 <img
                   src="/kmm-logo.png"
                   alt="KMM Kubota Logo"
-                  className="w-[48px] h-[32px] sm:w-[72px] sm:h-[44px] object-contain mix-blend-multiply"
+                  className="w-[72px] h-[44px] object-contain mix-blend-multiply"
                 />
                 <span className="text-[#D9531E]">News Report</span>
               </h1>
-              <p className="text-[22px] sm:text-[28px] font-bold text-gray-800 mt-2">
+              <p className="text-[28px] font-bold text-gray-800 mt-2">
                 {formatThaiDate(selectedDate)}
               </p>
             </div>
-            <div className="flex-1 min-w-0 bg-[#FAF9F5] border border-gray-200/90 rounded-2xl px-4 py-4 sm:px-7 sm:py-5 shadow-xs">
-              <h2 className="text-[18px] sm:text-[22px] font-bold text-gray-800 mb-3">
+            <div className="flex-1 min-w-0 bg-[#FAF9F5] border border-gray-200/90 rounded-2xl px-7 py-5 shadow-xs">
+              <h2 className="text-[22px] font-bold text-gray-800 mb-3">
                 สรุปประเภทข่าวที่ลงเผยแพร่
               </h2>
               {loading ? (
@@ -271,7 +271,7 @@ function DailyNewsReportContent() {
                   ยังไม่มีรายการข่าวสำหรับวันที่เลือก
                 </p>
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-1.5 text-[14px] sm:text-[18px]">
+                <div className="grid grid-cols-2 gap-x-10 gap-y-1.5 text-[18px]">
                   {categorySummary.map((cat) => (
                     <div
                       key={cat.label}
@@ -294,7 +294,7 @@ function DailyNewsReportContent() {
                 <h3 className="text-[22px] font-bold text-gray-800 mb-3">
                   {group.title}
                 </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="grid grid-cols-3 gap-4">
                   {group.articles.map((news) => {
                     const categoryName = normalizeCategoryTitle(
                       news.categoryText || news.categoryTitle
@@ -322,7 +322,7 @@ function DailyNewsReportContent() {
                               </div>
                             )}
                           </div>
-                          <div className="p-3">
+                          <div className="min-h-[130px] p-3">
                             <p className="text-[11px] font-extrabold text-[#B91C1C] tracking-wide truncate">
                               {categoryName}
                             </p>
@@ -330,7 +330,7 @@ function DailyNewsReportContent() {
                               {formatEnglishDate(news.publishedAt || news._createdAt)}
                             </p>
                             {newsTitle && (
-                              <h4 className="text-[12.5px] font-bold text-gray-800 leading-snug line-clamp-4 mt-1.5">
+                              <h4 className="text-[12.5px] font-bold text-gray-800 leading-snug line-clamp-5 mt-1.5">
                                 {newsTitle}
                               </h4>
                             )}
