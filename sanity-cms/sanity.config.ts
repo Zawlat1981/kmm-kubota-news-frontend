@@ -78,6 +78,8 @@ export default defineConfig({
                 S.documentTypeList('dailySale').title('Daily Sales Records')
               ),
 
+            S.documentTypeListItem('priceList').title('Machinery Prices'),
+
             // Settings
             S.divider(),
             S.listItem()

@@ -10,6 +10,7 @@ import whoWeAre from './whoWeAre'
 import { company } from './company'
 import companyType from './companyType'
 import { dailySale } from './dailySale'
+import { priceList } from './priceList'
 
 export const schemaTypes = [
   localeString,
@@ -26,4 +27,5 @@ export const schemaTypes = [
   company,
   companyType,
   dailySale,
+  priceList,
 ]

@@ -54,6 +54,16 @@ matching model appear separately. Unknown named brands are grouped under
 Other Brand. Totals require a machine price and, for selected implements,
 matching, specified currencies and prices.
 
+In Sanity Studio, open **Machinery Prices** to edit an existing record or create
+a new one. Choose Machine or Implement, enter the brand and model or implement
+name, and select the machine category where applicable. Enter a numeric price
+and currency, or leave the price empty if unknown. For an implement, enter the
+same brand and exact machine model in Matching Machine Model to show it with
+that machine; without a match it appears under other implements. Enter the real
+name for an unlisted brand, which the website groups under Other Brand. Publish
+the document to make it visible on the website. Deploy the Studio after schema
+or menu changes before expecting them to appear in the hosted Studio.
+
 ## Sanity chat cache
 
 The chat API caches a compact set of news, prices, products, sales, and company records on the server for up to one hour. Matching records are selected from that cache for each question. To expire the cache immediately after Sanity content changes, configure a Sanity webhook:
